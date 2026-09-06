@@ -694,7 +694,33 @@
                 updateUI();
             }
         }
+// Automatically sync progress to Supabase every 30 seconds
 
+async function syncToCloud() {
+    if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) return; // Skip if testing locally
+
+    let userId = tg.initDataUnsafe.user.id;
+    let username = tg.initDataUnsafe.user.first_name;
+
+    try {
+        await fetch('/.netlify/functions/syncGame', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                telegramId: userId,
+                username: username,
+                score: game.score,
+                multiplier: game.multiplier
+            })
+        });
+    } catch (e) {
+        console.error("Cloud sync failed:", e);
+    }
+}
+
+// Automatically sync progress to Supabase every 30 seconds
+setInterval(syncToCloud, 30000);
+        
         // Telegram Stars Instant Booster Purchase
      async function buyStarPackage() {
     const btn = event.target;
