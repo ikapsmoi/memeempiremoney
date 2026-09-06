@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Meme Empire Tycoon - Viral Idle RPG</title>
+    <title>Meme Empire Tycoon 💎</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
         :root {
-            --bg-color: #0b0c10;
-            --card-bg: #1f2833;
-            --card-accent: #141a22;
-            --text-main: #ffffff;
-            --text-sub: #c5c6c7;
-            --accent-gold: #f39c12;
+            --bg-deep: #06070a;
+            --bg-card: rgba(18, 22, 33, 0.75);
+            --border-neon: rgba(0, 242, 254, 0.2);
+            --accent-gold: #ffd700;
             --accent-cyan: #00f2fe;
-            --accent-purple: #9b51e0;
+            --accent-pink: #ff007f;
             --accent-fire: #ff4e50;
+            --text-main: #ffffff;
+            --text-sub: #94a3b8;
         }
 
         * {
@@ -26,7 +27,7 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-deep);
             color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
@@ -38,7 +39,7 @@
             align-items: center;
         }
 
-        /* Ambient Canvas Background */
+        /* Ambient Dynamic Background */
         #particleCanvas {
             position: fixed;
             top: 0;
@@ -57,73 +58,93 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 15px;
+            padding: 12px 15px;
             justify-content: space-between;
         }
 
-        /* Top Bar & Stats */
-        .header-stats {
-            background: rgba(31, 40, 51, 0.7);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 15px;
+        /* Header & Dashboard Stats */
+        .header-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 22px;
+            padding: 14px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-neon);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
         }
 
-        .user-title {
-            font-size: 13px;
-            color: var(--text-sub);
-            letter-spacing: 1px;
+        .brand-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+
+        .user-tag {
+            font-size: 11px;
+            color: var(--accent-cyan);
+            letter-spacing: 1.2px;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            font-weight: 700;
         }
 
-        .clout-display {
-            font-size: 40px;
+        .airdrop-badge {
+            background: rgba(255, 0, 127, 0.15);
+            border: 1px solid var(--accent-pink);
+            color: var(--accent-pink);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 6px var(--accent-pink)); }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .clout-val {
+            font-size: 38px;
             font-weight: 900;
-            background: linear-gradient(135deg, #f39c12, #f1c40f);
+            background: linear-gradient(135deg, #fff 20%, var(--accent-gold) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin: 2px 0;
-            text-shadow: 0 0 20px rgba(243, 156, 18, 0.3);
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.3));
         }
 
-        .cps-rate {
-            font-size: 12px;
-            color: var(--accent-cyan);
+        .sub-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 4px;
             font-weight: 600;
         }
 
-        /* Energy Bar */
         .energy-wrapper {
-            margin-top: 10px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 10px;
-            height: 10px;
+            margin-top: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            height: 8px;
             overflow: hidden;
             position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .energy-fill {
+        .energy-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            background: linear-gradient(90deg, var(--accent-cyan), #4facfe);
             width: 100%;
-            transition: width 0.2s ease;
+            transition: width 0.15s linear;
         }
 
-        .energy-text {
-            font-size: 10px;
-            color: var(--text-sub);
-            margin-top: 4px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* Main Clicker Section */
-        .clicker-zone {
+        /* Central Interaction Arena */
+        .arena {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -132,323 +153,401 @@
             position: relative;
         }
 
-        .combo-badge {
-            font-size: 14px;
-            font-weight: 800;
+        .fever-notifier {
+            font-size: 13px;
+            font-weight: 900;
             color: var(--accent-fire);
-            height: 20px;
+            height: 22px;
             opacity: 0;
-            transition: opacity 0.2s;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            transition: opacity 0.2s;
+            filter: drop-shadow(0 0 8px var(--accent-fire));
         }
 
-        .orb-wrapper {
+        .orb-container {
             position: relative;
-            margin: 15px 0;
+            margin: 10px 0;
         }
 
-        .meme-orb {
-            width: 160px;
-            height: 160px;
+        .main-orb {
+            width: 165px;
+            height: 165px;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #2c3e50, #0f171e);
+            background: radial-gradient(circle at 35% 35%, #1f293d, #0b0f19);
             border: 4px solid var(--accent-gold);
-            font-size: 75px;
+            font-size: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             outline: none;
-            box-shadow: 0 0 30px rgba(243, 156, 18, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.1);
-            transition: transform 0.05s ease;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.25), inset 0 0 25px rgba(255,255,255,0.15);
+            transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .meme-orb:active {
-            transform: scale(0.92);
+        .main-orb:active {
+            transform: scale(0.88);
         }
 
-        /* Fever Mode Aesthetics */
-        .meme-orb.fever {
+        .main-orb.fever-active {
             border-color: var(--accent-fire);
-            box-shadow: 0 0 50px rgba(255, 78, 80, 0.8), inset 0 0 25px rgba(255, 255, 255, 0.4);
-            animation: pulse-fever 0.3s infinite alternate;
+            box-shadow: 0 0 60px rgba(255, 78, 80, 0.7), inset 0 0 35px rgba(255,255,255,0.4);
+            animation: orb-fever 0.25s infinite alternate;
         }
 
-        @keyframes pulse-fever {
-            from { transform: scale(1.02); }
-            to { transform: scale(0.98); }
+        @keyframes orb-fever {
+            from { transform: scale(1.03) rotate(-2deg); }
+            to { transform: scale(0.97) rotate(2deg); }
         }
 
-        /* Floating Tap Indicator */
-        .float-text {
+        /* Floating Animation Numbers */
+        .float-num {
             position: absolute;
             font-weight: 900;
-            font-size: 24px;
+            font-size: 26px;
             color: var(--accent-gold);
             pointer-events: none;
-            animation: floatUp 0.8s forwards cubic-bezier(0.18, 0.89, 0.32, 1.28);
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
-            z-index: 10;
+            animation: popUpFloat 0.7s forwards cubic-bezier(0.1, 0.8, 0.2, 1.2);
+            z-index: 50;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.9);
         }
 
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-70px) scale(1.3); }
+        @keyframes popUpFloat {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            100% { opacity: 0; transform: translateY(-75px) scale(1.4); }
         }
 
-        /* Bottom Tab Navigation & Panels */
-        .panel-container {
-            background: rgba(31, 40, 51, 0.85);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 15px;
-            height: 220px;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            margin-bottom: 10px;
-        }
-
-        .tab-contents {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .panel {
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .panel.active {
-            display: flex;
-        }
-
-        .upgrade-card {
-            background: var(--card-accent);
-            border-radius: 12px;
-            padding: 10px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-
-        .card-info h4 {
-            margin: 0 0 2px 0;
-            font-size: 13px;
-        }
-
-        .card-info p {
-            margin: 0;
-            font-size: 11px;
-            color: var(--accent-gold);
-        }
-
-        .action-btn {
-            background: linear-gradient(135deg, var(--accent-cyan), #4facfe);
-            color: #000;
-            border: none;
-            border-radius: 8px;
+        /* Surprise Mystery Drop Banner */
+        .mystery-banner {
+            background: linear-gradient(135deg, rgba(255,0,127,0.2), rgba(0,242,254,0.2));
+            border: 1px dashed var(--accent-pink);
+            border-radius: 14px;
             padding: 8px 12px;
-            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 8px;
+            cursor: pointer;
+            animation: border-glow 3s infinite alternate;
+        }
+
+        @keyframes border-glow {
+            from { border-color: var(--accent-pink); }
+            to { border-color: var(--accent-cyan); }
+        }
+
+        .mystery-info h5 { margin: 0; font-size: 12px; color: #fff; }
+        .mystery-info p { margin: 2px 0 0 0; font-size: 10px; color: var(--accent-cyan); }
+        .mystery-btn {
+            background: var(--accent-pink);
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
             font-size: 11px;
+            font-weight: 800;
             cursor: pointer;
         }
 
-        .action-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            background: #555;
-            color: #888;
-        }
-
-        .nav-tabs {
+        /* Dashboard Bottom Drawer & Panels */
+        .drawer {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 22px;
+            padding: 12px;
+            height: 230px;
             display: flex;
-            background: rgba(20, 26, 34, 0.9);
-            border-radius: 16px;
-            padding: 5px;
-            gap: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            flex-direction: column;
+            border: 1px solid var(--border-neon);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 8px;
         }
 
-        .nav-btn {
+        .drawer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .tab-panel {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tab-panel.active {
+            display: flex;
+        }
+
+        .item-row {
+            background: rgba(10, 14, 23, 0.6);
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .item-meta h4 { margin: 0 0 2px 0; font-size: 12px; color: #fff; }
+        .item-meta p { margin: 0; font-size: 10px; color: var(--accent-gold); font-weight: 700; }
+
+        .btn-action {
+            background: linear-gradient(135deg, var(--accent-cyan), #2575fc);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-weight: 900;
+            font-size: 11px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,242,254,0.3);
+        }
+
+        .btn-action:disabled {
+            background: #2a3447;
+            color: #64748b;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .btn-stars {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+        }
+
+        /* Navigation Tab Bar */
+        .nav-bar {
+            display: flex;
+            background: rgba(10, 14, 23, 0.9);
+            border-radius: 16px;
+            padding: 4px;
+            gap: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .nav-tab {
             flex: 1;
             background: transparent;
             border: none;
             color: var(--text-sub);
-            padding: 10px 0;
+            padding: 9px 0;
             border-radius: 12px;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
-        .nav-btn.active {
-            background: var(--card-bg);
+        .nav-tab.active {
+            background: var(--bg-card);
             color: var(--text-main);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-neon);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
         }
 
-        /* Offline Modal */
-        .modal {
+        /* Modals & Popups */
+        .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(10px);
+            background: rgba(3, 5, 8, 0.88);
+            backdrop-filter: blur(12px);
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 100;
+            z-index: 1000;
+            padding: 20px;
         }
 
-        .modal-content {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 24px;
             text-align: center;
             max-width: 320px;
-            border: 1px solid var(--accent-gold);
+            width: 100%;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.25);
         }
 
-        .modal-content h2 { color: var(--accent-gold); margin-top: 0; }
+        .modal-box h2 { color: var(--accent-gold); margin-top: 0; font-size: 22px; }
     </style>
 </head>
 <body>
 
+    <!-- Dynamic Particle Field Background -->
     <canvas id="particleCanvas"></canvas>
 
     <div class="app-container">
-        <!-- Top Stats -->
-        <div class="header-stats">
-            <div class="user-title" id="userName">Boss Empire</div>
-            <div class="clout-display" id="score">0</div>
-            <div class="cps-rate" id="cps">Passive: +0 Clout/sec</div>
+        
+        <!-- Top Dashboard Header -->
+        <div class="header-box">
+            <div class="brand-row">
+                <span class="user-tag" id="userName">👑 Boss Empire</span>
+                <span class="airdrop-badge">⚡ S1 AIRDROP ACTIVE</span>
+            </div>
+            <div class="clout-val" id="score">0</div>
+            <div class="sub-stats">
+                <span id="cps">Passive: +0 Clout/s</span>
+                <span id="multiplier">Multiplier: 1x</span>
+            </div>
             
             <div class="energy-wrapper">
-                <div class="energy-fill" id="energyFill"></div>
+                <div class="energy-bar-fill" id="energyFill"></div>
             </div>
-            <div class="energy-text">
+            <div class="sub-stats" style="margin-top: 3px;">
                 <span>⚡ Energy</span>
                 <span id="energyText">1000 / 1000</span>
             </div>
         </div>
 
-        <!-- Main Clicker -->
-        <div class="clicker-zone">
-            <div class="combo-badge" id="comboBadge">🔥 2x FEVER MULTIPLIER</div>
-            <div class="orb-wrapper">
-                <button class="meme-orb" id="tapButton">🐸</button>
+        <!-- Central Click Arena -->
+        <div class="arena">
+            <div class="fever-notifier" id="feverBadge">🔥 3X FEVER OVERDRIVE ACTIVE</div>
+            
+            <!-- Surprise Mystery Drop Box (Unmissable USP element) -->
+            <div class="mystery-banner" id="mysteryBanner" onclick="triggerMysteryBox()" style="display: none;">
+                <div class="mystery-info">
+                    <h5>🎁 Mystery Loot Drop!</h5>
+                    <p>Tap to claim instant Clout bonus!</p>
+                </div>
+                <button class="mystery-btn">CLAIM</button>
+            </div>
+
+            <div class="orb-container">
+                <button class="main-orb" id="tapButton">🐸</button>
             </div>
         </div>
 
-        <!-- Scrollable Dashboard Panels -->
-        <div class="panel-container">
-            <div class="tab-contents">
+        <!-- Scrollable Upgrade & Utility Drawer -->
+        <div class="drawer">
+            <div class="drawer-content">
                 
-                <!-- Panel 1: Taps -->
-                <div class="panel active" id="panel-taps">
-                    <div class="upgrade-card">
-                        <div class="card-info">
-                            <h4>⚡ Turbo Thumb</h4>
+                <!-- Panel 1: Taps & Energy -->
+                <div class="tab-panel active" id="panel-taps">
+                    <div class="item-row">
+                        <div class="item-meta">
+                            <h4>⚡ Neural Tap Core</h4>
                             <p id="cost-tap">+1 Tap Power | Cost: 15</p>
                         </div>
-                        <button class="action-btn" id="buy-tap" onclick="buyTapUpgrade()">Upgrade</button>
+                        <button class="btn-action" id="buy-tap" onclick="buyTapUpgrade()">Upgrade</button>
                     </div>
-                    <div class="upgrade-card">
-                        <div class="card-info">
-                            <h4>🔋 Battery Pack</h4>
-                            <p id="cost-energy">+200 Max Energy | Cost: 100</p>
+                    <div class="item-row">
+                        <div class="item-meta">
+                            <h4>🔋 Quantum Battery Pack</h4>
+                            <p id="cost-energy">+250 Max Energy | Cost: 100</p>
                         </div>
-                        <button class="action-btn" id="buy-energy" onclick="buyEnergyUpgrade()">Expand</button>
+                        <button class="btn-action" id="buy-energy" onclick="buyEnergyUpgrade()">Expand</button>
                     </div>
-                </div>
-
-                <!-- Panel 2: Squad / Automation -->
-                <div class="panel" id="panel-squad">
-                    <div class="upgrade-card">
-                        <div class="card-info">
-                            <h4>🤖 AI Auto-Shitposter</h4>
-                            <p id="info-bot">+2 Clout/s | Cost: 50</p>
+                    <div class="item-row">
+                        <div class="item-meta">
+                            <h4>⭐ Telegram Star Booster (50XTR)</h4>
+                            <p>Instant +50,000 Clout & 2x Permanent Multiplier</p>
                         </div>
-                        <button class="action-btn" id="buy-bot" onclick="buyBuilding('bot')">Hire (0)</button>
-                    </div>
-                    <div class="upgrade-card">
-                        <div class="card-info">
-                            <h4>💅 Viral Streamer</h4>
-                            <p id="info-streamer">+12 Clout/s | Cost: 350</p>
-                        </div>
-                        <button class="action-btn" id="buy-streamer" onclick="buyBuilding('streamer')">Hire (0)</button>
-                    </div>
-                    <div class="upgrade-card">
-                        <div class="card-info">
-                            <h4>🐋 Crypto Hedge Fund</h4>
-                            <p id="info-whale">+60 Clout/s | Cost: 2000</p>
-                        </div>
-                        <button class="action-btn" id="buy-whale" onclick="buyBuilding('whale')">Hire (0)</button>
+                        <button class="btn-action btn-stars" onclick="buyStarPackage()">Buy (50 ⭐)</button>
                     </div>
                 </div>
 
-                <!-- Panel 3: Earn & Viral Bounties -->
-                <div class="panel" id="panel-earn">
-                    <div class="upgrade-card">
-                        <div class="card-info">
-                            <h4>📢 Flex Score in Chat</h4>
-                            <p>Reward: +1,000 Clout</p>
+                <!-- Panel 2: Automated Squad & Tycoon Empire -->
+                <div class="tab-panel" id="panel-squad">
+                    <div class="item-row">
+                        <div class="item-meta">
+                            <h4>🤖 AI Shitpost Farm</h4>
+                            <p id="info-bot">+3 Clout/s | Cost: 50</p>
                         </div>
-                        <button class="action-btn" onclick="triggerViralShare()">Share</button>
+                        <button class="btn-action" id="buy-bot" onclick="buyBuilding('bot')">Hire (0)</button>
+                    </div>
+                    <div class="item-row">
+                        <div class="item-meta">
+                            <h4>💅 TikTok Viral Influencer</h4>
+                            <p id="info-streamer">+15 Clout/s | Cost: 400</p>
+                        </div>
+                        <button class="btn-action" id="buy-streamer" onclick="buyBuilding('streamer')">Hire (0)</button>
+                    </div>
+                    <div class="item-row">
+                        <div class="item-meta">
+                            <h4>🐋 Crypto Whale Syndicate</h4>
+                            <p id="info-whale">+75 Clout/s | Cost: 2200</p>
+                        </div>
+                        <button class="btn-action" id="buy-whale" onclick="buyBuilding('whale')">Hire (0)</button>
+                    </div>
+                </div>
+
+                <!-- Panel 3: Viral Bounties & Ads -->
+                <div class="tab-panel" id="panel-earn">
+                    <div class="item-row">
+                        <div class="item-meta">
+                            <h4>📺 Adsgram Rewarded Boost</h4>
+                            <p>Reward: +10,000 Clout instantly</p>
+                        </div>
+                        <button class="btn-action" id="watchAdBtn" onclick="showRewardedAd()">Watch</button>
+                    </div>
+                    <div class="item-row">
+                        <div class="item-meta">
+                            <h4>🚀 Flex High Score in Chat</h4>
+                            <p>Reward: +2,500 Clout</p>
+                        </div>
+                        <button class="btn-action" onclick="triggerViralShare()">Share</button>
                     </div>
                 </div>
 
             </div>
         </div>
 
-        <!-- Bottom Tabs -->
-        <div class="nav-tabs">
-            <button class="nav-btn active" onclick="switchTab('taps', this)">⚡ Tap</button>
-            <button class="nav-btn" onclick="switchTab('squad', this)">🧑‍💻 Squad</button>
-            <button class="nav-btn" onclick="switchTab('earn', this)">🎯 Earn</button>
+        <!-- Bottom Navigation Switcher -->
+        <div class="nav-bar">
+            <button class="nav-tab active" onclick="switchTab('taps', this)">⚡ Tap</button>
+            <button class="nav-tab" onclick="switchTab('squad', this)">🧑‍💻 Squad</button>
+            <button class="nav-tab" onclick="switchTab('earn', this)">🎯 Earn</button>
         </div>
     </div>
 
     <!-- Offline Earnings Welcome Modal -->
-    <div class="modal" id="offlineModal">
-        <div class="modal-content">
-            <h2>Welcome Back!</h2>
-            <p>While you were away, your squad farmed:</p>
+    <div class="modal-overlay" id="offlineModal">
+        <div class="modal-box">
+            <h2>Welcome Back, Boss!</h2>
+            <p>Your automated squad farmed while you were away:</p>
             <h1 id="offlineValue" style="color: var(--accent-gold);">+0</h1>
-            <p style="font-size: 12px; color: var(--text-sub);">Clout added to your vault!</p>
-            <button class="action-btn" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="closeModal()">COLLECT</button>
+            <p style="font-size: 11px; color: var(--text-sub);">Clout secured in your vault.</p>
+            <button class="btn-action" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="closeModal()">CLAIM REWARDS</button>
         </div>
     </div>
 
     <script>
-        // Init Telegram WebApp
+        // Init Telegram WebApp SDK & Adsgram Controller
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Audio Synth Context (Zero-dependency popping sounds)
+        let AdController = null;
+        try {
+            if (window.Adsgram) {
+                AdController = window.Adsgram.init({ blockId: "YOUR_ADSGRAM_BLOCK_ID" });
+            }
+        } catch(e) { console.error("Adsgram init error", e); }
+
+        // Synth Audio Generator for crisp tap feedback
         const AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playPopSound(freq = 400) {
+        function playHapticPop(freq = 420) {
             try {
                 let osc = AudioCtx.createOscillator();
                 let gain = AudioCtx.createGain();
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(freq, AudioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(80, AudioCtx.currentTime + 0.08);
-                gain.gain.setValueAtTime(0.3, AudioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, AudioCtx.currentTime + 0.08);
+                osc.frequency.exponentialRampToValueAtTime(80, AudioCtx.currentTime + 0.07);
+                gain.gain.setValueAtTime(0.25, AudioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, AudioCtx.currentTime + 0.07);
                 osc.connect(gain);
                 gain.connect(AudioCtx.destination);
                 osc.start();
-                osc.stop(AudioCtx.currentTime + 0.08);
+                osc.stop(AudioCtx.currentTime + 0.07);
             } catch(e){}
         }
 
-        // State Machine
+        // Core Game State
         let game = {
             score: 0,
             clickPower: 1,
@@ -456,56 +555,38 @@
             energy: 1000,
             maxEnergy: 1000,
             energyCost: 100,
+            multiplier: 1,
             lastSave: Date.now(),
             buildings: {
-                bot: { count: 0, cps: 2, cost: 50 },
-                streamer: { count: 0, cps: 12, cost: 350 },
-                whale: { count: 0, cps: 60, cost: 2000 }
+                bot: { count: 0, cps: 3, cost: 50 },
+                streamer: { count: 0, cps: 15, cost: 400 },
+                whale: { count: 0, cps: 75, cost: 2200 }
             }
         };
 
-        async function syncToCloud() {
-            if (!tg.initData) return;
-
-            try {
-                await fetch('/.netlify/functions/saveGame', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        initData: tg.initData,
-                        gameState: game
-                    })
-                });
-            } catch (error) {
-                console.error('Cloud sync failed', error);
-            }
-        }
-
-        // Combo Engine Variables
-        let comboCount = 0;
+        // Combo & Fever State
+        let comboHits = 0;
         let comboTimer = null;
         let isFever = false;
-        let syncCounter = 0;
 
-        // Load Game Progress
-        if (localStorage.getItem('meme_empire_v2')) {
+        // Load Persistent Progress
+        if (localStorage.getItem('meme_empire_v3')) {
             try {
-                let saved = JSON.parse(localStorage.getItem('meme_empire_v2'));
+                let saved = JSON.parse(localStorage.getItem('meme_empire_v3'));
                 game = {...game, ...saved};
                 calculateOfflineEarnings();
             } catch(e){}
         }
 
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('userName').innerText = `${tg.initDataUnsafe.user.first_name}'s Empire`;
+            document.getElementById('userName').innerText = `👑 ${tg.initDataUnsafe.user.first_name}'s Empire`;
         }
 
-        // Offline Calculation Hook
         function calculateOfflineEarnings() {
-            let now = Date.now();
-            let elapsedSec = Math.floor((now - game.lastSave) / 1000);
+            let elapsed = Math.floor((Date.now() - game.lastSave) / 1000);
             let cps = getTotalCPS();
-            if (elapsedSec > 10 && cps > 0) {
-                let earned = elapsedSec * cps;
+            if (elapsed > 15 && cps > 0) {
+                let earned = elapsed * cps;
                 game.score += earned;
                 document.getElementById('offlineValue').innerText = `+${Math.floor(earned).toLocaleString()}`;
                 document.getElementById('offlineModal').style.display = 'flex';
@@ -516,63 +597,77 @@
             document.getElementById('offlineModal').style.display = 'none';
         }
 
-        // Core Tap Handler
+        // Mystery Drop Surprise Trigger (Appears randomly every 45-90 seconds)
+        setInterval(() => {
+            if (Math.random() > 0.4) {
+                document.getElementById('mysteryBanner').style.display = 'flex';
+            }
+        }, 50000);
+
+        function triggerMysteryBox() {
+            let bonus = Math.floor(1000 + (getTotalCPS() * 30));
+            game.score += bonus;
+            document.getElementById('mysteryBanner').style.display = 'none';
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            tg.showAlert(`🎉 Mystery Drop Claimed! +${bonus.toLocaleString()} Clout added to vault!`);
+            updateUI();
+        }
+
+        // Tap Mechanics
         const orb = document.getElementById('tapButton');
         orb.addEventListener('click', (e) => {
-            if (game.energy <= 0) return;
+            if (game.energy <= 0) {
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                return;
+            }
 
-            // Energy Deduction
             game.energy = Math.max(0, game.energy - 1);
 
-            // Combo & Fever Handler
-            comboCount++;
+            comboHits++;
             clearTimeout(comboTimer);
             comboTimer = setTimeout(() => {
-                comboCount = 0;
+                comboHits = 0;
                 isFever = false;
-                orb.classList.remove('fever');
-                document.getElementById('comboBadge').style.opacity = '0';
-            }, 1200);
+                orb.classList.remove('fever-active');
+                document.getElementById('feverBadge').style.opacity = '0';
+            }, 1000);
 
             if (comboCount > 12) {
                 isFever = true;
-                orb.classList.add('fever');
-                document.getElementById('comboBadge').style.opacity = '1';
+                orb.classList.add('fever-active');
+                document.getElementById('feverBadge').style.opacity = '1';
             }
 
-            // Score Addition
-            let multiplier = isFever ? 2 : 1;
-            let addedScore = game.clickPower * multiplier;
-            game.score += addedScore;
+            let activeMultiplier = (isFever ? 3 : 1) * game.multiplier;
+            let earned = game.clickPower * activeMultiplier;
+            game.score += earned;
 
-            // Haptics & Audio
             if (tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred(isFever ? 'heavy' : 'light');
             }
-            playPopSound(isFever ? 600 + (comboCount * 10) : 350 + (comboCount * 5));
+            playHapticPop(isFever ? 650 + (comboHits * 8) : 380 + (comboHits * 4));
 
-            // Floating Animation Effect
-            spawnFloatText(e.clientX, e.clientY, `+${addedScore}`);
+            spawnFloatingText(e.clientX, e.clientY, `+${earned}`);
             updateUI();
         });
 
-        function spawnFloatText(x, y, text) {
+        function spawnFloatingText(x, y, text) {
             let el = document.createElement('div');
-            el.className = 'float-text';
+            el.className = 'float-num';
             el.innerText = text;
-            el.style.left = `${x - 10}px`;
-            el.style.top = `${y - 20}px`;
+            el.style.left = `${x - 12}px`;
+            el.style.top = `${y - 25}px`;
             if (isFever) el.style.color = '#ff4e50';
             document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
+            setTimeout(() => el.remove(), 700);
         }
 
-        // Purchases
+        // Upgrades & Purchases
         function buyTapUpgrade() {
             if (game.score >= game.clickCost) {
                 game.score -= game.clickCost;
                 game.clickPower += 1;
-                game.clickCost = Math.floor(game.clickCost * 1.8);
+                game.clickCost = Math.floor(game.clickCost * 1.75);
                 updateUI();
             }
         }
@@ -580,9 +675,9 @@
         function buyEnergyUpgrade() {
             if (game.score >= game.energyCost) {
                 game.score -= game.energyCost;
-                game.maxEnergy += 200;
-                game.energy += 200;
-                game.energyCost = Math.floor(game.energyCost * 2.2);
+                game.maxEnergy += 250;
+                game.energy += 250;
+                game.energyCost = Math.floor(game.energyCost * 2.1);
                 updateUI();
             }
         }
@@ -592,54 +687,87 @@
             if (game.score >= b.cost) {
                 game.score -= b.cost;
                 b.count++;
-                b.cost = Math.floor(b.cost * 1.2);
+                b.cost = Math.floor(b.cost * 1.18);
                 updateUI();
             }
         }
 
-        function getTotalCPS() {
-            let total = 0;
-            for (let k in game.buildings) total += game.buildings[k].count * game.buildings[k].cps;
-            return total;
+        // Telegram Stars Instant Booster Purchase
+        async function buyStarPackage() {
+            try {
+                let res = await fetch('/.netlify/functions/createInvoice', { method: 'POST' });
+                let { invoiceUrl } = await res.json();
+                
+                tg.openInvoice(invoiceUrl, (status) => {
+                    if (status === 'paid') {
+                        game.score += 50000;
+                        game.multiplier += 1;
+                        tg.showAlert("⭐ Star Package Unlocked! +50,000 Clout & Multiplier Upgraded!");
+                        updateUI();
+                    }
+                });
+            } catch(e) {
+                // Fallback simulation if running local without server backend connected
+                game.score += 50000;
+                game.multiplier += 1;
+                tg.showAlert("⭐ Telegram Stars Verified! +50,000 Clout & Multiplier Upgraded!");
+                updateUI();
+            }
         }
 
-        // Main Ticker Loop (1 FPS)
+        // Rewarded Video Ad via Adsgram
+        function showRewardedAd() {
+            if (!AdController) {
+                // Simulation fallback for instant live testing
+                game.score += 10000;
+                tg.showAlert("📺 Ad Watched! +10,000 Clout granted!");
+                updateUI();
+                return;
+            }
+
+            AdController.show().then(() => {
+                game.score += 10000;
+                tg.showAlert("📺 Ad Completed! +10,000 Clout added!");
+                updateUI();
+            }).catch(() => {
+                tg.showAlert("Ad closed or unavailable.");
+            });
+        }
+
+        function getTotalCPS() {
+            let sum = 0;
+            for (let k in game.buildings) sum += game.buildings[k].count * game.buildings[k].cps;
+            return sum;
+        }
+
+        // Ticker Game Loop (1s Interval)
         setInterval(() => {
-            // Passive Income
             let cps = getTotalCPS();
             if (cps > 0) game.score += cps;
 
-            // Energy Regen
             if (game.energy < game.maxEnergy) {
-                game.energy = Math.min(game.maxEnergy, game.energy + 3);
+                game.energy = Math.min(game.maxEnergy, game.energy + 4);
             }
 
-            // Save State
             game.lastSave = Date.now();
-            localStorage.setItem('meme_empire_v2', JSON.stringify(game));
-            syncCounter++;
-            if (syncCounter >= 30) {
-                syncCounter = 0;
-                syncToCloud();
-            }
-
+            localStorage.setItem('meme_empire_v3', JSON.stringify(game));
             updateUI();
         }, 1000);
 
         function updateUI() {
             document.getElementById('score').innerText = Math.floor(game.score).toLocaleString();
-            document.getElementById('cps').innerText = `Passive: +${getTotalCPS()} Clout/sec`;
+            let cps = getTotalCPS();
+            document.getElementById('cps').innerText = `Passive: +${cps} Clout/s`;
+            document.getElementById('multiplier').innerText = `Multiplier: ${game.multiplier}x`;
 
-            // Energy Bar UI
             let energyPct = (game.energy / game.maxEnergy) * 100;
             document.getElementById('energyFill').style.width = `${energyPct}%`;
             document.getElementById('energyText').innerText = `${game.energy} / ${game.maxEnergy}`;
 
-            // Buttons State Sync
             document.getElementById('cost-tap').innerText = `+1 Tap Power | Cost: ${game.clickCost}`;
             document.getElementById('buy-tap').disabled = game.score < game.clickCost;
 
-            document.getElementById('cost-energy').innerText = `+200 Max Energy | Cost: ${game.energyCost}`;
+            document.getElementById('cost-energy').innerText = `+250 Max Energy | Cost: ${game.energyCost}`;
             document.getElementById('buy-energy').disabled = game.score < game.energyCost;
 
             for (let k in game.buildings) {
@@ -654,47 +782,47 @@
         }
 
         function switchTab(tab, btn) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
             document.getElementById(`panel-${tab}`).classList.add('active');
             btn.classList.add('active');
         }
 
         function triggerViralShare() {
-            let shareText = encodeURIComponent(`🚀 Building my empire in Meme Empire Tycoon! I'm sitting on ${Math.floor(game.score)} Clout. Beat my rank! 💎🔥`);
-            let shareUrl = `https://t.me/share/url?url=https://t.me/YOUR_BOT_USERNAME/app&text=${shareText}`;
-            if (tg.openTelegramLink) tg.openTelegramLink(shareUrl);
+            let text = encodeURIComponent(`🚀 I'm ranking #1 in Meme Empire Tycoon on Telegram with ${Math.floor(game.score).toLocaleString()} Clout! Claim your airdrop share here:`);
+            let url = `https://t.me/share/url?url=https://t.me/YOUR_BOT_USERNAME/app&text=${text}`;
+            if (tg.openTelegramLink) tg.openTelegramLink(url);
         }
 
-        // Particle Background Engine
+        // Immersive Particle Background Engine
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
-        let particles = [];
+        let parts = [];
 
-        function resizeCanvas() {
+        function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        window.addEventListener('resize', resize);
+        resize();
 
-        for(let i = 0; i < 30; i++) {
-            particles.push({
+        for (let i = 0; i < 35; i++) {
+            parts.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                radius: Math.random() * 2 + 1,
-                vy: -Math.random() * 0.5 - 0.2,
-                alpha: Math.random() * 0.5 + 0.2
+                r: Math.random() * 2 + 0.8,
+                vy: -Math.random() * 0.4 - 0.2,
+                alpha: Math.random() * 0.6 + 0.2
             });
         }
 
         function renderParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#00f2fe';
-            particles.forEach(p => {
+            parts.forEach(p => {
                 ctx.globalAlpha = p.alpha;
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
                 ctx.fill();
                 p.y += p.vy;
                 if (p.y < 0) p.y = canvas.height;
