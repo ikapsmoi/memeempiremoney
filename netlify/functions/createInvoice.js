@@ -1,41 +1,33 @@
 exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' };
+        return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
     }
 
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    if (!botToken) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Telegram bot is not configured.' })
-        };
+    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+    if (!BOT_TOKEN) {
+        return { statusCode: 500, body: JSON.stringify({ error: 'TELEGRAM_BOT_TOKEN is missing on Netlify' }) };
     }
 
-    const invoiceData = {
-        title: 'Super Energy Pack',
-        description: 'Refill your energy by 5,000 points instantly!',
-        payload: 'energy_pack_5000',
-        currency: 'XTR',
-        prices: [{ label: 'Price in Stars', amount: 50 }],
-        provider_token: ''
+    const invoicePayload = {
+        title: "Star Booster Pack",
+        description: "Instant +50,000 Clout & 2x Permanent Multiplier",
+        payload: "star_booster_50_payload",
+        currency: "XTR",
+        prices: [{ label: "Telegram Stars", amount: 50 }],
+        provider_token: ""
     };
 
     try {
-        const response = await fetch(
-            `https://api.telegram.org/bot${botToken}/createInvoiceLink`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(invoiceData)
-            }
-        );
+        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/createInvoiceLink`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(invoicePayload)
+        });
+
         const data = await response.json();
 
-        if (!response.ok || !data.ok || !data.result) {
-            return {
-                statusCode: 502,
-                body: JSON.stringify({ error: 'Telegram could not create the invoice.' })
-            };
+        if (!data.ok) {
+            return { statusCode: 400, body: JSON.stringify({ error: data.description || 'Telegram API Error' }) };
         }
 
         return {
@@ -43,9 +35,6 @@ exports.handler = async (event) => {
             body: JSON.stringify({ invoiceUrl: data.result })
         };
     } catch (error) {
-        return {
-            statusCode: 502,
-            body: JSON.stringify({ error: 'Unable to reach Telegram.' })
-        };
+        return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
     }
 };
