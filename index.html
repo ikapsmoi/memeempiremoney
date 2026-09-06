@@ -282,7 +282,7 @@
             display: flex;
         }
 
-        .item-row {
+        .item-row, .upgrade-card {
             background: rgba(10, 14, 23, 0.6);
             border-radius: 12px;
             padding: 8px 12px;
@@ -292,10 +292,10 @@
             border: 1px solid rgba(255,255,255,0.03);
         }
 
-        .item-meta h4 { margin: 0 0 2px 0; font-size: 12px; color: #fff; }
-        .item-meta p { margin: 0; font-size: 10px; color: var(--accent-gold); font-weight: 700; }
+        .item-meta h4, .card-info h4 { margin: 0 0 2px 0; font-size: 12px; color: #fff; }
+        .item-meta p, .card-info p { margin: 0; font-size: 10px; color: var(--accent-gold); font-weight: 700; }
 
-        .btn-action {
+        .btn-action, .action-btn {
             background: linear-gradient(135deg, var(--accent-cyan), #2575fc);
             color: #000;
             border: none;
@@ -307,7 +307,7 @@
             box-shadow: 0 4px 12px rgba(0,242,254,0.3);
         }
 
-        .btn-action:disabled {
+        .btn-action:disabled, .action-btn:disabled {
             background: #2a3447;
             color: #64748b;
             box-shadow: none;
@@ -409,7 +409,7 @@
         <div class="arena">
             <div class="fever-notifier" id="feverBadge">🔥 3X FEVER OVERDRIVE ACTIVE</div>
             
-            <!-- Surprise Mystery Drop Box (Unmissable USP element) -->
+            <!-- Surprise Mystery Drop Box -->
             <div class="mystery-banner" id="mysteryBanner" onclick="triggerMysteryBox()" style="display: none;">
                 <div class="mystery-info">
                     <h5>🎁 Mystery Loot Drop!</h5>
@@ -429,69 +429,69 @@
                 
                 <!-- Panel 1: Taps & Energy -->
                 <div class="tab-panel active" id="panel-taps">
-                    <div class="item-row">
-                        <div class="item-meta">
+                    <div class="upgrade-card">
+                        <div class="card-info">
                             <h4>⚡ Neural Tap Core</h4>
                             <p id="cost-tap">+1 Tap Power | Cost: 15</p>
                         </div>
-                        <button class="btn-action" id="buy-tap" onclick="buyTapUpgrade()">Upgrade</button>
+                        <button class="action-btn" id="buy-tap" onclick="buyTapUpgrade()">Upgrade</button>
                     </div>
-                    <div class="item-row">
-                        <div class="item-meta">
+                    <div class="upgrade-card">
+                        <div class="card-info">
                             <h4>🔋 Quantum Battery Pack</h4>
                             <p id="cost-energy">+250 Max Energy | Cost: 100</p>
                         </div>
-                        <button class="btn-action" id="buy-energy" onclick="buyEnergyUpgrade()">Expand</button>
+                        <button class="action-btn" id="buy-energy" onclick="buyEnergyUpgrade()">Expand</button>
                     </div>
-                    <div class="item-row">
-                        <div class="item-meta">
+                    <div class="upgrade-card">
+                        <div class="card-info">
                             <h4>⭐ Telegram Star Booster (50XTR)</h4>
                             <p>Instant +50,000 Clout & 2x Permanent Multiplier</p>
                         </div>
-                        <button class="btn-action btn-stars" onclick="buyStarPackage()">Buy (50 ⭐)</button>
+                        <button class="action-btn btn-stars" onclick="buyStarPackage()">Buy (50 ⭐)</button>
                     </div>
                 </div>
 
                 <!-- Panel 2: Automated Squad & Tycoon Empire -->
                 <div class="tab-panel" id="panel-squad">
-                    <div class="item-row">
-                        <div class="item-meta">
+                    <div class="upgrade-card">
+                        <div class="card-info">
                             <h4>🤖 AI Shitpost Farm</h4>
                             <p id="info-bot">+3 Clout/s | Cost: 50</p>
                         </div>
-                        <button class="btn-action" id="buy-bot" onclick="buyBuilding('bot')">Hire (0)</button>
+                        <button class="action-btn" id="buy-bot" onclick="buyBuilding('bot')">Hire (0)</button>
                     </div>
-                    <div class="item-row">
-                        <div class="item-meta">
+                    <div class="upgrade-card">
+                        <div class="card-info">
                             <h4>💅 TikTok Viral Influencer</h4>
                             <p id="info-streamer">+15 Clout/s | Cost: 400</p>
                         </div>
-                        <button class="btn-action" id="buy-streamer" onclick="buyBuilding('streamer')">Hire (0)</button>
+                        <button class="action-btn" id="buy-streamer" onclick="buyBuilding('streamer')">Hire (0)</button>
                     </div>
-                    <div class="item-row">
-                        <div class="item-meta">
+                    <div class="upgrade-card">
+                        <div class="card-info">
                             <h4>🐋 Crypto Whale Syndicate</h4>
                             <p id="info-whale">+75 Clout/s | Cost: 2200</p>
                         </div>
-                        <button class="btn-action" id="buy-whale" onclick="buyBuilding('whale')">Hire (0)</button>
+                        <button class="action-btn" id="buy-whale" onclick="buyBuilding('whale')">Hire (0)</button>
                     </div>
                 </div>
 
                 <!-- Panel 3: Viral Bounties & Ads -->
                 <div class="tab-panel" id="panel-earn">
-                    <div class="item-row">
-                        <div class="item-meta">
-                            <h4>📺 Adsgram Rewarded Boost</h4>
-                            <p>Reward: +10,000 Clout instantly</p>
+                    <div class="upgrade-card">
+                        <div class="card-info">
+                            <h4>📺 Watch Ad for Clout</h4>
+                            <p>Reward: +5,000 Clout</p>
                         </div>
-                        <button class="btn-action" id="watchAdBtn" onclick="showRewardedAd()">Watch</button>
+                        <button class="action-btn" id="watchAdBtn" onclick="showRewardedAd()">Watch</button>
                     </div>
-                    <div class="item-row">
-                        <div class="item-meta">
+                    <div class="upgrade-card">
+                        <div class="card-info">
                             <h4>🚀 Flex High Score in Chat</h4>
                             <p>Reward: +2,500 Clout</p>
                         </div>
-                        <button class="btn-action" onclick="triggerViralShare()">Share</button>
+                        <button class="action-btn" onclick="triggerViralShare()">Share</button>
                     </div>
                 </div>
 
@@ -513,21 +513,24 @@
             <p>Your automated squad farmed while you were away:</p>
             <h1 id="offlineValue" style="color: var(--accent-gold);">+0</h1>
             <p style="font-size: 11px; color: var(--text-sub);">Clout secured in your vault.</p>
-            <button class="btn-action" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="closeModal()">CLAIM REWARDS</button>
+            <button class="action-btn" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="closeModal()">CLAIM REWARDS</button>
         </div>
     </div>
 
     <script>
         // Init Telegram WebApp SDK & Adsgram Controller
-        let tg = window.Telegram.WebApp;
+       let tg = window.Telegram.WebApp;
         tg.expand();
 
         let AdController = null;
         try {
             if (window.Adsgram) {
-                AdController = window.Adsgram.init({ blockId: "YOUR_ADSGRAM_BLOCK_ID" });
+                // Using the required 'int-' prefix format or your numeric block ID safely
+                AdController = window.Adsgram.init({ blockId: "int-46469" });
             }
-        } catch(e) { console.error("Adsgram init error", e); }
+        } catch(e) { 
+            console.error("Adsgram init error", e); 
+        }
 
         // Synth Audio Generator for crisp tap feedback
         const AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -632,7 +635,7 @@
                 document.getElementById('feverBadge').style.opacity = '0';
             }, 1000);
 
-            if (comboCount > 12) {
+            if (comboHits > 15) {
                 isFever = true;
                 orb.classList.add('fever-active');
                 document.getElementById('feverBadge').style.opacity = '1';
@@ -715,22 +718,45 @@
             }
         }
 
-        // Rewarded Video Ad via Adsgram
+        // Rewarded Video Ad Handler
         function showRewardedAd() {
+            const btn = document.getElementById('watchAdBtn');
+            btn.disabled = true;
+            btn.innerText = "Loading...";
+
             if (!AdController) {
-                // Simulation fallback for instant live testing
-                game.score += 10000;
-                tg.showAlert("📺 Ad Watched! +10,000 Clout granted!");
-                updateUI();
+                // Fallback simulation for local/testing without block ID set
+                setTimeout(() => {
+                    game.score += 5000;
+                    updateUI();
+                    tg.showAlert("Reward granted: +5,000 Clout! 💎");
+                    btn.disabled = false;
+                    btn.innerText = "Watch";
+                    localStorage.setItem('meme_empire_v3', JSON.stringify(game));
+                }, 1000);
                 return;
             }
 
-            AdController.show().then(() => {
-                game.score += 10000;
-                tg.showAlert("📺 Ad Completed! +10,000 Clout added!");
+            AdController.show().then((result) => {
+                // User successfully watched the ad
+                game.score += 5000;
                 updateUI();
-            }).catch(() => {
-                tg.showAlert("Ad closed or unavailable.");
+                
+                tg.showAlert("Reward granted: +5,000 Clout! 💎");
+                
+                btn.disabled = false;
+                btn.innerText = "Watch";
+                
+                // Save state immediately
+                localStorage.setItem('meme_empire_v3', JSON.stringify(game));
+                
+            }).catch((error) => {
+                // User closed the ad early, or no ads were available
+                console.error("Ad failed or skipped:", error);
+                tg.showAlert("Ad skipped or unavailable. Try again later.");
+                
+                btn.disabled = false;
+                btn.innerText = "Watch";
             });
         }
 
