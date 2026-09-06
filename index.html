@@ -696,27 +696,51 @@
         }
 
         // Telegram Stars Instant Booster Purchase
-        async function buyStarPackage() {
-            try {
-                let res = await fetch('/.netlify/functions/createInvoice', { method: 'POST' });
-                let { invoiceUrl } = await res.json();
-                
-                tg.openInvoice(invoiceUrl, (status) => {
-                    if (status === 'paid') {
-                        game.score += 50000;
-                        game.multiplier += 1;
-                        tg.showAlert("⭐ Star Package Unlocked! +50,000 Clout & Multiplier Upgraded!");
-                        updateUI();
-                    }
-                });
-            } catch(e) {
-                // Fallback simulation if running local without server backend connected
+     async function buyStarPackage() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerText = "Generating Invoice...";
+
+    try {
+        // Call your Netlify serverless function to generate the Telegram Star invoice
+        let res = await fetch('/.netlify/functions/createInvoice', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ packageId: 'star_booster_50' })
+        });
+        
+        let data = await res.json();
+        if (!data.invoiceUrl) throw new Error("Failed to generate invoice link");
+
+        btn.disabled = false;
+        btn.innerText = "Buy (50 ⭐)";
+
+        // Open the native Telegram Star payment screen overlay
+        tg.openInvoice(data.invoiceUrl, async (status) => {
+            if (status === 'paid') {
+                // Grant reward locally or poll server
                 game.score += 50000;
                 game.multiplier += 1;
-                tg.showAlert("⭐ Telegram Stars Verified! +50,000 Clout & Multiplier Upgraded!");
                 updateUI();
+                tg.showAlert("⭐ Payment Successful! +50,000 Clout & Multiplier Upgraded!");
+            } else if (status === 'cancelled') {
+                console.log("User cancelled payment.");
+            } else {
+                tg.showAlert("Payment failed or pending.");
             }
-        }
+        });
+
+    } catch (e) {
+        console.error(e);
+        // Fallback simulation for offline/local testing if backend isn't connected yet
+        game.score += 50000;
+        game.multiplier += 1;
+        updateUI();
+        tg.showAlert("⭐ Star Package Unlocked (Simulation Mode)!");
+        btn.disabled = false;
+        btn.innerText = "Buy (50 ⭐)";
+    }
+}
 
         // Rewarded Video Ad Handler
         function showRewardedAd() {
