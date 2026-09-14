@@ -946,7 +946,7 @@ setInterval(syncToCloud, 30000);
             try {
                 const response = await fetch('/.netlify/functions/createInvoice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ packageId: pack.id }) });
                 const data = await response.json().catch(() => ({}));
-                if (response.status === 404) throw new Error('Checkout is not deployed yet. Open the live Netlify URL or run Netlify Dev.');
+                if (response.status === 404 || data.error === 'Not Found') throw new Error('Checkout is not deployed yet. In Netlify, redeploy with Functions directory set to netlify/functions.');
                 if (!response.ok || !data.invoiceUrl) throw new Error(data.error || 'Invoice unavailable');
                 if (!tgStore || !tgStore.openInvoice) throw new Error('Open this store inside Telegram to pay');
                 tgStore.openInvoice(data.invoiceUrl, status => { if (status === 'paid') { balance += pack.stars; localStorage.setItem('meme_balance', balance); document.getElementById('coinBalance').textContent = `${balance.toLocaleString('en-IN')} MEME`; showStoreToast(`${pack.stars.toLocaleString('en-IN')} Stars added to your wallet`); } else if (status === 'cancelled') showStoreToast('Payment cancelled'); else if (status === 'failed') showStoreToast('Payment failed. Please try again.'); });
