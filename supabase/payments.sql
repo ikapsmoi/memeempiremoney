@@ -7,6 +7,32 @@ create table if not exists public.telegram_payments (
 
 alter table public.telegram_payments enable row level security;
 
+create or replace function public.grant_meme_pack(
+    p_telegram_id bigint,
+    p_meme_amount integer,
+    p_payload text,
+    p_charge_id text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    insert into public.telegram_payments (telegram_payment_charge_id, telegram_id, payload)
+    values (p_charge_id, p_telegram_id, p_payload)
+    on conflict (telegram_payment_charge_id) do nothing;
+
+    if found then
+        insert into public.players (telegram_id, meme_balance, updated_at)
+        values (p_telegram_id, p_meme_amount, now())
+        on conflict (telegram_id) do update
+        set meme_balance = players.meme_balance + excluded.meme_balance,
+            updated_at = now();
+    end if;
+end;
+$$;
+
 create or replace function public.grant_energy_pack(
     p_telegram_id bigint,
     p_energy integer,
