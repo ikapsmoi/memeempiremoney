@@ -5,14 +5,23 @@ exports.handler = async (event) => {
 
     const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     
-    // Define your Star package pricing (e.g., 50 Stars for the Booster Pack)
+    const packages = {
+        stars_100: 100, stars_200: 200, stars_300: 300, stars_500: 500,
+        stars_1000: 1000, stars_2000: 2000, stars_10000: 10000, stars_20000: 20000
+    };
+    const packageId = JSON.parse(event.body || '{}').packageId;
+    const stars = packages[packageId];
+    if (!stars) {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Invalid Star package.' }) };
+    }
+
     const invoicePayload = {
-        title: "Star Booster Pack",
-        description: "Instant +50,000 Clout & 2x Permanent Multiplier",
-        payload: "star_booster_50_payload", // Unique tracking ID for this purchase
-        currency: "XTR",                    // MUST be XTR for Telegram Stars
-        prices: [{ label: "Telegram Stars", amount: 50 }], // 50 Stars
-        provider_token: ""                  // MUST be an empty string for digital goods/Stars
+        title: `${stars} Star Pack`,
+        description: `Receive ${stars} Stars worth of MemeCoin`,
+        payload: `${packageId}_payload`,
+        currency: "XTR",
+        prices: [{ label: "Telegram Stars", amount: stars }],
+        provider_token: ""
     };
 
     try {

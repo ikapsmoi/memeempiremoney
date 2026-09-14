@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Meme Empire Tycoon 💎</title>
+    <title>Mintory | Buy Stars</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
@@ -32,11 +32,12 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: stretch;
         }
 
         /* Ambient Dynamic Background */
@@ -111,6 +112,7 @@
             font-size: 38px;
             font-weight: 900;
             background: linear-gradient(135deg, #fff 20%, var(--accent-gold) 100%);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin: 2px 0;
@@ -375,9 +377,21 @@
         }
 
         .modal-box h2 { color: var(--accent-gold); margin-top: 0; font-size: 22px; }
+        .app-container { display: none; }
+        .storefront { position: relative; z-index: 2; width: min(1140px, 100%); padding: 25px 28px 70px; color: #18252b; font-family: 'Space Grotesk', sans-serif; }
+        .storefront::before { content: ''; position: fixed; inset: 0; z-index: -1; background: #f4f2ea; background-image: radial-gradient(#c3cbbb 1px, transparent 1px); background-size: 19px 19px; opacity: .94; }
+        .store-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #d9ddd3; padding-bottom: 22px; } .store-logo { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: -.04em; font-size: 21px; } .store-mark { width: 33px; height: 33px; display: grid; place-items: center; background: #18252b; color: #d7f06a; border-radius: 10px 10px 10px 3px; font: 14px 'DM Mono', monospace; } .wallet-chip { border: 1px solid #d9ddd3; border-radius: 999px; padding: 9px 14px; color: #68777a; font: 11px 'DM Mono', monospace; }
+        .store-main { padding-top: 66px; } .store-eyebrow { color: #1c7770; font: 500 11px 'DM Mono', monospace; letter-spacing: .12em; text-transform: uppercase; } .store-main h1 { max-width: 650px; margin: 14px 0 17px; color: #18252b; font-size: clamp(42px, 7vw, 82px); line-height: .94; letter-spacing: -.075em; font-weight: 600; } .store-intro { max-width: 520px; margin: 0; color: #68777a; font-size: 16px; line-height: 1.55; }
+        .wallet-balance { margin: 47px 0 28px; padding: 20px 24px; background: #18252b; color: white; display: flex; align-items: center; justify-content: space-between; border-radius: 3px; } .wallet-balance small { display: block; color: #aab8b7; font: 10px 'DM Mono', monospace; letter-spacing: .1em; text-transform: uppercase; } .wallet-balance strong { display: block; margin-top: 6px; color: #d7f06a; font-size: 25px; } .wallet-balance span { color: #d7dfd9; font-size: 12px; }
+        .pack-heading { display: flex; justify-content: space-between; align-items: end; margin: 38px 0 15px; } .pack-heading h2 { margin: 0; color: #18252b; font-size: 22px; letter-spacing: -.04em; } .pack-note { color: #68777a; font: 11px 'DM Mono', monospace; } .pack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .star-pack { position: relative; min-height: 220px; padding: 19px; background: #fffdf7; border: 1px solid #d9ddd3; border-radius: 3px; transition: transform .2s, border-color .2s, box-shadow .2s; } .star-pack:hover { transform: translateY(-4px); border-color: #1c7770; box-shadow: 0 12px 28px rgba(24,37,43,.1); } .star-pack.popular { background: #d7f06a; border-color: #d7f06a; } .pack-tag { position: absolute; top: 13px; right: 13px; color: #1c7770; font: 10px 'DM Mono', monospace; text-transform: uppercase; } .star-symbol { color: #ef765f; font-size: 22px; } .star-pack h3 { margin: 28px 0 3px; color: #18252b; font-size: 31px; letter-spacing: -.06em; } .star-pack h3 span { font-size: 14px; letter-spacing: 0; font-weight: 500; } .star-pack p { margin: 0; color: #68777a; font: 11px 'DM Mono', monospace; }
+        .pack-buy-row { position: absolute; right: 16px; bottom: 16px; left: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; } .pack-price { font-size: 18px; font-weight: 600; } .pack-buy { border: 0; border-radius: 2px; padding: 10px 13px; background: #18252b; color: white; font-size: 12px; font-weight: 600; } .pack-buy:hover { background: #1c7770; } .pack-buy:disabled { opacity: .5; cursor: wait; }
+        .store-trust { display: flex; gap: 28px; margin-top: 38px; padding-top: 20px; border-top: 1px solid #d9ddd3; color: #68777a; font: 11px 'DM Mono', monospace; } .store-toast { position: fixed; left: 50%; bottom: 25px; transform: translate(-50%, 90px); padding: 13px 18px; background: #18252b; color: white; border-left: 4px solid #d7f06a; font-size: 13px; transition: transform .25s; z-index: 5; } .store-toast.show { transform: translate(-50%, 0); }
+        @media (max-width: 760px) { .storefront { padding: 18px 16px 45px; } .store-main { padding-top: 42px; } .pack-grid { grid-template-columns: repeat(2, 1fr); } .star-pack { min-height: 198px; padding: 15px; } .star-pack h3 { font-size: 27px; } .pack-buy-row { right: 12px; bottom: 12px; left: 12px; } .pack-buy { padding: 9px 10px; } .pack-price { font-size: 16px; } } @media (max-width: 390px) { .pack-heading { display: block; } .pack-note { display: block; margin-top: 7px; } .store-trust { gap: 13px; flex-wrap: wrap; } }
     </style>
 </head>
 <body>
+    <div class="storefront"><header class="store-header"><div class="store-logo"><span class="store-mark">M/</span> mintory</div><div class="wallet-chip" id="storeUser">TELEGRAM WALLET</div></header><main class="store-main"><div class="store-eyebrow">Digital asset desk / 01</div><h1>Turn your Stars into something worth sharing.</h1><p class="store-intro">Choose a Star pack, pay securely in Telegram, and receive MemeCoin instantly in your wallet.</p><div class="wallet-balance"><div><small>Available balance</small><strong id="coinBalance">0 MEME</strong></div><span>Instant delivery · Telegram native checkout</span></div><div class="pack-heading"><h2>Choose your Star pack</h2><span class="pack-note">Prices shown in INR only</span></div><div class="pack-grid" id="packGrid"></div><div class="store-trust"><span>✓ Secure Telegram checkout</span><span>✓ Instant MemeCoin credit</span><span>✓ No hidden fees</span></div></main></div><div class="store-toast" id="storeToast" role="status"></div>
 
     <!-- Dynamic Particle Field Background -->
     <canvas id="particleCanvas"></canvas>
@@ -518,6 +532,8 @@
     </div>
 
     <script>
+        /* Legacy game script retained below for reference; storefront logic follows it. */
+        /*
         // Init Telegram WebApp SDK & Adsgram Controller
        let tg = window.Telegram.WebApp;
         tg.expand();
@@ -908,6 +924,35 @@ setInterval(syncToCloud, 30000);
         renderParticles();
 
         updateUI();
+        */
+    </script>
+    <script>
+        const tgStore = window.Telegram && window.Telegram.WebApp;
+        if (tgStore) tgStore.expand();
+        const starPacks = [
+            { id: 'stars_100', stars: 100, inr: 99 }, { id: 'stars_200', stars: 200, inr: 189 },
+            { id: 'stars_300', stars: 300, inr: 279 }, { id: 'stars_500', stars: 500, inr: 449, tag: 'Popular' },
+            { id: 'stars_1000', stars: 1000, inr: 899 }, { id: 'stars_2000', stars: 2000, inr: 1699, tag: 'Best value' },
+            { id: 'stars_10000', stars: 10000, inr: 7999, tag: 'Pro' }, { id: 'stars_20000', stars: 20000, inr: 14999, tag: 'Whale' }
+        ];
+        const packGrid = document.getElementById('packGrid');
+        let balance = Number(localStorage.getItem('meme_balance') || 0);
+        document.getElementById('coinBalance').textContent = `${balance.toLocaleString('en-IN')} MEME`;
+        if (tgStore && tgStore.initDataUnsafe && tgStore.initDataUnsafe.user) document.getElementById('storeUser').textContent = `${tgStore.initDataUnsafe.user.first_name.toUpperCase()} / WALLET`;
+        packGrid.innerHTML = starPacks.map(pack => `<article class="star-pack ${pack.tag === 'Popular' ? 'popular' : ''}"><span class="star-symbol">✦</span>${pack.tag ? `<span class="pack-tag">${pack.tag}</span>` : ''}<h3>${pack.stars.toLocaleString('en-IN')} <span>Stars</span></h3><p>+${pack.stars.toLocaleString('en-IN')} MEME</p><div class="pack-buy-row"><span class="pack-price">₹${pack.inr.toLocaleString('en-IN')}</span><button class="pack-buy" data-pack="${pack.id}">Buy pack</button></div></article>`).join('');
+        function showStoreToast(message) { const toast = document.getElementById('storeToast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3500); }
+        async function purchasePack(pack, button) {
+            button.disabled = true; button.textContent = 'Preparing...';
+            try {
+                const response = await fetch('/.netlify/functions/createInvoice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ packageId: pack.id }) });
+                const data = await response.json();
+                if (!response.ok || !data.invoiceUrl) throw new Error(data.error || 'Invoice unavailable');
+                if (!tgStore || !tgStore.openInvoice) throw new Error('Open this store inside Telegram to pay');
+                tgStore.openInvoice(data.invoiceUrl, status => { if (status === 'paid') { balance += pack.stars; localStorage.setItem('meme_balance', balance); document.getElementById('coinBalance').textContent = `${balance.toLocaleString('en-IN')} MEME`; showStoreToast(`${pack.stars.toLocaleString('en-IN')} Stars added to your wallet`); } else if (status === 'cancelled') showStoreToast('Payment cancelled'); else if (status === 'failed') showStoreToast('Payment failed. Please try again.'); });
+            } catch (error) { showStoreToast(error.message); }
+            button.disabled = false; button.textContent = 'Buy pack';
+        }
+        packGrid.addEventListener('click', event => { const button = event.target.closest('[data-pack]'); if (button) purchasePack(starPacks.find(pack => pack.id === button.dataset.pack), button); });
     </script>
 </body>
 </html>
