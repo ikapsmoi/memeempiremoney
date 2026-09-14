@@ -4,8 +4,8 @@ exports.handler = async (event) => {
     }
 
     const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-    if (!BOT_TOKEN) {
-        return { statusCode: 500, body: JSON.stringify({ error: 'TELEGRAM_BOT_TOKEN is missing on Netlify' }) };
+    if (!BOT_TOKEN || !BOT_TOKEN.includes(':')) {
+        return { statusCode: 500, body: JSON.stringify({ error: 'TELEGRAM_BOT_TOKEN is missing or invalid on Netlify. Use the full token from BotFather.' }) };
     }
 
     const packages = {
@@ -43,7 +43,8 @@ exports.handler = async (event) => {
         const data = await response.json();
 
         if (!data.ok) {
-            return { statusCode: 400, body: JSON.stringify({ error: data.description || 'Telegram API Error' }) };
+            console.error('Telegram createInvoiceLink failed:', data.description);
+            return { statusCode: 502, body: JSON.stringify({ error: `Telegram rejected the invoice: ${data.description || 'Unknown API error'}` }) };
         }
 
         return {
