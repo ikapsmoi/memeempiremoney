@@ -130,6 +130,19 @@
             border-color: var(--app-border);
         }
 
+        .app-header {
+            background: #17181d;
+            border-color: #2f3139;
+        }
+
+        .app-header h1,
+        .app-header h1 .text-app-vip,
+        .app-header p,
+        .app-header .text-app-secondary,
+        .app-header .text-app-vip {
+            color: #ffffff !important;
+        }
+
         .brand-mark {
             width: 38px;
             height: 38px;
@@ -146,6 +159,12 @@
             .brand-mark,
             .yellow-button {
                 color: #111115 !important;
+            }
+
+            .app-header .brand-mark {
+                background: #2b2e36;
+                color: #ffffff !important;
+                border: 1px solid #5d616c;
             }
 
         .category-tile {
@@ -193,6 +212,14 @@
         }
 
         .yellow-button:hover { background: #d8ff4a; }
+
+        .app-header .yellow-button {
+            background: #2b2e36;
+            border: 1px solid #5d616c;
+            color: #ffffff !important;
+        }
+
+        .app-header .yellow-button:hover { background: #3b3f49; }
 
         .offer-card {
             background: color-mix(in srgb, var(--app-card) 96%, transparent);
@@ -276,10 +303,24 @@
             overflow: hidden;
             border: 1px solid var(--app-border);
             border-radius: 999px;
-            background: color-mix(in srgb, var(--app-card) 94%, transparent);
+            background: #17181d;
+            color: #ffffff;
             box-shadow: 0 8px 24px rgba(17, 17, 21, 0.1);
             backdrop-filter: blur(12px);
         }
+
+        .social-proof-ticker .ticker-message { color: #ffffff !important; }
+
+        .dark-title-band {
+            background: #17181d;
+            color: #ffffff;
+            border: 1px solid #2f3139;
+            border-radius: 18px;
+        }
+
+        .dark-title-band h2,
+        .dark-title-band p,
+        .dark-title-band span { color: #ffffff !important; }
 
         .ticker-message { animation: tickerFade 4.8s ease-in-out infinite; }
 
@@ -451,7 +492,7 @@
         <!-- VIEW: VIP STORE                            -->
         <!-- ========================================== -->
         <section id="view-store" class="view-section pt-6">
-            <div class="px-5 mb-8 text-center">
+            <div class="dark-title-band mx-5 mb-5 px-4 py-5 text-center">
                 <span class="inline-block bg-app-vip/10 text-app-vip px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-app-vip/20 mb-3">Enterprise Access</span>
                 <h2 class="text-3xl font-bold mb-3 tracking-tight">Unlock Wholesale.</h2>
                 <p class="text-sm text-app-secondary">Secure checkout via Telegram Stars. Instantly unlock zero-markup travel worldwide.</p>
@@ -466,7 +507,9 @@
         <!-- VIEW: VAULT (HISTORY)                      -->
         <!-- ========================================== -->
         <section id="view-vault" class="view-section pt-6 px-5">
-            <h2 class="text-2xl font-bold mb-6 tracking-tight">Your Vault</h2>
+            <div class="dark-title-band px-4 py-3 mb-5">
+                <h2 class="text-2xl font-bold tracking-tight">Your Vault</h2>
+            </div>
             
             <div id="inquiries-list" class="space-y-3">
                 <p class="text-sm text-app-secondary">Loading your requests...</p>
@@ -794,6 +837,15 @@
             const btn = document.getElementById('btn-submit');
             const counter = document.getElementById('trial-counter');
             const badge = document.getElementById('status-badge');
+            const membershipButton = document.querySelector('.app-header .yellow-button');
+
+            if (membershipButton) {
+                membershipButton.innerHTML = state.isVIP
+                    ? 'VIP active <span class="text-sm">✓</span>'
+                    : state.inquiriesUsed >= 2
+                        ? 'Subscribe to continue <span class="text-sm">→</span>'
+                        : 'Explore membership <span class="text-sm">→</span>';
+            }
 
             if (state.isVIP) {
                 badge.innerText = 'VIP ACCESS';
