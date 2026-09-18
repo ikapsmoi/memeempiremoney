@@ -545,7 +545,6 @@
 
         let supabaseClient = null;
         try {
-            // Replaced the buggy condition with a proper check to safely init Supabase
             if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
@@ -979,123 +978,121 @@
                 await supabaseClient
                     .from('users')
                     .update({ trial_count: state.inquiriesUsed })
-                    .eq('telegram_id', telegramUser.id);
+                    .eq('telegram_id', Number(telegramUser.id));
             } catch(e) {
                 console.warn('Could not update user table trial count:', e);
             }
         }
 
-        // Updated Supabase Insertion Logic with Foreign Key Fix
-async function submitInquiry() {
-    if (!state.isVIP && state.inquiriesUsed >= 2) {
-        if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
-        switchTab('store');
-        return;
-    }
-
-    const dest = document.getElementById('req-dest').value;
-    const checkin = document.getElementById('req-checkin').value;
-    const checkout = document.getElementById('req-checkout').value;
-
-    if (!dest) {
-        if(tg && tg.showAlert) tg.showAlert('Please enter a destination.');
-        else alert('Please enter a destination.');
-        return;
-    }
-
-    const btn = document.getElementById('btn-submit');
-    const originalText = btn.innerText;
-    btn.innerText = 'Submitting...';
-    btn.disabled = true;
-
-    try {
-        let submissionSuccess = false;
-
-        // Try submitting to Supabase if configured
-        if (supabaseClient) {
-            
-            // 1. Create the user (and explicitly check for errors)
-            const { error: userError } = await supabaseClient
-                .from('users')
-                .upsert(
-                    { telegram_id: telegramUser.id, username: telegramUser.first_name || 'Traveler' },
-                    { onConflict: 'telegram_id', ignoreDuplicates: true }
-                );
-
-            if (userError) {
-                console.error('Failed to create user:', userError);
-                throw new Error(`User sync failed: ${userError.message}`);
+        // Updated Supabase Insertion Logic
+        async function submitInquiry() {
+            if (!state.isVIP && state.inquiriesUsed >= 2) {
+                if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+                switchTab('store');
+                return;
             }
 
-            // 2. Insert the inquiry safely
-            const { error: inquiryError } = await supabaseClient
-                .from('inquiries')
-                .insert([{
-                    telegram_id: telegramUser.id,
-                    category: state.category,
-                    destination: dest,
-                    dates: JSON.stringify({ checkin, checkout }),
-                    status: 'Pending'
-                }]);
+            const dest = document.getElementById('req-dest').value;
+            const checkin = document.getElementById('req-checkin').value;
+            const checkout = document.getElementById('req-checkout').value;
 
-            if (inquiryError) {
-                console.error('Supabase insert error:', inquiryError);
-                throw new Error(`Database insert failed: ${inquiryError.message}`);
+            if (!dest) {
+                if(tg && tg.showAlert) tg.showAlert('Please enter a destination.');
+                else alert('Please enter a destination.');
+                return;
             }
-            submissionSuccess = true;
-        } else {
-            console.log('Simulating inquiry save (Supabase not configured)');
-            submissionSuccess = true;
-        }
 
-        if (submissionSuccess) {
-            // Increment trial count if not VIP
-            if (!state.isVIP) {
-                state.inquiriesUsed++;
-                localStorage.setItem('sm_inquiries', state.inquiriesUsed);
-                
+            const btn = document.getElementById('btn-submit');
+            const originalText = btn.innerText;
+            btn.innerText = 'Submitting...';
+            btn.disabled = true;
+
+            try {
+                let submissionSuccess = false;
+
+                // Try submitting to Supabase if configured
                 if (supabaseClient) {
-                    await supabaseClient
+                    
+                    // 1. Create the user (enforcing bigint and string types)
+                    const { error: userError } = await supabaseClient
                         .from('users')
-                        .update({ trial_count: state.inquiriesUsed })
-                        .eq('telegram_id', telegramUser.id);
+                        .upsert(
+                            { 
+                                telegram_id: Number(telegramUser.id), 
+                                username: String(telegramUser.first_name || 'Traveler') 
+                            },
+                            { onConflict: 'telegram_id', ignoreDuplicates: true }
+                        );
+
+                    if (userError) {
+                        console.error('Failed to create user:', userError);
+                        throw new Error(`User sync failed: ${userError.message}`);
+                    }
+
+                    // 2. Insert the inquiry safely
+                    const { error: inquiryError } = await supabaseClient
+                        .from('inquiries')
+                        .insert([{
+                            telegram_id: Number(telegramUser.id),
+                            category: state.category,
+                            destination: dest,
+                            dates: JSON.stringify({ checkin, checkout }),
+                            status: 'Pending'
+                        }]);
+
+                    if (inquiryError) {
+                        console.error('Supabase insert error:', inquiryError);
+                        throw new Error(`Database insert failed: ${inquiryError.message}`);
+                    }
+                    submissionSuccess = true;
+                } else {
+                    console.log('Simulating inquiry save (Supabase not configured)');
+                    submissionSuccess = true;
                 }
-            }
 
-            document.getElementById('req-dest').value = '';
-            document.getElementById('req-checkin').value = '';
-            document.getElementById('req-checkout').value = '';
-            updateUI();
+                if (submissionSuccess) {
+                    // Increment trial count if not VIP
+                    if (!state.isVIP) {
+                        state.inquiriesUsed++;
+                        localStorage.setItem('sm_inquiries', state.inquiriesUsed);
+                        
+                        if (supabaseClient) {
+                            await SUPABASE_UPDATE_USER_TRIAL();
+                        }
+                    }
 
-            if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            if(tg && tg.showAlert) {
-                tg.showAlert(`✅ ${state.category} request sent! Our desk will reply with wholesale rates.`);
-            } else {
-                alert(`✅ ${state.category} request sent successfully!`);
+                    document.getElementById('req-dest').value = '';
+                    document.getElementById('req-checkin').value = '';
+                    document.getElementById('req-checkout').value = '';
+                    updateUI();
+
+                    if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    if(tg && tg.showAlert) {
+                        tg.showAlert(`✅ ${state.category} request sent! Our desk will reply with wholesale rates.`);
+                    } else {
+                        alert(`✅ ${state.category} request sent successfully!`);
+                    }
+                    
+                    setTimeout(() => switchTab('vault'), 500);
+                }
+
+            } catch (err) {
+                console.error('Quote submission failure:', err);
+                const errorMsg = `Error: ${err.message}`;
+                if(tg && tg.showAlert) tg.showAlert(errorMsg);
+                else alert(errorMsg);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
-            
-            setTimeout(() => switchTab('vault'), 500);
         }
 
-    } catch (err) {
-        console.error('Quote submission failure:', err);
-        // This will now show you the EXACT database error if it fails again
-        const errorMsg = `Error: ${err.message}`;
-        if(tg && tg.showAlert) tg.showAlert(errorMsg);
-        else alert(errorMsg);
-    } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }
-}
-        
         async function purchasePackage(packageId, btnElement) {
             const originalHTML = btnElement.innerHTML;
             btnElement.innerHTML = '<span class="animate-pulse">Loading secure checkout...</span>';
             btnElement.disabled = true;
 
             try {
-                // Exact Netlify /createInvoice fetch logic preserved
                 const response = await fetch('/.netlify/functions/createInvoice', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1128,7 +1125,6 @@ async function submitInquiry() {
             }
         }
 
-        // Boot
         window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
