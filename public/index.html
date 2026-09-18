@@ -36,11 +36,57 @@
     </script>
 
     <style>
+        :root {
+            color-scheme: light;
+            --app-bg: #f9f9fb;
+            --app-card: #ffffff;
+            --app-surface: #f1f1f4;
+            --app-border: #e5e5ea;
+            --app-text: #111115;
+            --app-muted: #73737d;
+            --app-accent: #ccff00;
+            --app-accent-soft: rgba(204, 255, 0, 0.16);
+        }
+
         body {
-            background: #f7f7f5;
-            color: #171717;
+            background: var(--app-bg);
+            color: var(--app-text);
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark;
+                --app-bg: #17181d;
+                --app-card: #22242b;
+                --app-surface: #2c2e36;
+                --app-border: #3b3e48;
+                --app-text: #f7f7f8;
+                --app-muted: #a5a7b1;
+                --app-accent-soft: rgba(204, 255, 0, 0.18);
+            }
+
+            body,
+            .app-background { background: var(--app-bg); color: var(--app-text); }
+            .app-background::after { background: rgba(23, 24, 29, 0.9); }
+            .app-header { background: rgba(23, 24, 29, 0.94); border-color: var(--app-border); }
+            .category-tile,
+            .rate-card,
+            .offer-card,
+            .deal-dialog,
+            .bg-app-card { background: var(--app-card); color: var(--app-text); border-color: var(--app-border); }
+            .bg-app-surface { background: var(--app-surface); }
+            .category-tile.selected { color: #111115; }
+            .rate-showcase-title,
+            .rate-card dd,
+            .rate-showcase-card,
+            .text-neutral-900 { color: var(--app-text); }
+            .deal-dialog { color: var(--app-text); }
+            .deal-dialog::backdrop { background: rgba(0, 0, 0, 0.58); }
+            .cash-note { background: var(--app-card); }
+            input, select { color: var(--app-text); }
+            input::placeholder { color: var(--app-muted); }
         }
 
         .app-background {
@@ -49,7 +95,7 @@
             z-index: 0;
             pointer-events: none;
             overflow: hidden;
-            background: #f7f7f5;
+            background: var(--app-bg);
         }
 
         .app-background::before {
@@ -67,7 +113,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: rgba(247, 247, 245, 0.9);
+            background: color-mix(in srgb, var(--app-bg) 90%, transparent);
             backdrop-filter: blur(5px);
         }
 
@@ -77,8 +123,8 @@
         nav { z-index: 50; }
 
         .app-header {
-            background: rgba(247, 247, 245, 0.94);
-            border-color: #e4e4df;
+            background: color-mix(in srgb, var(--app-bg) 94%, transparent);
+            border-color: var(--app-border);
         }
 
         .brand-mark {
@@ -87,8 +133,8 @@
             display: grid;
             place-items: center;
             border-radius: 12px;
-            background: #c8ff00;
-            color: #171717;
+            background: var(--app-accent);
+            color: var(--app-text);
             font-size: 21px;
             font-weight: 800;
             letter-spacing: -2px;
@@ -97,17 +143,17 @@
 
         .category-tile {
             min-height: 58px;
-            border: 1px solid #d6d6d0;
+            border: 1px solid var(--app-border);
             border-radius: 12px;
-            background: #ffffff;
+            background: var(--app-card);
             transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
         }
 
         .category-tile:hover,
         .category-tile:focus-visible,
         .category-tile.selected {
-            border-color: #171717;
-            background: #c8ff00;
+            border-color: var(--app-text);
+            background: var(--app-accent);
         }
 
         .category-tile:active { transform: scale(0.97); }
@@ -135,16 +181,16 @@
         }
 
         .yellow-button {
-            background: #c8ff00;
-            color: #171717;
+            background: var(--app-accent);
+            color: var(--app-text);
         }
 
         .yellow-button:hover { background: #d8ff4a; }
 
         .offer-card {
-            background: rgba(255, 255, 255, 0.96);
-            color: #171717;
-            border: 1px solid #deded9;
+            background: color-mix(in srgb, var(--app-card) 96%, transparent);
+            color: var(--app-text);
+            border: 1px solid var(--app-border);
             cursor: pointer;
             text-align: left;
         }
@@ -152,33 +198,33 @@
         .offer-card:active { transform: scale(0.98); }
 
         .offer-card-image {
-            background: #c8ff00;
+            background: var(--app-accent);
         }
 
         .section-label { color: #777872; }
 
         .usp-banner {
-            background: #c8ff00;
-            color: #171717;
+            background: linear-gradient(135deg, var(--app-accent-soft), color-mix(in srgb, var(--app-card) 94%, transparent));
+            color: var(--app-text);
             border-radius: 16px;
         }
 
         .cash-note {
-            border-left: 3px solid #c8ff00;
-            background: #ffffff;
+            border-left: 3px solid var(--app-accent);
+            background: var(--app-card);
         }
 
         .rate-card {
             width: 224px;
             min-width: 224px;
-            background: #ffffff;
-            border: 1px solid #deded9;
+            background: var(--app-card);
+            border: 1px solid var(--app-border);
             border-radius: 14px;
         }
 
-        .rate-card dt { color: #777872; font-size: 9px; }
-        .rate-card dd { color: #171717; font-size: 11px; font-weight: 700; }
-        .rate-card .secret-rate { color: #171717; font-size: 15px; }
+        .rate-card dt { color: var(--app-muted); font-size: 9px; }
+        .rate-card dd { color: var(--app-text); font-size: 11px; font-weight: 700; }
+        .rate-card .secret-rate { color: var(--app-text); font-size: 15px; }
 
         .rate-showcase {
             min-height: 126px;
@@ -207,12 +253,34 @@
             border: 1px solid #deded9;
             border-radius: 18px;
             padding: 0;
-            color: #171717;
-            background: #ffffff;
+            color: var(--app-text);
+            background: var(--app-card);
             box-shadow: 0 20px 60px rgba(23, 23, 23, 0.22);
         }
 
         .deal-dialog::backdrop { background: rgba(23, 23, 23, 0.35); }
+
+        .social-proof-ticker {
+            position: fixed;
+            right: 12px;
+            bottom: calc(68px + env(safe-area-inset-bottom));
+            left: 12px;
+            z-index: 40;
+            overflow: hidden;
+            border: 1px solid var(--app-border);
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--app-card) 94%, transparent);
+            box-shadow: 0 8px 24px rgba(17, 17, 21, 0.1);
+            backdrop-filter: blur(12px);
+        }
+
+        .ticker-message { animation: tickerFade 4.8s ease-in-out infinite; }
+
+        @keyframes tickerFade {
+            0%, 12% { opacity: 0; transform: translateY(5px); }
+            20%, 78% { opacity: 1; transform: translateY(0); }
+            88%, 100% { opacity: 0; transform: translateY(-5px); }
+        }
 
         @media (max-width: 350px) { .category-tile { min-height: 54px; } }
 
@@ -231,7 +299,11 @@
 
         /* Form Inputs */
         input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1); opacity: 0.5;
+            opacity: 0.55;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
         }
     </style>
 </head>
@@ -409,6 +481,10 @@
         </div>
     </dialog>
 
+    <div class="social-proof-ticker" aria-live="polite">
+        <p id="ticker-message" class="ticker-message px-4 py-2 text-[10px] font-bold text-center">Member savings are updated regularly.</p>
+    </div>
+
     <!-- Bottom App Navigation -->
     <nav class="fixed bottom-0 left-0 w-full bg-app-bg/95 backdrop-blur-xl border-t border-app-border pb-[env(safe-area-inset-bottom)]">
             <div class="flex justify-around items-center p-1">
@@ -498,14 +574,33 @@
         };
 
         const formProfiles = {
-            Hotels: { title: 'Request stays', destination: 'Destination / property', placeholder: 'City, hotel, or property', origin: false, checkout: true, budget: false, notes: true, checkin: 'Check in', checkoutLabel: 'Check out' },
-            Flights: { title: 'Request flights', destination: 'To', placeholder: 'Destination city or airport', origin: true, originLabel: 'From', checkout: true, budget: true, notes: true, checkin: 'Departure', checkoutLabel: 'Return' },
-            Transfers: { title: 'Request rental cars & transfers', destination: 'Drop-off / destination', placeholder: 'Airport, hotel, or address', origin: true, originLabel: 'Pick-up / collection', checkout: true, budget: true, notes: true, checkin: 'Start date', checkoutLabel: 'End date' },
-            Packages: { title: 'Request a package', destination: 'Destination', placeholder: 'Where would you like to go?', origin: false, checkout: true, budget: true, notes: true, checkin: 'Start date', checkoutLabel: 'End date' },
-            Sightseeing: { title: 'Request sightseeing', destination: 'City / attraction', placeholder: 'Tour, attraction, or city', origin: false, checkout: false, budget: true, notes: true, checkin: 'Visit date', checkoutLabel: 'End date' },
-            Cruises: { title: 'Request a cruise', destination: 'Route / arrival port', placeholder: 'Port, route, or destination', origin: true, originLabel: 'Departure port', checkout: true, budget: true, notes: true, checkin: 'Sail date', checkoutLabel: 'Return date' },
-            Festivals: { title: 'Request music festivals', destination: 'Festival / city', placeholder: 'Festival name or city', origin: false, checkout: true, budget: true, notes: true, checkin: 'Event start', checkoutLabel: 'Event end' }
+            Hotels: { title: 'Request Stays', destination: 'Destination / property', placeholder: 'City, hotel, or property', origin: false, checkout: true, budget: false, notes: false, checkin: 'Check in', checkoutLabel: 'Check out' },
+            Flights: { title: 'Request Flights', destination: 'To', placeholder: 'Destination city or airport', origin: true, originLabel: 'From', checkout: true, budget: false, notes: true, checkin: 'Departure', checkoutLabel: 'Return' },
+            Transfers: { title: 'Request Rental Cars & Transfers', destination: 'Drop-off / destination', placeholder: 'Airport, hotel, or address', origin: true, originLabel: 'Pick-up / collection', checkout: true, budget: true, notes: true, checkin: 'Start date', checkoutLabel: 'End date' },
+            Packages: { title: 'Request Packages', destination: 'Destination', placeholder: 'Where would you like to go?', origin: false, checkout: true, budget: true, notes: true, checkin: 'Start date', checkoutLabel: 'End date' },
+            Sightseeing: { title: 'Request Sightseeing', destination: 'Event / tour name', placeholder: 'Tour, attraction, or city', origin: false, checkout: false, budget: false, notes: true, checkin: 'Visit date', checkoutLabel: 'End date' },
+            Cruises: { title: 'Request Cruises', destination: 'Route / arrival port', placeholder: 'Port, route, or destination', origin: true, originLabel: 'Departure port', checkout: true, budget: true, notes: true, checkin: 'Sail date', checkoutLabel: 'Return date' },
+            Festivals: { title: 'Request Music Festivals', destination: 'Festival / city', placeholder: 'Festival name or city', origin: false, checkout: false, budget: false, notes: true, checkin: 'Event date', checkoutLabel: 'End date' }
         };
+
+        const tickerMessages = [
+            'Member saved $240 on a festival travel package',
+            'A new quote was prepared for a Bali stay',
+            'Member saved 12% on an airport transfer',
+            'A private concierge quote was requested in Paris'
+        ];
+
+        function rotateTicker() {
+            const ticker = document.getElementById('ticker-message');
+            if (!ticker) return;
+            let index = 0;
+            const updateTicker = () => {
+                ticker.innerText = `Member update · ${tickerMessages[index]}`;
+                index = (index + 1) % tickerMessages.length;
+            };
+            updateTicker();
+            setInterval(updateTicker, 4800);
+        }
 
         function init() {
             renderOffers();
@@ -517,6 +612,7 @@
             loadInquiries();
             loadDealRates();
             loadTravelDeals();
+            rotateTicker();
         }
 
         // -----------------------------------------------------
