@@ -1013,14 +1013,11 @@
                 // Try submitting to Supabase if configured
                 if (supabaseClient) {
                     
-                    // 1. Create the user (enforcing bigint and string types)
+                    // 1. Create the user (OMITTING USERNAME ENTIRELY to bypass schema typo)
                     const { error: userError } = await supabaseClient
                         .from('users')
                         .upsert(
-                            { 
-                                telegram_id: Number(telegramUser.id), 
-                                username: String(telegramUser.first_name || 'Traveler') 
-                            },
+                            { telegram_id: Number(telegramUser.id) },
                             { onConflict: 'telegram_id', ignoreDuplicates: true }
                         );
 
