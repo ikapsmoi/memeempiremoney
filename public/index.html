@@ -985,93 +985,104 @@
             }
         }
 
-        // Updated Supabase Insertion Logic
-        async function submitInquiry() {
-            if (!state.isVIP && state.inquiriesUsed >= 2) {
-                if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
-                switchTab('store');
-                return;
+        // Updated Supabase Insertion Logic with Foreign Key Fix
+async function submitInquiry() {
+    if (!state.isVIP && state.inquiriesUsed >= 2) {
+        if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+        switchTab('store');
+        return;
+    }
+
+    const dest = document.getElementById('req-dest').value;
+    const checkin = document.getElementById('req-checkin').value;
+    const checkout = document.getElementById('req-checkout').value;
+
+    if (!dest) {
+        if(tg && tg.showAlert) tg.showAlert('Please enter a destination.');
+        else alert('Please enter a destination.');
+        return;
+    }
+
+    const btn = document.getElementById('btn-submit');
+    const originalText = btn.innerText;
+    btn.innerText = 'Submitting...';
+    btn.disabled = true;
+
+    try {
+        let submissionSuccess = false;
+
+        // Try submitting to Supabase if configured
+        if (supabaseClient) {
+            
+            // 🔥 THE FIX: Ensure the user exists in the 'users' table FIRST
+            // This prevents the foreign key constraint error.
+            await supabaseClient
+                .from('users')
+                .upsert(
+                    { telegram_id: telegramUser.id, username: telegramUser.first_name || 'Traveler' },
+                    { onConflict: 'telegram_id', ignoreDuplicates: true }
+                );
+
+            // Now insert the inquiry safely
+            const { error: inquiryError } = await supabaseClient
+                .from('inquiries')
+                .insert([{
+                    telegram_id: telegramUser.id,
+                    category: state.category,
+                    destination: dest,
+                    dates: JSON.stringify({ checkin, checkout }),
+                    status: 'Pending'
+                }]);
+
+            if (inquiryError) {
+                console.error('Supabase insert error:', inquiryError);
+                throw new Error(inquiryError.message || 'Database insert failed');
             }
-
-            const dest = document.getElementById('req-dest').value;
-            const checkin = document.getElementById('req-checkin').value;
-            const checkout = document.getElementById('req-checkout').value;
-
-            if (!dest) {
-                if(tg && tg.showAlert) tg.showAlert('Please enter a destination.');
-                else alert('Please enter a destination.');
-                return;
-            }
-
-            const btn = document.getElementById('btn-submit');
-            const originalText = btn.innerText;
-            btn.innerText = 'Submitting...';
-            btn.disabled = true;
-
-            try {
-                let submissionSuccess = false;
-
-                // Try submitting to Supabase if configured
-                if (supabaseClient) {
-                    const { error: inquiryError } = await supabaseClient
-                        .from('inquiries')
-                        .insert([{
-                            telegram_id: telegramUser.id,
-                            category: state.category,
-                            destination: dest,
-                            dates: JSON.stringify({ checkin, checkout }),
-                            status: 'Pending'
-                        }]);
-
-                    if (inquiryError) {
-                        console.error('Supabase insert error:', inquiryError);
-                        throw new Error(inquiryError.message || 'Database insert failed');
-                    }
-                    submissionSuccess = true;
-                } else {
-                    // Fallback mode if Supabase isn't wired up yet
-                    console.log('Simulating inquiry save (Supabase not configured):', { dest, checkin, checkout });
-                    submissionSuccess = true;
-                }
-
-                if (submissionSuccess) {
-                    // Increment trial count if not VIP
-                    if (!state.isVIP) {
-                        state.inquiriesUsed++;
-                        localStorage.setItem('sm_inquiries', state.inquiriesUsed);
-                        
-                        // Try updating Supabase user trial count if client exists
-                        if (supabaseClient) {
-                            await SUPABASE_UPDATE_USER_TRIAL();
-                        }
-                    }
-
-                    document.getElementById('req-dest').value = '';
-                    document.getElementById('req-checkin').value = '';
-                    document.getElementById('req-checkout').value = '';
-                    updateUI();
-
-                    if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    if(tg && tg.showAlert) {
-                        tg.showAlert(`✅ ${state.category} request sent! Our desk will reply with wholesale rates.`);
-                    } else {
-                        alert(`✅ ${state.category} request sent successfully!`);
-                    }
-                    
-                    setTimeout(() => switchTab('vault'), 500);
-                }
-
-            } catch (err) {
-                console.error('Quote submission failure:', err);
-                const errorMsg = `Unable to send quote request: ${err.message || 'Check database configuration.'}`;
-                if(tg && tg.showAlert) tg.showAlert(errorMsg);
-                else alert(errorMsg);
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+            submissionSuccess = true;
+        } else {
+            // Fallback mode if Supabase isn't wired up yet
+            console.log('Simulating inquiry save (Supabase not configured):', { dest, checkin, checkout });
+            submissionSuccess = true;
         }
 
+        if (submissionSuccess) {
+            // Increment trial count if not VIP
+            if (!state.isVIP) {
+                state.inquiriesUsed++;
+                localStorage.setItem('sm_inquiries', state.inquiriesUsed);
+                
+                // Try updating Supabase user trial count if client exists
+                if (supabaseClient) {
+                    await SUPABASE_UPDATE_USER_TRIAL();
+                }
+            }
+
+            document.getElementById('req-dest').value = '';
+            document.getElementById('req-checkin').value = '';
+            document.getElementById('req-checkout').value = '';
+            updateUI();
+
+            if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            if(tg && tg.showAlert) {
+                tg.showAlert(`✅ ${state.category} request sent! Our desk will reply with wholesale rates.`);
+            } else {
+                alert(`✅ ${state.category} request sent successfully!`);
+            }
+            
+            setTimeout(() => switchTab('vault'), 500);
+        }
+
+    } catch (err) {
+        console.error('Quote submission failure:', err);
+        const errorMsg = `Unable to send quote request: ${err.message || 'Check database configuration.'}`;
+        if(tg && tg.showAlert) tg.showAlert(errorMsg);
+        else alert(errorMsg);
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+}
+        
         async function purchasePackage(packageId, btnElement) {
             const originalHTML = btnElement.innerHTML;
             btnElement.innerHTML = '<span class="animate-pulse">Loading secure checkout...</span>';
