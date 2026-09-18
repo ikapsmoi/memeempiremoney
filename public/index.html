@@ -1014,16 +1014,20 @@ async function submitInquiry() {
         // Try submitting to Supabase if configured
         if (supabaseClient) {
             
-            // 🔥 THE FIX: Ensure the user exists in the 'users' table FIRST
-            // This prevents the foreign key constraint error.
-            await supabaseClient
+            // 1. Create the user (and explicitly check for errors)
+            const { error: userError } = await supabaseClient
                 .from('users')
                 .upsert(
                     { telegram_id: telegramUser.id, username: telegramUser.first_name || 'Traveler' },
                     { onConflict: 'telegram_id', ignoreDuplicates: true }
                 );
 
-            // Now insert the inquiry safely
+            if (userError) {
+                console.error('Failed to create user:', userError);
+                throw new Error(`User sync failed: ${userError.message}`);
+            }
+
+            // 2. Insert the inquiry safely
             const { error: inquiryError } = await supabaseClient
                 .from('inquiries')
                 .insert([{
@@ -1036,12 +1040,11 @@ async function submitInquiry() {
 
             if (inquiryError) {
                 console.error('Supabase insert error:', inquiryError);
-                throw new Error(inquiryError.message || 'Database insert failed');
+                throw new Error(`Database insert failed: ${inquiryError.message}`);
             }
             submissionSuccess = true;
         } else {
-            // Fallback mode if Supabase isn't wired up yet
-            console.log('Simulating inquiry save (Supabase not configured):', { dest, checkin, checkout });
+            console.log('Simulating inquiry save (Supabase not configured)');
             submissionSuccess = true;
         }
 
@@ -1051,9 +1054,11 @@ async function submitInquiry() {
                 state.inquiriesUsed++;
                 localStorage.setItem('sm_inquiries', state.inquiriesUsed);
                 
-                // Try updating Supabase user trial count if client exists
                 if (supabaseClient) {
-                    await SUPABASE_UPDATE_USER_TRIAL();
+                    await supabaseClient
+                        .from('users')
+                        .update({ trial_count: state.inquiriesUsed })
+                        .eq('telegram_id', telegramUser.id);
                 }
             }
 
@@ -1074,7 +1079,8 @@ async function submitInquiry() {
 
     } catch (err) {
         console.error('Quote submission failure:', err);
-        const errorMsg = `Unable to send quote request: ${err.message || 'Check database configuration.'}`;
+        // This will now show you the EXACT database error if it fails again
+        const errorMsg = `Error: ${err.message}`;
         if(tg && tg.showAlert) tg.showAlert(errorMsg);
         else alert(errorMsg);
     } finally {
