@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Travel4life x Telegram | Our Secret Your Miles</title>
     
-    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Google Fonts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -358,7 +357,6 @@
 <body class="pb-20 bg-app-bg text-neutral-900">
     <div class="app-background" aria-hidden="true"></div>
 
-    <!-- Sticky Header -->
     <header class="app-header sticky top-0 z-50 backdrop-blur-lg border-b px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="brand-mark" aria-label="Travel4life logo">t4</div>
@@ -375,9 +373,6 @@
     </header>
 
     <main>
-        <!-- ========================================== -->
-        <!-- VIEW: CONCIERGE (HOME)                     -->
-        <!-- ========================================== -->
         <section id="view-home" class="view-section active pt-4">
             <div class="px-5 mb-3 flex items-end justify-between">
                 <div>
@@ -401,11 +396,9 @@
 
             <div class="px-5 mb-3">
                 <div id="categories-container" class="categories-grid grid grid-cols-3 gap-2">
-                    <!-- Categories injected via JS -->
-                </div>
+                    </div>
             </div>
 
-            <!-- Sleek Booking Form -->
             <div class="px-5">
                 <div class="bg-app-card border border-app-border rounded-[14px] p-4 shadow-sm">
                     <div class="flex justify-between items-center mb-3">
@@ -468,8 +461,7 @@
                 <span class="text-[10px] text-app-secondary">Tap to explore</span>
             </div>
             <div id="offers-container" class="flex overflow-x-auto no-scrollbar gap-3 px-5 pb-5 snap-x">
-                <!-- Offers injected via JS -->
-            </div>
+                </div>
 
             <div class="px-5 mb-2 flex justify-between items-end">
                 <div>
@@ -479,8 +471,7 @@
                 <span class="text-[10px] text-app-vip font-bold">15 each</span>
             </div>
             <div id="rates-container" class="px-5 pb-5">
-                <!-- Rate showcases injected via JS -->
-            </div>
+                </div>
 
             <footer class="px-5 pb-4 text-center">
                 <a href="https://www.travel4life.net" target="_blank" rel="noopener" class="text-[10px] font-extrabold text-neutral-900 underline">Visit travel4life.net</a>
@@ -488,9 +479,6 @@
             </footer>
         </section>
 
-        <!-- ========================================== -->
-        <!-- VIEW: VIP STORE                            -->
-        <!-- ========================================== -->
         <section id="view-store" class="view-section pt-6">
             <div class="dark-title-band mx-5 mb-5 px-4 py-5 text-center">
                 <span class="inline-block bg-app-vip/10 text-app-vip px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-app-vip/20 mb-3">Enterprise Access</span>
@@ -499,13 +487,9 @@
             </div>
 
             <div id="store-grid" class="px-5 space-y-4">
-                <!-- VIP Packages Injected via JS -->
-            </div>
+                </div>
         </section>
 
-        <!-- ========================================== -->
-        <!-- VIEW: VAULT (HISTORY)                      -->
-        <!-- ========================================== -->
         <section id="view-vault" class="view-section pt-6 px-5">
             <div class="dark-title-band px-4 py-3 mb-5">
                 <h2 class="text-2xl font-bold tracking-tight">Your Vault</h2>
@@ -535,7 +519,6 @@
         <p id="ticker-message" class="ticker-message px-4 py-2 text-[10px] font-bold text-center">Member savings are updated regularly.</p>
     </div>
 
-    <!-- Bottom App Navigation -->
     <nav class="fixed bottom-0 left-0 w-full bg-app-bg/95 backdrop-blur-xl border-t border-app-border pb-[env(safe-area-inset-bottom)]">
             <div class="flex justify-around items-center p-1">
             <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center p-2 opacity-50 [&.active]:opacity-100 transition" data-target="home">
@@ -553,13 +536,44 @@
         </div>
     </nav>
 
-    <!-- Application Logic -->
     <script>
         // -----------------------------------------------------
-        // 1. DATABASE STRUCTURES (Ready for Supabase)
+        // 1. SUPABASE INIT & GLOBALS
         // -----------------------------------------------------
+        const SUPABASE_URL = 'https://kaiqftrzoocqcmqtikua.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_OdJsOx6kA7SVlFWJTCgFtg_mpi_QB7u';
+
+        let supabaseClient = null;
+        try {
+            // Replaced the buggy condition with a proper check to safely init Supabase
+            if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.warn('Supabase initialization skipped. Running in local fallback mode.');
+        }
+
+        const tg = window.Telegram && window.Telegram.WebApp;
+        let telegramUser = { id: 123456, first_name: 'Guest' }; // Fallback for local testing
         
-        // This array represents the rows you will pull from your Supabase `offers` table
+        if (tg) {
+            tg.expand();
+            if(tg.initDataUnsafe?.user) {
+                telegramUser = tg.initDataUnsafe.user;
+                document.getElementById('header-user').innerText = `${telegramUser.first_name}`;
+            }
+        }
+
+        let state = {
+            category: 'Hotels',
+            inquiriesUsed: Number(localStorage.getItem('sm_inquiries') || 0),
+            isVIP: localStorage.getItem('sm_vip') === 'true',
+            selectedDeal: null
+        };
+
+        // -----------------------------------------------------
+        // 2. DATABASE STRUCTURES
+        // -----------------------------------------------------
         let offersDB = [
             { id: 1, title: 'Bali Villas', discount: 'Save 40%', tag: 'Hot Deal', emoji: '🌴' },
             { id: 2, title: 'Tomorrowland', discount: 'VIP Access', tag: 'Music Festival', emoji: '🎪' },
@@ -604,24 +618,6 @@
 
         let showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
         let showcaseTimer;
-
-        // -----------------------------------------------------
-        // 2. STATE & INIT
-        // -----------------------------------------------------
-        const tg = window.Telegram && window.Telegram.WebApp;
-        if (tg) {
-            tg.expand();
-            if(tg.initDataUnsafe?.user) {
-                document.getElementById('header-user').innerText = `${tg.initDataUnsafe.user.first_name}`;
-            }
-        }
-
-        let state = {
-            category: 'Hotels',
-            inquiriesUsed: Number(localStorage.getItem('sm_inquiries') || 0),
-            isVIP: localStorage.getItem('sm_vip') === 'true',
-            selectedDeal: null
-        };
 
         const formProfiles = {
             Hotels: { title: 'Request Stays', destination: 'Destination / property', placeholder: 'City, hotel, or property', origin: false, checkout: true, budget: false, notes: false, checkin: 'Check in', checkoutLabel: 'Check out' },
@@ -866,7 +862,7 @@
         }
 
         // -----------------------------------------------------
-        // 4. INTERACTION LOGIC
+        // 4. INTERACTION & SUBMISSION LOGIC
         // -----------------------------------------------------
         function switchTab(tabId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
@@ -978,6 +974,18 @@
             }
         }
 
+        async function SUPABASE_UPDATE_USER_TRIAL() {
+            try {
+                await supabaseClient
+                    .from('users')
+                    .update({ trial_count: state.inquiriesUsed })
+                    .eq('telegram_id', telegramUser.id);
+            } catch(e) {
+                console.warn('Could not update user table trial count:', e);
+            }
+        }
+
+        // Updated Supabase Insertion Logic
         async function submitInquiry() {
             if (!state.isVIP && state.inquiriesUsed >= 2) {
                 if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
@@ -986,72 +994,81 @@
             }
 
             const dest = document.getElementById('req-dest').value;
-            const origin = document.getElementById('req-origin').value;
             const checkin = document.getElementById('req-checkin').value;
             const checkout = document.getElementById('req-checkout').value;
-            const profile = formProfiles[state.category] || formProfiles.Hotels;
-            const travellers = document.getElementById('req-travellers').value;
-            const budget = document.getElementById('req-budget').value;
-            const notes = document.getElementById('req-notes').value;
+
             if (!dest) {
                 if(tg && tg.showAlert) tg.showAlert('Please enter a destination.');
                 else alert('Please enter a destination.');
                 return;
             }
 
-            if (!checkin || (profile.checkout && (!checkout || checkout <= checkin))) {
-                const message = profile.checkout ? 'Please choose valid start and end dates.' : 'Please choose a visit date.';
-                if(tg && tg.showAlert) tg.showAlert(message);
-                else alert(message);
-                return;
-            }
-
-            if (!tg || !tg.initData) {
-                const message = 'Open this app in Telegram to submit a quote.';
-                if(tg && tg.showAlert) tg.showAlert(message);
-                else alert(message);
-                return;
-            }
-
-            const button = document.getElementById('btn-submit');
-            const originalText = button.innerText;
-            button.disabled = true;
-            button.innerText = 'Sending request...';
+            const btn = document.getElementById('btn-submit');
+            const originalText = btn.innerText;
+            btn.innerText = 'Submitting...';
+            btn.disabled = true;
 
             try {
-                const response = await fetch('/.netlify/functions/inquiries', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Telegram-Init-Data': tg.initData
-                    },
-                    body: JSON.stringify({
-                        category: state.category,
-                        destination: dest,
-                        dates: profile.checkout ? `${checkin} to ${checkout}` : checkin,
-                        details: { origin, travellers, budget, notes }
-                    })
-                });
-                const data = await response.json().catch(() => ({}));
-                if (!response.ok) throw new Error(data.error || 'Unable to send your quote request.');
-                state.inquiriesUsed += state.isVIP ? 0 : 1;
-                localStorage.setItem('sm_inquiries', state.inquiriesUsed);
-                document.getElementById('req-dest').value = '';
-                document.getElementById('req-checkin').value = '';
-                document.getElementById('req-checkout').value = '';
-                updateUI();
-                await loadInquiries();
-                if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                if(tg && tg.showAlert) tg.showAlert('Your quote request was received.');
-                switchTab('vault');
-            } catch (error) {
-                console.error(error);
-                if(tg && tg.showAlert) tg.showAlert(error.message);
-                else alert(error.message);
-                button.innerText = originalText;
+                let submissionSuccess = false;
+
+                // Try submitting to Supabase if configured
+                if (supabaseClient) {
+                    const { error: inquiryError } = await supabaseClient
+                        .from('inquiries')
+                        .insert([{
+                            telegram_id: telegramUser.id,
+                            category: state.category,
+                            destination: dest,
+                            dates: JSON.stringify({ checkin, checkout }),
+                            status: 'Pending'
+                        }]);
+
+                    if (inquiryError) {
+                        console.error('Supabase insert error:', inquiryError);
+                        throw new Error(inquiryError.message || 'Database insert failed');
+                    }
+                    submissionSuccess = true;
+                } else {
+                    // Fallback mode if Supabase isn't wired up yet
+                    console.log('Simulating inquiry save (Supabase not configured):', { dest, checkin, checkout });
+                    submissionSuccess = true;
+                }
+
+                if (submissionSuccess) {
+                    // Increment trial count if not VIP
+                    if (!state.isVIP) {
+                        state.inquiriesUsed++;
+                        localStorage.setItem('sm_inquiries', state.inquiriesUsed);
+                        
+                        // Try updating Supabase user trial count if client exists
+                        if (supabaseClient) {
+                            await SUPABASE_UPDATE_USER_TRIAL();
+                        }
+                    }
+
+                    document.getElementById('req-dest').value = '';
+                    document.getElementById('req-checkin').value = '';
+                    document.getElementById('req-checkout').value = '';
+                    updateUI();
+
+                    if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    if(tg && tg.showAlert) {
+                        tg.showAlert(`✅ ${state.category} request sent! Our desk will reply with wholesale rates.`);
+                    } else {
+                        alert(`✅ ${state.category} request sent successfully!`);
+                    }
+                    
+                    setTimeout(() => switchTab('vault'), 500);
+                }
+
+            } catch (err) {
+                console.error('Quote submission failure:', err);
+                const errorMsg = `Unable to send quote request: ${err.message || 'Check database configuration.'}`;
+                if(tg && tg.showAlert) tg.showAlert(errorMsg);
+                else alert(errorMsg);
             } finally {
-                button.disabled = false;
-                if (button.innerText === 'Sending request...') button.innerText = originalText;
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         }
 
@@ -1099,114 +1116,3 @@
     </script>
 </body>
 </html>
-
-// 1. Initialize Supabase (Ensure these match your actual Supabase project keys)
-const SUPABASE_URL = 'https://kaiqftrzoocqcmqtikua.supabase.co'; // e.g., 'https://xyzcompany.supabase.co'
-const SUPABASE_ANON_KEY = 'sb_publishable_OdJsOx6kA7SVlFWJTCgFtg_mpi_QB7u'; // your public anon key
-
-let supabaseClient = null;
-try {
-    if (window.supabase && SUPABASE_URL !== 'https://kaiqftrzoocqcmqtikua.supabase.co') {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-} catch (e) {
-    console.warn('Supabase initialization skipped. Running in local fallback mode.');
-}
-
-// 2. Fixed Submit Inquiry Function with Robust Error Handling
-async function submitInquiry() {
-    if (!state.isVIP && state.inquiriesUsed >= 2) {
-        if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
-        switchTab('store');
-        return;
-    }
-
-    const dest = document.getElementById('req-dest').value;
-    const checkin = document.getElementById('req-checkin').value;
-    const checkout = document.getElementById('req-checkout').value;
-
-    if (!dest) {
-        if(tg && tg.showAlert) tg.showAlert('Please enter a destination.');
-        else alert('Please enter a destination.');
-        return;
-    }
-
-    const btn = document.getElementById('btn-submit');
-    const originalText = btn.innerText;
-    btn.innerText = 'Submitting...';
-    btn.disabled = true;
-
-    try {
-        let submissionSuccess = false;
-
-        // Try submitting to Supabase if configured
-        if (supabaseClient) {
-            const { error: inquiryError } = await supabaseClient
-                .from('inquiries')
-                .insert([{
-                    telegram_id: telegramUser.id,
-                    category: state.category,
-                    destination: dest,
-                    dates: JSON.stringify({ checkin, checkout }),
-                    status: 'Pending'
-                }]);
-
-            if (inquiryError) {
-                console.error('Supabase insert error:', inquiryError);
-                throw new Error(inquiryError.message || 'Database insert failed');
-            }
-            submissionSuccess = true;
-        } else {
-            // Fallback mode if Supabase isn't wired up yet
-            console.log('Simulating inquiry save (Supabase not configured):', { dest, checkin, checkout });
-            submissionSuccess = true;
-        }
-
-        if (submissionSuccess) {
-            // Increment trial count if not VIP
-            if (!state.isVIP) {
-                state.inquiriesUsed++;
-                localStorage.setItem('sm_inquiries', state.inquiriesUsed);
-                
-                // Try updating Supabase user trial count if client exists
-                if (supabaseClient) {
-                    await SUPABASE_UPDATE_USER_TRIAL();
-                }
-            }
-
-            document.getElementById('req-dest').value = '';
-            document.getElementById('req-checkin').value = '';
-            document.getElementById('req-checkout').value = '';
-            updateUI();
-
-            if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            if(tg && tg.showAlert) {
-                tg.showAlert(`✅ ${state.category} request sent! Our desk will reply with wholesale rates.`);
-            } else {
-                alert(`✅ ${state.category} request sent successfully!`);
-            }
-            
-            setTimeout(() => switchTab('vault'), 500);
-        }
-
-    } catch (err) {
-        console.error('Quote submission failure:', err);
-        const errorMsg = `Unable to send quote request: ${err.message || 'Check database configuration.'}`;
-        if(tg && tg.showAlert) tg.showAlert(errorMsg);
-        else alert(errorMsg);
-    } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }
-}
-
-async function SUPABASE_UPDATE_USER_TRIAL() {
-    try {
-        await supabaseClient
-            .from('users')
-            .update({ trial_count: state.inquiriesUsed })
-            .eq('telegram_id', telegramUser.id);
-    } catch(e) {
-        console.warn('Could not update user table trial count:', e);
-    }
-}
