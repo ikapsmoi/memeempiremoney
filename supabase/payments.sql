@@ -9,6 +9,102 @@ create table if not exists public.telegram_payments (
 
 alter table public.telegram_payments enable row level security;
 
+create table if not exists public.users (
+    telegram_id bigint primary key,
+    is_vip boolean not null default false,
+    trial_count integer not null default 0 check (trial_count >= 0),
+    created_at timestamptz not null default now()
+);
+
+create table if not exists public.inquiries (
+    inquiry_id uuid primary key default gen_random_uuid(),
+    telegram_id bigint not null references public.users(telegram_id),
+    category text not null,
+    destination text not null,
+    dates text not null,
+    details jsonb not null default '{}'::jsonb,
+    status text not null default 'received',
+    created_at timestamptz not null default now()
+);
+
+create table if not exists public.payments_log (
+    charge_id text primary key,
+    telegram_id bigint not null,
+    package_id text not null,
+    stars_paid integer not null,
+    payload text not null,
+    created_at timestamptz not null default now()
+);
+
+create table if not exists public.deal_rates (
+    rate_id uuid primary key default gen_random_uuid(),
+    category text not null check (category in ('Hotels', 'Transfers', 'Sightseeing', 'Cruises', 'Packages', 'Festivals')),
+    title text not null,
+    unit text not null,
+    reference_rate numeric(12, 2) not null check (reference_rate >= 0),
+    our_rate numeric(12, 2) not null check (our_rate >= 0 and our_rate <= reference_rate),
+    reference_source text not null default 'manual reference',
+    freshness_label text not null default 'Reference snapshot',
+    is_active boolean not null default true,
+    updated_at timestamptz not null default now()
+);
+
+alter table public.inquiries add column if not exists details jsonb not null default '{}'::jsonb;
+alter table public.users enable row level security;
+alter table public.inquiries enable row level security;
+alter table public.payments_log enable row level security;
+alter table public.deal_rates enable row level security;
+
+create or replace function public.create_inquiry(
+    p_telegram_id bigint,
+    p_category text,
+    p_destination text,
+    p_dates text,
+    p_details jsonb default '{}'::jsonb
+)
+returns setof public.inquiries
+language plpgsql
+security definer
+set search_path = public
+as $inquiry$
+declare
+    account public.users;
+begin
+    if p_telegram_id is null
+        or nullif(trim(p_category), '') is null
+        or nullif(trim(p_destination), '') is null
+        or nullif(trim(p_dates), '') is null then
+        raise exception 'Inquiry fields are required' using errcode = '22023';
+    end if;
+
+    insert into public.users (telegram_id)
+    values (p_telegram_id)
+    on conflict (telegram_id) do nothing;
+
+    select * into account
+    from public.users
+    where telegram_id = p_telegram_id
+    for update;
+
+    if not account.is_vip and account.trial_count >= 2 then
+        raise exception 'Two free quotes have already been used' using errcode = 'P0001';
+    end if;
+
+    return query
+    insert into public.inquiries (telegram_id, category, destination, dates, details, status)
+    values (p_telegram_id, trim(p_category), trim(p_destination), trim(p_dates), coalesce(p_details, '{}'::jsonb), 'received')
+    returning *;
+
+    update public.users
+    set trial_count = case when account.is_vip then trial_count else trial_count + 1 end
+    where telegram_id = p_telegram_id;
+end;
+$inquiry$;
+
+drop function if exists public.create_inquiry(bigint, text, text, text);
+revoke execute on function public.create_inquiry(bigint, text, text, text, jsonb) from public, anon, authenticated;
+grant execute on function public.create_inquiry(bigint, text, text, text, jsonb) to service_role;
+
 create table if not exists public.travel_deals (
     deal_id uuid primary key default gen_random_uuid(),
     title text not null unique,
@@ -86,10 +182,10 @@ begin
         raise exception 'Payment identity is required';
     end if;
 
-    insert into public.telegram_payments (telegram_payment_charge_id, telegram_id, payload)
-    values (p_charge_id, p_telegram_id, p_payload)
-    on conflict (telegram_payment_charge_id) do nothing
-    returning telegram_payment_charge_id into inserted_charge_id;
+    insert into public.payments_log (charge_id, telegram_id, package_id, stars_paid, payload)
+    values (p_charge_id, p_telegram_id, p_package_id, p_stars_paid, p_payload)
+    on conflict (charge_id) do nothing
+    returning charge_id into inserted_charge_id;
 
     if inserted_charge_id is null then
         return;
@@ -118,6 +214,9 @@ begin
         updated_at = excluded.updated_at;
 end;
 $$;
+
+revoke execute on function public.grant_vip_access(bigint, text, integer, text, text) from public, anon, authenticated;
+grant execute on function public.grant_vip_access(bigint, text, integer, text, text) to service_role;
 
 create or replace function public.grant_meme_pack(
     p_telegram_id bigint,
