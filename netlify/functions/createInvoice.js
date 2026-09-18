@@ -65,13 +65,13 @@ exports.handler = async (event) => {
     };
 
     try {
-        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/createInvoiceLink`, {
+        const telegramResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/createInvoiceLink`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(invoicePayload)
         });
 
-        const data = await response.json();
+        const data = await telegramResponse.json();
 
         if (!data.ok) {
             console.error('Telegram createInvoiceLink failed:', data.description);
