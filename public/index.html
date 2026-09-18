@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Travel4life x Telegram | Our Secret Your Miles</title>
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Manrope', 'sans-serif'] },
+                    colors: {
+                        app: {
+                            bg: '#f7f7f5',
+                            card: '#ffffff',
+                            surface: '#f0f0ee',
+                            border: '#deded9',
+                            primary: '#171717',
+                            secondary: '#777872',
+                            accent: '#c8ff00',
+                            vip: '#c8ff00'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: #f7f7f5;
+            color: #171717;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+        }
+
+        .app-background {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            background: #f7f7f5;
+        }
+
+        .app-background::before {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            background-image: url('https://media.giphy.com/media/l0HlNaQ6gWfllcjDO/giphy.gif');
+            background-size: cover;
+            background-position: center;
+            filter: saturate(0.8) contrast(0.9);
+            opacity: 0.13;
+        }
+
+        .app-background::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(247, 247, 245, 0.82);
+            backdrop-filter: blur(2px);
+        }
+
+        main { position: relative; z-index: 1; }
+
+        .app-header,
+        nav { z-index: 50; }
+
+        .app-header {
+            background: rgba(247, 247, 245, 0.94);
+            border-color: #e4e4df;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: #c8ff00;
+            color: #171717;
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .category-tile {
+            min-height: 58px;
+            border: 1px solid #d6d6d0;
+            border-radius: 12px;
+            background: #ffffff;
+            transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+        }
+
+        .category-tile:hover,
+        .category-tile:focus-visible,
+        .category-tile.selected {
+            border-color: #171717;
+            background: #c8ff00;
+        }
+
+        .category-tile:active { transform: scale(0.97); }
+
+        .category-icon {
+            font-size: 20px;
+            line-height: 1;
+            filter: saturate(0.9);
+        }
+
+        .member-panel {
+            background: #3b405d;
+            border: 2px solid #666b83;
+        }
+
+        .member-orbit {
+            width: 82px;
+            height: 82px;
+            display: grid;
+            place-items: center;
+            border: 9px dotted #ffffff;
+            border-radius: 50%;
+            color: #171717;
+            font-size: 25px;
+        }
+
+        .yellow-button {
+            background: #c8ff00;
+            color: #171717;
+        }
+
+        .yellow-button:hover { background: #d8ff4a; }
+
+        .offer-card {
+            background: #c8ff00;
+            color: #171717;
+            border: 1px solid #c8ff00;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .offer-card:active { transform: scale(0.98); }
+
+        .offer-card-image {
+            background: #e5e5df;
+        }
+
+        .section-label { color: #777872; }
+
+        .usp-banner {
+            background: #c8ff00;
+            color: #171717;
+            border-radius: 16px;
+        }
+
+        .cash-note {
+            border-left: 3px solid #c8ff00;
+            background: #ffffff;
+        }
+
+        .rate-card {
+            width: 224px;
+            min-width: 224px;
+            background: #ffffff;
+            border: 1px solid #deded9;
+            border-radius: 14px;
+        }
+
+        .rate-card dt { color: #777872; font-size: 9px; }
+        .rate-card dd { color: #171717; font-size: 11px; font-weight: 700; }
+        .rate-card .secret-rate { color: #171717; font-size: 15px; }
+
+        .rate-showcase {
+            min-height: 126px;
+            opacity: 1;
+            transition: opacity 260ms ease, transform 260ms ease;
+        }
+
+        .rate-showcase.is-fading { opacity: 0; transform: translateY(4px); }
+
+        .rate-showcase-title { color: #171717; }
+
+        #rates-container {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        #rates-container .rate-card {
+            width: auto;
+            min-width: 0;
+        }
+
+        .deal-dialog {
+            width: min(92vw, 390px);
+            margin: auto;
+            border: 1px solid #deded9;
+            border-radius: 18px;
+            padding: 0;
+            color: #171717;
+            background: #ffffff;
+            box-shadow: 0 20px 60px rgba(23, 23, 23, 0.22);
+        }
+
+        .deal-dialog::backdrop { background: rgba(23, 23, 23, 0.35); }
+
+        @media (max-width: 350px) { .category-tile { min-height: 54px; } }
+
+        /* Hide Scrollbars but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Smooth View Transitions */
+        .view-section { display: none; animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .view-section.active { display: block; }
+        
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Inputs */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1); opacity: 0.5;
+        }
+    </style>
+</head>
+<body class="pb-20 bg-app-bg text-neutral-900">
+    <div class="app-background" aria-hidden="true"></div>
+
+    <!-- Sticky Header -->
+    <header class="app-header sticky top-0 z-50 backdrop-blur-lg border-b px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="brand-mark" aria-label="Travel4life logo">t4</div>
+            <div>
+                <h1 class="text-base font-extrabold tracking-tight">Travel4life <span class="text-app-vip">x</span> Telegram</h1>
+                <p class="text-[9px] text-app-secondary font-bold uppercase tracking-[0.14em]">Our Secret Your Miles</p>
+            </div>
+        </div>
+        <div class="text-right">
+            <p id="header-user" class="hidden text-xs text-app-secondary font-medium">Hi, traveler</p>
+            <button onclick="switchTab('store')" class="yellow-button rounded-full px-3 py-2 text-[11px] font-extrabold whitespace-nowrap" type="button">Explore membership <span class="text-sm">→</span></button>
+            <div id="status-badge" class="hidden">Free Trial</div>
+        </div>
+    </header>
+
+    <main>
+        <!-- ========================================== -->
+        <!-- VIEW: CONCIERGE (HOME)                     -->
+        <!-- ========================================== -->
+        <section id="view-home" class="view-section active pt-4">
+            <div class="px-5 mb-3 flex items-end justify-between">
+                <div>
+                    <p class="section-label text-[10px] font-bold uppercase tracking-[0.16em] mb-1">Private travel access</p>
+                    <h2 class="text-xl font-extrabold leading-tight tracking-tight">Plan your next trip</h2>
+                </div>
+                <a class="text-[10px] text-app-secondary font-bold underline" href="https://www.travel4life.net" target="_blank" rel="noopener">travel4life.net</a>
+            </div>
+
+            <div class="usp-banner mx-5 mb-3 p-4 flex items-center justify-between gap-3 shadow-sm">
+                <div>
+                    <p class="text-[10px] font-extrabold uppercase tracking-[0.16em]">Your advantage</p>
+                    <h3 class="text-2xl font-extrabold leading-none mt-1">2 free quotes</h3>
+                    <p class="text-[11px] font-semibold mt-1">Try the concierge before you pay.</p>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="text-[10px] font-extrabold uppercase">Every visit</p>
+                    <p class="text-sm font-extrabold">No card required</p>
+                </div>
+            </div>
+
+            <div class="px-5 mb-3">
+                <div id="categories-container" class="categories-grid grid grid-cols-3 gap-2">
+                    <!-- Categories injected via JS -->
+                </div>
+            </div>
+
+            <!-- Sleek Booking Form -->
+            <div class="px-5">
+                <div class="bg-app-card border border-app-border rounded-[14px] p-4 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 id="form-title" class="text-base font-extrabold">Request Stays</h3>
+                        <span id="trial-counter" class="text-[9px] bg-app-vip text-neutral-900 px-2 py-1 rounded-md font-bold uppercase">0/2 free</span>
+                    </div>
+                    
+                    <div id="inquiry-fields" class="space-y-2 mb-3">
+                        <div id="field-origin" class="inquiry-field hidden bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                            <label id="origin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">From</label>
+                            <input type="text" id="req-origin" placeholder="City or airport" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
+                        </div>
+                        <div class="bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                            <label id="destination-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Destination / Property</label>
+                            <input type="text" id="req-dest" placeholder="City, hotel, or experience" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                <label id="checkin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Check in</label>
+                                <input type="date" id="req-checkin" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                            </div>
+                            <div id="field-checkout" class="bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                <label id="checkout-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Check out</label>
+                                <input type="date" id="req-checkout" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                <label id="travellers-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Travellers</label>
+                                <select id="req-travellers" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                                    <option value="1">1 traveller</option><option value="2" selected>2 travellers</option><option value="3">3 travellers</option><option value="4">4 travellers</option><option value="5">5+ travellers</option>
+                                </select>
+                            </div>
+                            <div id="field-budget" class="bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                <label class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Budget</label>
+                                <select id="req-budget" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                                    <option value="">Any budget</option><option value="under-500">Under $500</option><option value="500-1500">$500-$1,500</option><option value="1500-plus">$1,500+</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="field-notes" class="hidden bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                            <label class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Preferences</label>
+                            <input type="text" id="req-notes" placeholder="Cabin, room, event, or other preference" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
+                        </div>
+                    </div>
+
+                    <button id="btn-submit" onclick="submitInquiry()" class="w-full yellow-button hover:bg-app-vip font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-sm">
+                        Get my free quote
+                    </button>
+                    <div class="cash-note mt-3 px-3 py-2 rounded-r-lg">
+                        <p class="text-[10px] font-extrabold">100% cash bookings</p>
+                        <p class="text-[10px] text-app-secondary mt-0.5">Pay in cash when your booking is confirmed.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 mt-5 mb-3 flex justify-between items-end">
+                <h2 class="text-xs font-extrabold uppercase tracking-[0.16em] section-label">Travel deals</h2>
+                <span class="text-[10px] text-app-secondary">Tap to explore</span>
+            </div>
+            <div id="offers-container" class="flex overflow-x-auto no-scrollbar gap-3 px-5 pb-5 snap-x">
+                <!-- Offers injected via JS -->
+            </div>
+
+            <div class="px-5 mb-2 flex justify-between items-end">
+                <div>
+                    <h2 class="text-xs font-extrabold uppercase tracking-[0.16em] section-label">Member rate previews</h2>
+                    <p class="text-[10px] text-app-secondary mt-1">Illustrative reference snapshots, not live availability.</p>
+                </div>
+                <span class="text-[10px] text-app-vip font-bold">15 each</span>
+            </div>
+            <div id="rates-container" class="px-5 pb-5">
+                <!-- Rate showcases injected via JS -->
+            </div>
+
+            <footer class="px-5 pb-4 text-center">
+                <a href="https://www.travel4life.net" target="_blank" rel="noopener" class="text-[10px] font-extrabold text-neutral-900 underline">Visit travel4life.net</a>
+                <p class="text-[9px] text-app-secondary mt-1">Travel4life x Telegram · Our Secret Your Miles</p>
+            </footer>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW: VIP STORE                            -->
+        <!-- ========================================== -->
+        <section id="view-store" class="view-section pt-6">
+            <div class="px-5 mb-8 text-center">
+                <span class="inline-block bg-app-vip/10 text-app-vip px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-app-vip/20 mb-3">Enterprise Access</span>
+                <h2 class="text-3xl font-bold mb-3 tracking-tight">Unlock Wholesale.</h2>
+                <p class="text-sm text-app-secondary">Secure checkout via Telegram Stars. Instantly unlock zero-markup travel worldwide.</p>
+            </div>
+
+            <div id="store-grid" class="px-5 space-y-4">
+                <!-- VIP Packages Injected via JS -->
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW: VAULT (HISTORY)                      -->
+        <!-- ========================================== -->
+        <section id="view-vault" class="view-section pt-6 px-5">
+            <h2 class="text-2xl font-bold mb-6 tracking-tight">Your Vault</h2>
+            
+            <div id="inquiries-list" class="space-y-3">
+                <p class="text-sm text-app-secondary">Loading your requests...</p>
+            </div>
+        </section>
+    </main>
+
+    <dialog id="deal-dialog" class="deal-dialog">
+        <div class="p-5">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-[10px] text-app-secondary font-extrabold uppercase tracking-[0.16em]">Deal details</p>
+                    <h2 id="deal-dialog-title" class="text-xl font-extrabold mt-1">Travel deal</h2>
+                </div>
+                <button onclick="closeDeal()" class="text-xl leading-none text-app-secondary" type="button" aria-label="Close deal details">×</button>
+            </div>
+            <div id="deal-dialog-body" class="mt-4"></div>
+            <button onclick="requestSelectedDeal()" class="yellow-button w-full mt-4 py-3 rounded-xl text-xs font-extrabold" type="button">Request this deal</button>
+        </div>
+    </dialog>
+
+    <!-- Bottom App Navigation -->
+    <nav class="fixed bottom-0 left-0 w-full bg-app-bg/95 backdrop-blur-xl border-t border-app-border pb-[env(safe-area-inset-bottom)]">
+            <div class="flex justify-around items-center p-1">
+            <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center p-2 opacity-50 [&.active]:opacity-100 transition" data-target="home">
+                <span class="text-xl mb-1">🧭</span>
+                <span class="text-[10px] font-bold">Explore</span>
+            </button>
+            <button onclick="switchTab('store')" class="nav-btn flex flex-col items-center p-2 opacity-50 [&.active]:opacity-100 transition" data-target="store">
+                <span class="text-xl mb-1">⭐️</span>
+                <span class="text-[10px] font-bold text-app-vip">VIP Pass</span>
+            </button>
+            <button onclick="switchTab('vault')" class="nav-btn flex flex-col items-center p-2 opacity-50 [&.active]:opacity-100 transition" data-target="vault">
+                <span class="text-xl mb-1">📂</span>
+                <span class="text-[10px] font-bold">Vault</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Application Logic -->
+    <script>
+        // -----------------------------------------------------
+        // 1. DATABASE STRUCTURES (Ready for Supabase)
+        // -----------------------------------------------------
+        
+        // This array represents the rows you will pull from your Supabase `offers` table
+        const offersDB = [
+            { id: 1, title: 'Bali Villas', discount: 'Save 40%', tag: 'Hot Deal', emoji: '🌴', gradient: 'from-emerald-900 to-black' },
+            { id: 2, title: 'Tomorrowland', discount: 'VIP Access', tag: 'Festival', emoji: '🎪', gradient: 'from-purple-900 to-black' },
+            { id: 3, title: 'Maldives', discount: 'Wholesale Rates', tag: 'Luxury', emoji: '🚤', gradient: 'from-blue-900 to-black' }
+        ];
+
+        const categoriesDB = [
+            { id: 'Hotels', label: 'Stays', icon: '🏨' }, { id: 'Flights', label: 'Flights', icon: '✈️' },
+            { id: 'Transfers', label: 'Rental Cars & Transfers', icon: '🚘' }, { id: 'Packages', label: 'Packages', icon: '🧳' },
+            { id: 'Sightseeing', label: 'Sightseeing', icon: '🎟️' }, { id: 'Cruises', label: 'Cruises', icon: '🛳️' },
+            { id: 'Festivals', label: 'Music Festivals', icon: '🎶' }
+        ];
+
+        const storePackagesDB = [
+            { id: 'secret_miles_vip_monthly', title: 'VIP Monthly', desc: 'Unlimited wholesale requests. Dedicated agent.', price: 750, icon: '🌟', badge: 'Most Popular' },
+            { id: 'secret_miles_vip_annual', title: 'VIP Annual', desc: 'Year-round unlimited access. Maximum savings.', price: 7500, icon: '👑', badge: 'Best Value' },
+            { id: 'secret_miles_single_pass', title: 'Single Pass', desc: '1x Custom Wholesale Quote.', price: 150, icon: '🎫' }
+        ];
+
+        function makeDemoRates(names, category, baseRate, unit) {
+            return names.map((name, index) => {
+                const referenceRate = baseRate + (index % 5) * 25;
+                return {
+                    category,
+                    name,
+                    unit,
+                    referenceRate,
+                    ourRate: Number((referenceRate * 0.9).toFixed(2)),
+                    freshness: 'Reference snapshot · illustrative'
+                };
+            });
+        }
+
+        let rateCatalog = {
+            Hotels: makeDemoRates(['Lisbon', 'Bali', 'Dubai', 'Tokyo', 'Paris', 'Cancun', 'Bangkok', 'Rome', 'Maldives', 'Barcelona', 'Athens', 'Marrakech', 'Sydney', 'Istanbul', 'Cape Town'], 'Hotels', 180, 'per stay'),
+            Transfers: makeDemoRates(['Lisbon Airport', 'Denpasar Airport', 'Dubai Airport', 'Haneda Airport', 'Charles de Gaulle', 'Cancun Airport', 'Suvarnabhumi Airport', 'Fiumicino Airport', 'Velana Airport', 'Barcelona Airport', 'Athens Airport', 'Marrakech Airport', 'Sydney Airport', 'Istanbul Airport', 'Cape Town Airport'], 'Transfers', 35, 'airport transfer'),
+            Sightseeing: makeDemoRates(['Lisbon city tour', 'Bali temple day', 'Dubai skyline tour', 'Tokyo food walk', 'Paris museum pass', 'Cancun reef trip', 'Bangkok river tour', 'Rome Colosseum visit', 'Maldives island day', 'Barcelona Gaudi tour', 'Athens Acropolis visit', 'Marrakech souk tour', 'Sydney harbour cruise', 'Istanbul Bosphorus tour', 'Cape Town peninsula tour'], 'Sightseeing', 60, 'per person'),
+            Cruises: makeDemoRates(['Barcelona port', 'Athens port', 'Dubai port', 'Tokyo port', 'Rome port', 'Miami port', 'Singapore port', 'Venice port', 'Maldives cruise', 'Sydney port', 'Copenhagen port', 'Marrakech route', 'Auckland port', 'Istanbul port', 'Cape Town port'], 'Cruises', 420, 'per guest'),
+            Packages: makeDemoRates(['Portugal escape', 'Bali wellness week', 'Dubai city break', 'Japan highlights', 'Paris weekend', 'Cancun beach week', 'Thailand discovery', 'Italy essentials', 'Maldives retreat', 'Spain explorer', 'Greece islands', 'Morocco discovery', 'Australia essentials', 'Turkey culture trip', 'South Africa escape'], 'Packages', 850, 'per package'),
+            Festivals: makeDemoRates(['Lisbon music week', 'Bali festival pass', 'Dubai live weekend', 'Tokyo summer shows', 'Paris concert break', 'Cancun beach festival', 'Bangkok music nights', 'Rome live events', 'Maldives sounds', 'Barcelona festival', 'Athens music week', 'Marrakech live nights', 'Sydney festival pass', 'Istanbul music week', 'Cape Town live'], 'Festivals', 120, 'per pass')
+        };
+
+        let showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
+        let showcaseTimer;
+
+        // -----------------------------------------------------
+        // 2. STATE & INIT
+        // -----------------------------------------------------
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (tg) {
+            tg.expand();
+            if(tg.initDataUnsafe?.user) {
+                document.getElementById('header-user').innerText = `${tg.initDataUnsafe.user.first_name}`;
+            }
+        }
+
+        let state = {
+            category: 'Hotels',
+            inquiriesUsed: Number(localStorage.getItem('sm_inquiries') || 0),
+            isVIP: localStorage.getItem('sm_vip') === 'true',
+            selectedDeal: null
+        };
+
+        const formProfiles = {
+            Hotels: { title: 'Request stays', destination: 'Destination / property', placeholder: 'City, hotel, or property', origin: false, checkout: true, budget: false, notes: true, checkin: 'Check in', checkoutLabel: 'Check out' },
+            Flights: { title: 'Request flights', destination: 'To', placeholder: 'Destination city or airport', origin: true, originLabel: 'From', checkout: true, budget: true, notes: true, checkin: 'Departure', checkoutLabel: 'Return' },
+            Transfers: { title: 'Request rental cars & transfers', destination: 'Drop-off / destination', placeholder: 'Airport, hotel, or address', origin: true, originLabel: 'Pick-up / collection', checkout: true, budget: true, notes: true, checkin: 'Start date', checkoutLabel: 'End date' },
+            Packages: { title: 'Request a package', destination: 'Destination', placeholder: 'Where would you like to go?', origin: false, checkout: true, budget: true, notes: true, checkin: 'Start date', checkoutLabel: 'End date' },
+            Sightseeing: { title: 'Request sightseeing', destination: 'City / attraction', placeholder: 'Tour, attraction, or city', origin: false, checkout: false, budget: true, notes: true, checkin: 'Visit date', checkoutLabel: 'End date' },
+            Cruises: { title: 'Request a cruise', destination: 'Route / arrival port', placeholder: 'Port, route, or destination', origin: true, originLabel: 'Departure port', checkout: true, budget: true, notes: true, checkin: 'Sail date', checkoutLabel: 'Return date' },
+            Festivals: { title: 'Request music festivals', destination: 'Festival / city', placeholder: 'Festival name or city', origin: false, checkout: true, budget: true, notes: true, checkin: 'Event start', checkoutLabel: 'Event end' }
+        };
+
+        function init() {
+            renderOffers();
+            renderCategories();
+            renderStore();
+            renderRates();
+            updateInquiryForm();
+            updateUI();
+            loadInquiries();
+            loadDealRates();
+        }
+
+        // -----------------------------------------------------
+        // 3. UI RENDERING FUNCTIONS
+        // -----------------------------------------------------
+        function renderOffers() {
+            const container = document.getElementById('offers-container');
+            container.innerHTML = offersDB.map(offer => `
+                <button type="button" onclick="openDeal('${offer.title}')" class="offer-card snap-start shrink-0 w-52 h-24 rounded-[18px] p-3 relative flex overflow-hidden shadow-lg">
+                    <div class="w-[58%] flex flex-col justify-between relative z-10">
+                        <span class="text-[8px] font-extrabold uppercase tracking-[0.12em]">${offer.tag}</span>
+                        <div class="pr-1">
+                            <h4 class="text-sm font-extrabold leading-tight">${offer.title}</h4>
+                            <p class="text-[10px] font-bold leading-tight mt-0.5">${offer.discount} <span class="text-sm">→</span></p>
+                        </div>
+                    </div>
+                    <div class="offer-card-image absolute inset-y-0 right-0 w-[42%] flex items-center justify-center text-3xl">${offer.emoji}</div>
+                </button>
+            `).join('');
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categories-container');
+            container.innerHTML = categoriesDB.map(cat => `
+                <button onclick="selectCategory('${cat.id}')" id="cat-${cat.id}" class="cat-pill category-tile flex flex-col items-center justify-center gap-3 ${cat.id === state.category ? 'selected' : ''} px-3 py-4">
+                    <span class="category-icon">${cat.icon}</span>
+                    <span class="text-sm font-extrabold">${cat.label}</span>
+                </button>
+            `).join('');
+        }
+
+        function updateInquiryForm() {
+            const profile = formProfiles[state.category] || formProfiles.Hotels;
+            document.getElementById('form-title').innerText = profile.title;
+            document.getElementById('destination-label').innerText = profile.destination;
+            document.getElementById('req-dest').placeholder = profile.placeholder;
+            document.getElementById('origin-label').innerText = profile.originLabel || 'From';
+            document.getElementById('checkin-label').innerText = profile.checkin;
+            document.getElementById('checkout-label').innerText = profile.checkoutLabel;
+            setFieldVisibility('field-origin', profile.origin);
+            setFieldVisibility('field-checkout', profile.checkout);
+            setFieldVisibility('field-budget', profile.budget);
+            setFieldVisibility('field-notes', profile.notes);
+        }
+
+        function setFieldVisibility(fieldId, visible) {
+            const field = document.getElementById(fieldId);
+            field.classList.toggle('hidden', !visible);
+            field.querySelectorAll('input, select').forEach(input => { input.disabled = !visible; });
+        }
+
+        function renderRates() {
+            const container = document.getElementById('rates-container');
+            clearInterval(showcaseTimer);
+            container.innerHTML = Object.keys(rateCatalog).map(category => `
+                <section class="rate-showcase" id="rate-showcase-${category}">
+                    <div class="flex justify-between items-end mb-2">
+                        <div>
+                            <h3 class="text-sm font-extrabold rate-showcase-title">${category}</h3>
+                            <p class="text-[10px] text-app-secondary">15 reference snapshots · editable in Supabase</p>
+                        </div>
+                        <span class="text-[9px] text-app-secondary">Rotating preview</span>
+                    </div>
+                    <div class="rate-showcase-card"></div>
+                </section>
+            `).join('');
+            Object.keys(rateCatalog).forEach(category => renderRate(category));
+            showcaseTimer = setInterval(advanceRateShowcases, 4500);
+        }
+
+        function renderRate(category) {
+            const rates = rateCatalog[category];
+            const rate = rates[showcaseState[category]];
+            const container = document.querySelector(`#rate-showcase-${category} .rate-showcase-card`);
+            if (!container) return;
+            container.innerHTML = `
+                <article class="rate-card p-3" onclick="openRateDeal('${category}', ${showcaseState[category]})" tabindex="0" role="button">
+                    <div class="flex justify-between items-start gap-2 mb-3">
+                        <div>
+                            <h4 class="text-sm font-extrabold capitalize leading-tight">${rate.name}</h4>
+                            <p class="text-[10px] text-app-secondary mt-1">${rate.unit} · ${rate.freshness}</p>
+                        </div>
+                        <span class="text-[9px] text-app-vip font-extrabold whitespace-nowrap">10% less</span>
+                    </div>
+                    <div class="flex items-end justify-between gap-3">
+                        <div>
+                            <p class="text-[9px] text-app-secondary">Reference price</p>
+                            <p class="text-xs font-bold">$${rate.referenceRate}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[9px] text-app-secondary">Secret Miles</p>
+                            <p class="secret-rate">$${rate.ourRate}</p>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
+
+        function advanceRateShowcases() {
+            Object.keys(rateCatalog).forEach(category => {
+                const showcase = document.getElementById(`rate-showcase-${category}`);
+                showcase.classList.add('is-fading');
+                setTimeout(() => {
+                    showcaseState[category] = (showcaseState[category] + 1) % rateCatalog[category].length;
+                    renderRate(category);
+                    showcase.classList.remove('is-fading');
+                }, 260);
+            });
+        }
+
+        async function loadDealRates() {
+            try {
+                const response = await fetch('/.netlify/functions/dealRates');
+                if (!response.ok) return;
+                const data = await response.json();
+                if (!Array.isArray(data.rates) || !data.rates.length) return;
+                const databaseCatalog = {};
+                data.rates.forEach(rate => {
+                    if (!databaseCatalog[rate.category]) databaseCatalog[rate.category] = [];
+                    databaseCatalog[rate.category].push({
+                        category: rate.category,
+                        name: rate.title,
+                        unit: rate.unit,
+                        referenceRate: Number(rate.reference_rate),
+                        ourRate: Number(rate.our_rate),
+                        freshness: rate.freshness_label || 'Reference snapshot'
+                    });
+                });
+                rateCatalog = databaseCatalog;
+                showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
+                renderRates();
+            } catch (error) {
+                console.warn('Using local rate preview:', error);
+            }
+        }
+
+        function renderStore() {
+            const container = document.getElementById('store-grid');
+            container.innerHTML = storePackagesDB.map(pack => `
+                <div class="bg-app-card border border-app-border rounded-[14px] p-4 relative overflow-hidden shadow-sm">
+                    ${pack.badge ? `<div class="absolute top-0 right-0 bg-app-vip text-black text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-bl-xl">${pack.badge}</div>` : ''}
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-app-surface flex items-center justify-center text-2xl">${pack.icon}</div>
+                        <div>
+                            <h4 class="text-lg font-bold">${pack.title}</h4>
+                            <p class="text-[11px] text-app-secondary font-medium leading-snug mt-0.5">${pack.desc}</p>
+                        </div>
+                    </div>
+                    <button onclick="purchasePackage('${pack.id}', this)" class="w-full bg-app-surface border border-app-border hover:border-neutral-900 text-neutral-900 font-bold py-3 rounded-xl text-sm transition flex justify-center items-center gap-2">
+                        <span>Pay</span>
+                        <span class="text-base">⭐️</span>
+                        <span>${pack.price} Stars</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function updateUI() {
+            const btn = document.getElementById('btn-submit');
+            const counter = document.getElementById('trial-counter');
+            const badge = document.getElementById('status-badge');
+
+            if (state.isVIP) {
+                badge.innerText = 'VIP ACCESS';
+                badge.className = 'bg-app-vip border border-app-vip text-black px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase';
+                counter.innerText = 'UNLIMITED';
+                counter.className = 'text-[10px] bg-app-vip/20 text-app-vip px-2.5 py-1 rounded-md font-bold uppercase';
+                btn.innerText = 'Request my VIP quote';
+                btn.className = 'w-full bg-app-vip text-black font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)]';
+            } else {
+                counter.innerText = `${state.inquiriesUsed}/2 USED`;
+                if (state.inquiriesUsed >= 2) {
+                    btn.innerText = 'Unlock more quotes';
+                    btn.className = 'w-full bg-app-surface border border-app-border text-neutral-900 font-bold py-3 rounded-xl text-xs transition active:scale-95';
+                } else {
+                    btn.innerText = 'Get my free quote';
+                }
+            }
+        }
+
+        // -----------------------------------------------------
+        // 4. INTERACTION LOGIC
+        // -----------------------------------------------------
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${tabId}`).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.nav-btn[data-target="${tabId}"]`).classList.add('active');
+            
+            if(tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectCategory(catId) {
+            state.category = catId;
+            updateInquiryForm();
+            
+            document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('selected'));
+            document.getElementById(`cat-${catId}`).classList.add('selected');
+            
+            if(tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+
+        function openDeal(title) {
+            const offer = offersDB.find(item => item.title === title);
+            state.selectedDeal = offer || { title };
+            document.getElementById('deal-dialog-title').innerText = state.selectedDeal.title;
+            document.getElementById('deal-dialog-body').innerHTML = `
+                <div class="bg-app-surface rounded-xl p-3">
+                    <p class="text-sm font-extrabold">${state.selectedDeal.discount}</p>
+                    <p class="text-xs text-app-secondary mt-1">${state.selectedDeal.tag} · illustrative offer</p>
+                </div>
+                <p class="text-xs text-app-secondary mt-3 leading-relaxed">This preview is not live availability. Request it for a current quote from the concierge.</p>
+            `;
+            document.getElementById('deal-dialog').showModal();
+            if(tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function openRateDeal(category, index) {
+            const rate = rateCatalog[category]?.[index];
+            if (!rate) return;
+            state.selectedDeal = { title: rate.name };
+            document.getElementById('deal-dialog-title').innerText = rate.name;
+            document.getElementById('deal-dialog-body').innerHTML = `
+                <div class="bg-app-surface rounded-xl p-3">
+                    <p class="text-xs text-app-secondary">${category} · ${rate.unit} · ${rate.freshness}</p>
+                    <div class="grid grid-cols-2 gap-y-1 mt-3 text-xs">
+                        <span class="text-app-secondary">Reference price</span><strong class="text-right">$${rate.referenceRate}</strong>
+                        <span class="font-extrabold">Secret Miles</span><strong class="text-right text-app-vip">$${rate.ourRate}</strong>
+                    </div>
+                </div>
+                <p class="text-xs text-app-secondary mt-3 leading-relaxed">Illustrative reference rate only, not live availability. Request a current quote for exact dates and guests.</p>
+            `;
+            document.getElementById('deal-dialog').showModal();
+        }
+
+        function closeDeal() {
+            document.getElementById('deal-dialog').close();
+        }
+
+        function requestSelectedDeal() {
+            if (!state.selectedDeal) return;
+            closeDeal();
+            selectCategory('Sightseeing');
+            document.getElementById('req-dest').value = state.selectedDeal.title;
+            document.getElementById('req-dest').focus();
+            document.getElementById('req-dest').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function formatInquiryDate(value) {
+            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+
+        function renderInquiries(inquiries) {
+            const container = document.getElementById('inquiries-list');
+            if (!inquiries.length) {
+                container.innerHTML = '<p class="text-sm text-app-secondary">Your submitted requests will appear here.</p>';
+                return;
+            }
+            container.innerHTML = inquiries.map(inquiry => `
+                <article class="bg-app-card border border-app-border p-4 rounded-[14px] shadow-sm">
+                    <div class="flex justify-between items-start gap-3">
+                        <div>
+                            <h4 class="text-sm font-extrabold">${inquiry.destination}</h4>
+                            <p class="text-xs text-app-secondary mt-1">${inquiry.category} · ${inquiry.dates}</p>
+                        </div>
+                        <span class="bg-app-vip px-2 py-1 rounded-md text-[9px] font-extrabold uppercase">${inquiry.status}</span>
+                    </div>
+                    <p class="text-[10px] text-app-secondary mt-3">Received ${formatInquiryDate(inquiry.created_at)}</p>
+                </article>
+            `).join('');
+        }
+
+        async function loadInquiries() {
+            const initData = tg && tg.initData;
+            if (!initData) {
+                document.getElementById('inquiries-list').innerHTML = '<p class="text-sm text-app-secondary">Open this app in Telegram to view your requests.</p>';
+                return;
+            }
+            try {
+                const response = await fetch('/.netlify/functions/inquiries', {
+                    headers: { 'X-Telegram-Init-Data': initData }
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(data.error || 'Unable to load requests.');
+                renderInquiries(data.inquiries || []);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('inquiries-list').innerHTML = '<p class="text-sm text-app-secondary">Requests are temporarily unavailable.</p>';
+            }
+        }
+
+        async function submitInquiry() {
+            if (!state.isVIP && state.inquiriesUsed >= 2) {
+                if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+                switchTab('store');
+                return;
+            }
+
+            const dest = document.getElementById('req-dest').value;
+            const origin = document.getElementById('req-origin').value;
+            const checkin = document.getElementById('req-checkin').value;
+            const checkout = document.getElementById('req-checkout').value;
+            const profile = formProfiles[state.category] || formProfiles.Hotels;
+            const travellers = document.getElementById('req-travellers').value;
+            const budget = document.getElementById('req-budget').value;
+            const notes = document.getElementById('req-notes').value;
+            if (!dest) {
+                if(tg && tg.showAlert) tg.showAlert('Please enter a destination.');
+                else alert('Please enter a destination.');
+                return;
+            }
+
+            if (!checkin || (profile.checkout && (!checkout || checkout <= checkin))) {
+                const message = profile.checkout ? 'Please choose valid start and end dates.' : 'Please choose a visit date.';
+                if(tg && tg.showAlert) tg.showAlert(message);
+                else alert(message);
+                return;
+            }
+
+            if (!tg || !tg.initData) {
+                const message = 'Open this app in Telegram to submit a quote.';
+                if(tg && tg.showAlert) tg.showAlert(message);
+                else alert(message);
+                return;
+            }
+
+            const button = document.getElementById('btn-submit');
+            const originalText = button.innerText;
+            button.disabled = true;
+            button.innerText = 'Sending request...';
+
+            try {
+                const response = await fetch('/.netlify/functions/inquiries', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Telegram-Init-Data': tg.initData
+                    },
+                    body: JSON.stringify({
+                        category: state.category,
+                        destination: dest,
+                        dates: profile.checkout ? `${checkin} to ${checkout}` : checkin,
+                        details: { origin, travellers, budget, notes }
+                    })
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(data.error || 'Unable to send your quote request.');
+                state.inquiriesUsed += state.isVIP ? 0 : 1;
+                localStorage.setItem('sm_inquiries', state.inquiriesUsed);
+                document.getElementById('req-dest').value = '';
+                document.getElementById('req-checkin').value = '';
+                document.getElementById('req-checkout').value = '';
+                updateUI();
+                await loadInquiries();
+                if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                if(tg && tg.showAlert) tg.showAlert('Your quote request was received.');
+                switchTab('vault');
+            } catch (error) {
+                console.error(error);
+                if(tg && tg.showAlert) tg.showAlert(error.message);
+                else alert(error.message);
+                button.innerText = originalText;
+            } finally {
+                button.disabled = false;
+                if (button.innerText === 'Sending request...') button.innerText = originalText;
+            }
+        }
+
+        async function purchasePackage(packageId, btnElement) {
+            const originalHTML = btnElement.innerHTML;
+            btnElement.innerHTML = '<span class="animate-pulse">Loading secure checkout...</span>';
+            btnElement.disabled = true;
+
+            try {
+                // Exact Netlify /createInvoice fetch logic preserved
+                const response = await fetch('/.netlify/functions/createInvoice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ packageId: packageId })
+                });
+
+                const data = await response.json().catch(() => ({}));
+                
+                if (response.status === 404 || data.error === 'Not Found') throw new Error('Checkout API not found.');
+                if (!response.ok || !data.invoiceUrl) throw new Error(data.error || 'Invoice generation failed.');
+                if (!tg || !tg.openInvoice) throw new Error('Please open in Telegram to pay with Stars.');
+
+                tg.openInvoice(data.invoiceUrl, status => {
+                    if (status === 'paid') {
+                        localStorage.setItem('sm_vip', 'true');
+                        state.isVIP = true;
+                        updateUI();
+                        if(tg.showAlert) tg.showAlert('🎉 VIP Unlocked! Welcome to Secret Miles Enterprise.');
+                        switchTab('home');
+                    }
+                    btnElement.innerHTML = originalHTML;
+                    btnElement.disabled = false;
+                });
+
+            } catch (err) {
+                if(tg && tg.showAlert) tg.showAlert(err.message);
+                else alert(err.message);
+                btnElement.innerHTML = originalHTML;
+                btnElement.disabled = false;
+            }
+        }
+
+        // Boot
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

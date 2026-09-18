@@ -1,36 +1,67 @@
+const fetch = global.fetch || require('node-fetch');
+
+const corsHeaders = {
+    'Access-Control-Allow-Origin': process.env.APP_ORIGIN || '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Content-Type': 'application/json'
+};
+
+const response = (statusCode, body) => ({
+    statusCode,
+    headers: corsHeaders,
+    body: JSON.stringify(body)
+});
+
 exports.handler = async (event) => {
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
-    }
+    if (event.httpMethod === 'OPTIONS') return response(204, {});
+    if (event.httpMethod !== 'POST') return response(405, { error: 'Method Not Allowed' });
 
     const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     if (!BOT_TOKEN || !BOT_TOKEN.includes(':')) {
-        return { statusCode: 500, body: JSON.stringify({ error: 'TELEGRAM_BOT_TOKEN is missing or invalid on Netlify. Use the full token from BotFather.' }) };
+        return response(500, { error: 'TELEGRAM_BOT_TOKEN is missing or invalid on Netlify.' });
     }
 
+    // 1. Updated Packages to match the Secret Miles Frontend
     const packages = {
-        stars_100: { stars: 100, rupees: 99 },
-        stars_200: { stars: 200, rupees: 189 },
-        stars_300: { stars: 300, rupees: 279 },
-        stars_500: { stars: 500, rupees: 449 },
-        stars_1000: { stars: 1000, rupees: 899 },
-        stars_2000: { stars: 2000, rupees: 1699 },
-        stars_10000: { stars: 10000, rupees: 7999 },
-        stars_20000: { stars: 20000, rupees: 14999 }
+        secret_miles_vip_monthly: {
+            stars: 750,
+            title: "VIP Monthly Pass",
+            description: "Unlimited wholesale travel inquiries for 30 days."
+        },
+        secret_miles_vip_annual: {
+            stars: 7500,
+            title: "VIP Annual Pass",
+            description: "Year-round access. Dedicated agent. Maximum savings."
+        },
+        secret_miles_single_pass: {
+            stars: 150,
+            title: "Single Priority Pass",
+            description: "1x Custom Wholesale Travel Quote."
+        }
     };
-    const packageId = JSON.parse(event.body || '{}').packageId;
+
+    let packageId;
+    try {
+        packageId = JSON.parse(event.body || '{}').packageId;
+    } catch (error) {
+        return response(400, { error: 'Request body must be valid JSON.' });
+    }
     const selectedPackage = packages[packageId];
+
     if (!selectedPackage) {
-        return { statusCode: 400, body: JSON.stringify({ error: 'Invalid Star package.' }) };
+        return response(400, { error: 'Invalid VIP package selected.' });
     }
 
+    // 2. Format the Telegram Stars Invoice Payload
     const invoicePayload = {
-        title: `${selectedPackage.stars} Star Pack`,
-        description: `Receive ${selectedPackage.stars} Stars worth of MemeCoin`,
-        payload: `${packageId}_payload`,
-        currency: "XTR",
+        title: selectedPackage.title,
+        description: selectedPackage.description,
+        // Added a timestamp to the payload string to prevent Telegram "duplicate invoice" errors
+        payload: `${packageId}_${Date.now()}`,
+        currency: "XTR", // Native Telegram Stars code
         prices: [{ label: "Telegram Stars", amount: selectedPackage.stars }],
-        provider_token: ""
+        provider_token: "" // MUST be empty for Telegram Stars transactions
     };
 
     try {
@@ -44,14 +75,12 @@ exports.handler = async (event) => {
 
         if (!data.ok) {
             console.error('Telegram createInvoiceLink failed:', data.description);
-            return { statusCode: 502, body: JSON.stringify({ error: `Telegram rejected the invoice: ${data.description || 'Unknown API error'}` }) };
+            return response(502, { error: `Telegram rejected the invoice: ${data.description || 'Unknown API error'}` });
         }
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ invoiceUrl: data.result })
-        };
+        return response(200, { invoiceUrl: data.result });
     } catch (error) {
-        return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+        console.error('Invoice function error:', error);
+        return response(500, { error: 'Unable to create invoice.' });
     }
 };

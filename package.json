@@ -2,9 +2,11 @@
   "name": "meme-empire-tycoon",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node -e \"console.log('Static Netlify build ready')\"",
+    "start": "netlify dev",
+    "test": "node --check netlify/functions/createInvoice.js && node --check netlify/functions/webhook.js && node --check netlify/functions/inquiries.js && node --check netlify/functions/dealRates.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +21,10 @@
   },
   "homepage": "https://github.com/ikapsmoi/memeempiremoney#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.115.0"
+    "@supabase/supabase-js": "^2.115.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^23.7.0"
   }
 }
