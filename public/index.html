@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <title>Travel4life x Telegram | Our Secret Your Miles</title>
     
     <!-- Telegram WebApp SDK -->
@@ -131,8 +131,9 @@
         }
 
         .app-header {
-            background: #17181d;
-            border-color: #2f3139;
+            background: rgba(23, 24, 29, 0.98);
+            border-color: rgba(47, 49, 57, 0.9);
+            box-shadow: 0 8px 24px rgba(17, 17, 21, 0.08);
         }
 
         .app-header h1,
@@ -167,27 +168,65 @@
                 border: 1px solid #5d616c;
             }
 
+        .categories-grid {
+            gap: 4px;
+        }
+
         .category-tile {
-            min-height: 58px;
+            min-height: 30px;
+            padding: 5px 8px;
             border: 1px solid var(--app-border);
-            border-radius: 12px;
-            background: var(--app-card);
-            transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--app-card) 94%, transparent);
+            transition: border-color 180ms ease, background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+            box-shadow: 0 1px 0 rgba(17, 17, 21, 0.02);
+            gap: 4px;
         }
 
         .category-tile:hover,
         .category-tile:focus-visible,
         .category-tile.selected {
-            border-color: var(--app-text);
+            border-color: rgba(17, 17, 21, 0.2);
             background: var(--app-accent);
+            box-shadow: 0 8px 18px rgba(17, 17, 21, 0.06);
         }
 
-        .category-tile:active { transform: scale(0.97); }
+        .category-tile:active { transform: scale(0.98); }
 
         .category-icon {
-            font-size: 20px;
+            font-size: 12px;
             line-height: 1;
             filter: saturate(0.9);
+        }
+
+        .category-tile span:last-child {
+            font-size: 8px;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+        }
+
+        .field-shell {
+            position: relative;
+        }
+
+        .field-shell.invalid {
+            border-color: rgba(239, 68, 68, 0.75) !important;
+            box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25);
+        }
+
+        .field-message {
+            min-height: 12px;
+            margin-top: 4px;
+            font-size: 9px;
+            line-height: 1.2;
+            color: #dc2626;
+            display: none;
+        }
+
+        .field-shell.invalid + .field-message,
+        .field-message.visible {
+            display: block;
         }
 
         .member-panel {
@@ -207,11 +246,28 @@
         }
 
         .yellow-button {
-            background: var(--app-accent);
+            background: linear-gradient(180deg, #dfff3a 0%, var(--app-accent) 100%);
             color: var(--app-text);
+            box-shadow: 0 12px 24px rgba(204, 255, 0, 0.28), 0 0 0 1px rgba(17, 17, 21, 0.06);
+            transform: translateY(0);
+            transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease, opacity 150ms ease;
         }
 
-        .yellow-button:hover { background: #d8ff4a; }
+        .yellow-button:hover {
+            background: linear-gradient(180deg, #e4ff62 0%, #d9ff32 100%);
+            box-shadow: 0 16px 28px rgba(204, 255, 0, 0.34), 0 0 0 1px rgba(17, 17, 21, 0.06);
+        }
+
+        .yellow-button:active {
+            transform: translateY(1px) scale(0.995);
+            box-shadow: 0 8px 18px rgba(204, 255, 0, 0.2);
+        }
+
+        .yellow-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
 
         .app-header .yellow-button {
             background: #2b2e36;
@@ -220,6 +276,15 @@
         }
 
         .app-header .yellow-button:hover { background: #3b3f49; }
+
+        .nav-btn .text-xl {
+            color: #f4c542;
+            text-shadow: 0 0 8px rgba(244,197,66,0.5);
+        }
+
+        .nav-btn span:last-child {
+            color: #111115 !important;
+        }
 
         .offer-card {
             background: color-mix(in srgb, var(--app-card) 96%, transparent);
@@ -238,9 +303,93 @@
         .section-label { color: #777872; }
 
         .usp-banner {
-            background: linear-gradient(135deg, var(--app-accent-soft), color-mix(in srgb, var(--app-card) 94%, transparent));
-            color: var(--app-text);
+            position: relative;
+            overflow: hidden;
+            color: #f8f8f6;
             border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 18px 36px rgba(17, 17, 21, 0.12);
+            background: rgba(12, 15, 18, 0.72);
+        }
+
+        .usp-banner video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.38;
+            filter: saturate(1.4) contrast(1.18) brightness(0.82);
+            pointer-events: none;
+        }
+
+        .usp-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(10, 12, 18, 0.6), rgba(10, 12, 18, 0.52));
+            pointer-events: none;
+        }
+
+        .usp-banner > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-aspiration {
+            padding: 10px 14px;
+        }
+
+        .hero-aspiration-inner {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .hero-price-anchor {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+
+        .price-anchor-pill {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 7px 9px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.09);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(4px);
+        }
+
+        .price-anchor-pill span {
+            font-size: 7px;
+            line-height: 1.1;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: rgba(255,255,255,0.76);
+        }
+
+        .price-anchor-pill strong {
+            font-size: 12px;
+            line-height: 1;
+            font-weight: 900;
+            color: #ffffff;
+        }
+
+        .price-anchor-pill.is-highlight {
+            background: rgba(204, 255, 0, 0.18);
+            border-color: rgba(204, 255, 0, 0.45);
+        }
+
+        .price-anchor-pill.is-highlight strong {
+            color: #dfff3a;
         }
 
         .cash-note {
@@ -273,12 +422,191 @@
         #rates-container {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
+            gap: 8px;
         }
 
         #rates-container .rate-card {
             width: auto;
             min-width: 0;
+        }
+
+        .travel-deals-box {
+            position: relative;
+            height: 190px;
+            overflow: hidden;
+            border: 1px solid rgba(17, 17, 21, 0.08);
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(204,255,0,0.18), rgba(255,255,255,0.9));
+            box-shadow: inset 0 0 0 1px rgba(204,255,0,0.18), 0 10px 22px rgba(17, 17, 21, 0.03);
+        }
+
+        .travel-deals-track {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding: 8px;
+            animation: dealScroll 18s linear infinite;
+        }
+
+        .travel-deal-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: center;
+            border: 1px solid rgba(17, 17, 21, 0.06);
+            border-radius: 999px;
+            background: rgba(204,255,0,0.9);
+            padding: 9px 12px;
+            box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 18px rgba(204,255,0,0.2);
+        }
+
+        .travel-deal-row strong {
+            display: block;
+            font-size: 12px;
+            line-height: 1.2;
+            font-weight: 800;
+            color: #111115;
+        }
+
+        .travel-deal-row span {
+            display: block;
+            font-size: 9px;
+            color: rgba(17, 17, 21, 0.78);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .travel-deal-row em {
+            font-style: normal;
+            font-size: 11px;
+            font-weight: 800;
+            color: #111115;
+        }
+
+        .quick-deal-pills {
+            position: relative;
+            overflow: hidden;
+            padding: 0 20px 10px;
+            margin-top: 2px;
+            mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+            -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+        }
+
+        .quick-deal-track {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: max-content;
+            animation: quickDealScroll 30s linear infinite;
+            will-change: transform;
+        }
+
+        .quick-deal-track:hover {
+            animation-play-state: paused;
+        }
+
+        .quick-deal-pill {
+            flex-shrink: 0;
+            border: 1px solid rgba(17, 17, 21, 0.08);
+            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(245,245,243,0.92));
+            color: #18181b;
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            line-height: 1.2;
+            box-shadow: 0 6px 14px rgba(17, 17, 21, 0.04);
+        }
+
+        @keyframes quickDealScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .field-shell.flash-highlight {
+            animation: quickFillFlash 1.2s ease;
+            border-color: rgba(34, 197, 94, 0.7) !important;
+            background: rgba(34, 197, 94, 0.08) !important;
+        }
+
+        @keyframes quickFillFlash {
+            0% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); transform: scale(1); }
+            20% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.14); transform: scale(1.01); }
+            100% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); transform: scale(1); }
+        }
+
+        @keyframes dealScroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+
+        .compact-rate-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(241,241,244,0.96));
+            border: 1px solid rgba(204,255,0,0.4);
+            border-radius: 12px;
+            padding: 9px 9px 8px;
+            min-height: 78px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 16px rgba(204,255,0,0.12);
+            animation: glowPulse 2.8s ease-in-out infinite alternate;
+        }
+
+        .rate-cycle-card {
+            animation: cardFade 0.7s ease;
+        }
+
+        .compact-rate-card .meta {
+            font-size: 8px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--app-muted);
+            font-weight: 800;
+        }
+
+        .compact-rate-card h4 {
+            font-size: 11px;
+            line-height: 1.25;
+            font-weight: 800;
+            margin-top: 2px;
+            overflow: hidden;
+            display: -webkit-box;
+            line-clamp: 2;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .compact-rate-card .rate-bottom {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .compact-rate-card .savings {
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--app-text);
+        }
+
+        .compact-rate-card .savings-value {
+            font-size: 10px;
+            color: var(--app-text);
+            font-weight: 900;
+        }
+
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 0 rgba(204,255,0,0.08), 0 0 8px rgba(204,255,0,0.08); }
+            100% { box-shadow: 0 0 0 rgba(204,255,0,0.25), 0 0 18px rgba(204,255,0,0.22); }
+        }
+
+        @keyframes cardFade {
+            0% { opacity: 0; transform: translateY(4px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         .deal-dialog {
@@ -293,6 +621,57 @@
         }
 
         .deal-dialog::backdrop { background: rgba(23, 23, 23, 0.35); }
+
+        .header-socials {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .header-socials a {
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid rgba(17, 17, 21, 0.12);
+            background: rgba(255, 255, 255, 0.92);
+            color: #111115;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(17, 17, 21, 0.05);
+            transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+        }
+
+        .header-socials a svg {
+            width: 11px;
+            height: 11px;
+            display: block;
+            filter: drop-shadow(0 0 2px rgba(255,255,255,0.8));
+        }
+
+        .header-socials a:hover,
+        .header-socials a:focus-visible {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(17, 17, 21, 0.08);
+            filter: brightness(1.04);
+        }
+
+        .header-socials .social-site {
+            background: linear-gradient(135deg, rgba(204, 255, 0, 0.95), rgba(166, 220, 0, 0.85));
+            color: #10130d;
+        }
+
+        .header-socials .social-ig {
+            background: linear-gradient(135deg, rgba(255, 148, 108, 0.98), rgba(255, 92, 150, 0.9));
+            color: #fff;
+        }
+
+        .header-socials .social-fb {
+            background: linear-gradient(135deg, rgba(67, 110, 255, 0.96), rgba(31, 78, 213, 0.92));
+            color: #fff;
+        }
 
         .social-proof-ticker {
             position: fixed;
@@ -350,6 +729,10 @@
             opacity: 0.55;
         }
 
+        input, select, textarea {
+            font-size: 16px;
+        }
+
         @media (prefers-color-scheme: dark) {
             input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
         }
@@ -359,97 +742,136 @@
     <div class="app-background" aria-hidden="true"></div>
 
     <!-- Sticky Header -->
-    <header class="app-header sticky top-0 z-50 backdrop-blur-lg border-b px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="brand-mark" aria-label="Travel4life logo">t4</div>
-            <div>
-                <h1 class="text-base font-extrabold tracking-tight">Travel4life <span class="text-app-vip">x</span> Telegram</h1>
-                <p class="text-[9px] text-app-secondary font-bold uppercase tracking-[0.14em]">Our Secret Your Miles</p>
+    <header class="app-header sticky top-0 z-50 backdrop-blur-lg border-b px-4 py-3">
+        <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="brand-mark" aria-label="Travel4life logo">t4</div>
+                <div class="min-w-0">
+                    <h1 class="text-base font-extrabold tracking-tight truncate">Travel4life <span class="text-app-vip">x</span> Telegram</h1>
+                    <div class="mt-1">
+                        <div class="header-socials mt-1.5" aria-label="Travel4life social links">
+                            <a href="https://www.travel4life.net" target="_blank" rel="noopener" class="social-site" aria-label="Travel4life website">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="8.2" stroke="currentColor" stroke-width="1.8"/>
+                                    <path d="M3.8 12H20.2M12 3.8C14.8 6.1 16.4 8.9 16.4 12C16.4 15.1 14.8 17.9 12 20.2C9.2 17.9 7.6 15.1 7.6 12C7.6 8.9 9.2 6.1 12 3.8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </a>
+                            <a href="https://www.instagram.com/travel4life_net" target="_blank" rel="noopener" class="social-ig" aria-label="Instagram">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" stroke-width="1.7"/>
+                                    <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/>
+                                    <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/>
+                                </svg>
+                            </a>
+                            <a href="https://www.facebook.com/travellife2" target="_blank" rel="noopener" class="social-fb" aria-label="Facebook">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M13.3 21V12.9H15.8L16.2 9.9H13.3V8.1C13.3 7.2 13.6 6.6 14.8 6.6H16.3V4C15.6 3.9 14.9 3.9 14.2 3.9C11.9 3.9 10.3 5.3 10.3 8V9.9H7.7V12.9H10.3V21H13.3Z" fill="currentColor"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-right flex items-center gap-2 shrink-0">
+                <p id="header-user" class="hidden text-xs text-app-secondary font-medium">Hi, traveler</p>
+                <button onclick="switchTab('store')" class="yellow-button rounded-full px-3 py-2 text-[11px] font-extrabold whitespace-nowrap" type="button">Explore membership <span class="text-sm">→</span></button>
+                <div id="status-badge" class="hidden">Free Trial</div>
             </div>
         </div>
-        <div class="text-right">
-            <p id="header-user" class="hidden text-xs text-app-secondary font-medium">Hi, traveler</p>
-            <button onclick="switchTab('store')" class="yellow-button rounded-full px-3 py-2 text-[11px] font-extrabold whitespace-nowrap" type="button">Explore membership <span class="text-sm">→</span></button>
-            <div id="status-badge" class="hidden">Free Trial</div>
-        </div>
     </header>
+
+    <div class="px-5 pt-0.5 pb-1.5">
+        <div class="flex items-center justify-between rounded-full border border-app-border bg-app-card px-3 py-2 shadow-sm">
+            <span class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Travel concierge</span>
+            <a href="https://www.travel4life.net" target="_blank" rel="noopener" class="text-[10px] font-extrabold text-neutral-900 underline">Visit travel4life.net</a>
+        </div>
+    </div>
 
     <main>
         <!-- ========================================== -->
         <!-- VIEW: CONCIERGE (HOME)                     -->
         <!-- ========================================== -->
-        <section id="view-home" class="view-section active pt-4">
-            <div class="px-5 mb-3 flex items-end justify-between">
-                <div>
-                    <p class="section-label text-[10px] font-bold uppercase tracking-[0.16em] mb-1">Private travel access</p>
-                    <h2 class="text-xl font-extrabold leading-tight tracking-tight">Plan your next trip</h2>
-                </div>
-                <a class="text-[10px] text-app-secondary font-bold underline" href="https://www.travel4life.net" target="_blank" rel="noopener">travel4life.net</a>
+        <section id="view-home" class="view-section active pt-0.5">
+            <div class="px-5 mb-0.5">
+                <div class="inline-flex items-center rounded-full border border-app-border bg-app-card px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Zero-Markup Wholesale Travel Desk</div>
+                <h2 class="mt-1 text-xl font-extrabold leading-tight tracking-tight">Plan your next trip</h2>
             </div>
 
-            <div class="usp-banner mx-5 mb-3 p-4 flex items-center justify-between gap-3 shadow-sm">
-                <div>
-                    <p class="text-[10px] font-extrabold uppercase tracking-[0.16em]">Your advantage</p>
-                    <h3 class="text-2xl font-extrabold leading-none mt-1">2 free quotes</h3>
-                    <p class="text-[11px] font-semibold mt-1">Try the concierge before you pay.</p>
-                </div>
-                <div class="text-right shrink-0">
-                    <p class="text-[10px] font-extrabold uppercase">Member value</p>
-                    <p class="text-sm font-extrabold">5%+ savings</p>
-                </div>
-            </div>
+            <div id="quick-deal-pills" class="quick-deal-pills" aria-label="Quick travel deal shortcuts"></div>
 
-            <div class="px-5 mb-3">
-                <div id="categories-container" class="categories-grid grid grid-cols-3 gap-2">
-                    <!-- Categories injected via JS -->
+            <div class="usp-banner hero-aspiration mx-5 mb-3 shadow-sm">
+                <video autoplay muted loop playsinline preload="auto" aria-hidden="true">
+                    <source src="https://videos.pexels.com/video-files/36720422/36720422-hd_1920_1080_25fps.mp4" type="video/mp4">
+                </video>
+                <div class="hero-aspiration-inner">
+                    <div>
+                        <p class="text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/70">Your advantage</p>
+                        <h3 class="text-2xl font-extrabold leading-none mt-1 text-white">2 free quotes</h3>
+                        <p class="text-[11px] font-semibold mt-1 text-white/90">Before your next adventure.</p>
+                    </div>
+                    <div class="hero-price-anchor" aria-label="Price comparison">
+                        <div class="price-anchor-pill">
+                            <span>Online Hotel</span>
+                            <strong>₹300</strong>
+                        </div>
+                        <div class="price-anchor-pill is-highlight">
+                            <span>Ours</span>
+                            <strong>₹220</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Sleek Booking Form -->
             <div class="px-5">
-                <div class="bg-app-card border border-app-border rounded-[14px] p-4 shadow-sm">
-                    <div class="flex justify-between items-center mb-3">
+                <div class="bg-app-card border border-app-border rounded-[14px] p-3 shadow-sm">
+                    <div class="flex justify-between items-center mb-3 gap-2">
                         <h3 id="form-title" class="text-base font-extrabold">Request Stays</h3>
                         <span id="trial-counter" class="text-[9px] bg-app-vip text-neutral-900 px-2 py-1 rounded-md font-bold uppercase">0/2 free</span>
                     </div>
+
+                    <div id="categories-container" class="categories-grid grid grid-cols-3 gap-2 mb-3">
+                        <!-- Categories injected via JS -->
+                    </div>
                     
                     <div id="inquiry-fields" class="space-y-2 mb-3">
-                        <div id="field-origin" class="inquiry-field hidden bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                        <div id="field-origin" class="inquiry-field field-shell hidden bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
                             <label id="origin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">From</label>
-                            <input type="text" id="req-origin" placeholder="City or airport" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
+                            <input type="text" id="req-origin" autocomplete="off" inputmode="text" placeholder="City or airport" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
                         </div>
-                        <div class="bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                        <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
                             <label id="destination-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Destination / Property</label>
-                            <input type="text" id="req-dest" placeholder="City, hotel, or experience" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
+                            <input type="text" id="req-dest" autocomplete="off" inputmode="text" placeholder="City, hotel, or experience" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
                         </div>
+                        <div class="field-message" id="dest-error">Please add a destination.</div>
                         
                         <div class="grid grid-cols-2 gap-2">
-                            <div class="bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                            <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
                                 <label id="checkin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Check in</label>
-                                <input type="date" id="req-checkin" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                                <input type="date" id="req-checkin" autocomplete="off" inputmode="numeric" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
                             </div>
-                            <div id="field-checkout" class="bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                            <div id="field-checkout" class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
                                 <label id="checkout-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Check out</label>
-                                <input type="date" id="req-checkout" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                                <input type="date" id="req-checkout" autocomplete="off" inputmode="numeric" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <div class="bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                            <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
                                 <label id="travellers-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Travellers</label>
-                                <select id="req-travellers" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                                <select id="req-travellers" autocomplete="off" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
                                     <option value="1">1 traveller</option><option value="2" selected>2 travellers</option><option value="3">3 travellers</option><option value="4">4 travellers</option><option value="5">5+ travellers</option>
                                 </select>
                             </div>
-                            <div id="field-budget" class="bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                            <div id="field-budget" class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
                                 <label class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Budget</label>
-                                <select id="req-budget" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
-                                    <option value="">Any budget</option><option value="under-500">Under $500</option><option value="500-1500">$500-$1,500</option><option value="1500-plus">$1,500+</option>
+                                <select id="req-budget" autocomplete="off" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                                    <option value="">Any budget</option><option value="under-500">Under ₹500</option><option value="500-1500">₹500-₹1,500</option><option value="1500-plus">₹1,500+</option>
                                 </select>
                             </div>
                         </div>
-                        <div id="field-notes" class="hidden bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                        <div id="field-notes" class="hidden field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
                             <label class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Preferences</label>
-                            <input type="text" id="req-notes" placeholder="Cabin, room, event, or other preference" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
+                            <input type="text" id="req-notes" autocomplete="off" inputmode="text" placeholder="Cabin, room, event, or other preference" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
                         </div>
                     </div>
 
@@ -465,25 +887,24 @@
 
             <div class="px-5 mt-5 mb-3 flex justify-between items-end">
                 <h2 class="text-xs font-extrabold uppercase tracking-[0.16em] section-label">Travel deals</h2>
-                <span class="text-[10px] text-app-secondary">Tap to explore</span>
+                <span class="text-[10px] text-app-secondary">Live savings</span>
             </div>
-            <div id="offers-container" class="flex overflow-x-auto no-scrollbar gap-3 px-5 pb-5 snap-x">
+            <div id="offers-container" class="px-5 pb-5">
                 <!-- Offers injected via JS -->
             </div>
 
             <div class="px-5 mb-2 flex justify-between items-end">
                 <div>
                     <h2 class="text-xs font-extrabold uppercase tracking-[0.16em] section-label">Member rate previews</h2>
-                    <p class="text-[10px] text-app-secondary mt-1">Illustrative reference snapshots, not live availability.</p>
+                    <p class="text-[10px] text-app-secondary mt-1">Compact reference snapshots.</p>
                 </div>
-                <span class="text-[10px] text-app-vip font-bold">15 each</span>
+                <span class="text-[10px] text-app-vip font-bold">2 per row</span>
             </div>
             <div id="rates-container" class="px-5 pb-5">
                 <!-- Rate showcases injected via JS -->
             </div>
 
             <footer class="px-5 pb-4 text-center">
-                <a href="https://www.travel4life.net" target="_blank" rel="noopener" class="text-[10px] font-extrabold text-neutral-900 underline">Visit travel4life.net</a>
                 <p class="text-[9px] text-app-secondary mt-1">Travel4life x Telegram · Our Secret Your Miles</p>
             </footer>
         </section>
@@ -609,19 +1030,114 @@
         // 2. STATE & INIT
         // -----------------------------------------------------
         const tg = window.Telegram && window.Telegram.WebApp;
+
+        const safeTg = {
+            expand() {
+                if (tg && typeof tg.expand === 'function') tg.expand();
+            },
+            haptic(type, pattern) {
+                if (!tg || !tg.HapticFeedback) return;
+                if (type === 'impact' && typeof tg.HapticFeedback.impactOccurred === 'function') tg.HapticFeedback.impactOccurred(pattern || 'light');
+                if (type === 'selection' && typeof tg.HapticFeedback.selectionChanged === 'function') tg.HapticFeedback.selectionChanged();
+                if (type === 'notification' && typeof tg.HapticFeedback.notificationOccurred === 'function') tg.HapticFeedback.notificationOccurred(pattern || 'success');
+            },
+            showAlert(message) {
+                if (tg && typeof tg.showAlert === 'function') return tg.showAlert(message);
+                return window.alert(message);
+            },
+            openInvoice(url, handler) {
+                if (tg && typeof tg.openInvoice === 'function') return tg.openInvoice(url, handler);
+                return window.open(url, '_blank', 'noopener,noreferrer');
+            }
+        };
+
+        function getSafeStorage() {
+            try {
+                const storage = window.localStorage;
+                const testKey = '__travel4life_storage_test__';
+                storage.setItem(testKey, '1');
+                storage.removeItem(testKey);
+                return storage;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function getSafeStorageValue(key, fallback = null) {
+            const storage = getSafeStorage();
+            if (!storage) return fallback;
+            try {
+                const raw = storage.getItem(key);
+                if (raw === null) return fallback;
+                return JSON.parse(raw);
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function setSafeStorageValue(key, value) {
+            const storage = getSafeStorage();
+            if (!storage) return false;
+            try {
+                storage.setItem(key, JSON.stringify(value));
+                return true;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+            const requestOptions = {
+                ...options,
+                signal: controller.signal
+            };
+
+            return fetch(url, requestOptions).finally(() => clearTimeout(timeoutId));
+        }
+
+        function notifyInquiry(inquiry) {
+            const queue = getSafeStorageValue('sm_inquiry_queue', []);
+            const nextQueue = Array.isArray(queue) ? queue : [];
+            nextQueue.unshift({
+                ...inquiry,
+                queuedAt: new Date().toISOString(),
+                status: inquiry.status || 'queued'
+            });
+            setSafeStorageValue('sm_inquiry_queue', nextQueue.slice(0, 25));
+            return nextQueue[0];
+        }
+
         if (tg) {
-            tg.expand();
-            if(tg.initDataUnsafe?.user) {
-                document.getElementById('header-user').innerText = `${tg.initDataUnsafe.user.first_name}`;
+            safeTg.expand();
+            if (tg.initDataUnsafe?.user) {
+                const headerUser = document.getElementById('header-user');
+                if (headerUser) headerUser.innerText = `${tg.initDataUnsafe.user.first_name}`;
+            }
+        }
+
+        function readLocalState() {
+            try {
+                return {
+                    inquiriesUsed: Number.parseInt(getSafeStorageValue('sm_inquiries', '0'), 10) || 0,
+                    isVIP: getSafeStorageValue('sm_vip', false) === true
+                };
+            } catch (error) {
+                return { inquiriesUsed: 0, isVIP: false };
             }
         }
 
         let state = {
             category: 'Hotels',
-            inquiriesUsed: Number(localStorage.getItem('sm_inquiries') || 0),
-            isVIP: localStorage.getItem('sm_vip') === 'true',
+            inquiriesUsed: 0,
+            isVIP: false,
             selectedDeal: null
         };
+
+        const localUserState = readLocalState();
+        state.inquiriesUsed = localUserState.inquiriesUsed;
+        state.isVIP = localUserState.isVIP;
 
         const formProfiles = {
             Hotels: { title: 'Request Stays', destination: 'Destination / property', placeholder: 'City, hotel, or property', origin: false, checkout: true, budget: false, notes: false, checkin: 'Check in', checkoutLabel: 'Check out' },
@@ -634,7 +1150,7 @@
         };
 
         const tickerMessages = [
-            'Member saved $240 on a festival travel package',
+            'Member saved ₹240 on a festival travel package',
             'A new quote was prepared for a Bali stay',
             'Member saved 12% on an airport transfer',
             'A private concierge quote was requested in Paris'
@@ -652,6 +1168,31 @@
             setInterval(updateTicker, 4800);
         }
 
+        function bindKeyboardSafeScroll() {
+            const focusable = document.querySelectorAll('input, select, textarea');
+
+            focusable.forEach(field => {
+                field.addEventListener('focusin', () => {
+                    const active = document.activeElement;
+                    if (!active) return;
+                    setTimeout(() => {
+                        active.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+                    }, 120);
+                });
+            });
+
+            if (window.visualViewport) {
+                const syncViewport = () => {
+                    const viewportHeight = window.visualViewport.height;
+                    const offset = Math.max(0, window.innerHeight - viewportHeight - 90);
+                    document.body.style.paddingBottom = offset > 0 ? `${offset}px` : '';
+                };
+                window.visualViewport.addEventListener('resize', syncViewport);
+                window.visualViewport.addEventListener('scroll', syncViewport);
+                syncViewport();
+            }
+        }
+
         function init() {
             renderOffers();
             renderCategories();
@@ -663,25 +1204,125 @@
             loadDealRates();
             loadTravelDeals();
             rotateTicker();
+            bindKeyboardSafeScroll();
         }
 
         // -----------------------------------------------------
         // 3. UI RENDERING FUNCTIONS
         // -----------------------------------------------------
+        function formatINR(value) {
+            const numericValue = Number(value) || 0;
+            const isWholeNumber = Number.isInteger(numericValue);
+            return `₹${numericValue.toLocaleString('en-IN', {
+                minimumFractionDigits: isWholeNumber ? 0 : 2,
+                maximumFractionDigits: isWholeNumber ? 0 : 2
+            })}`;
+        }
+
         function renderOffers() {
             const container = document.getElementById('offers-container');
-            container.innerHTML = offersDB.map(offer => `
-                <button type="button" onclick="openDeal('${offer.title}')" class="offer-card snap-start shrink-0 w-52 h-24 rounded-[18px] p-3 relative flex overflow-hidden shadow-lg">
-                    <div class="w-[58%] flex flex-col justify-between relative z-10">
-                        <span class="text-[8px] font-extrabold uppercase tracking-[0.12em]">${offer.tag}</span>
-                        <div class="pr-1">
-                            <h4 class="text-sm font-extrabold leading-tight">${offer.title}</h4>
-                            <p class="text-[10px] font-bold leading-tight mt-0.5">${offer.discount} <span class="text-sm">→</span></p>
-                        </div>
+            const rows = [...offersDB, ...offersDB].slice(0, 10);
+            container.innerHTML = `
+                <div class="travel-deals-box">
+                    <div class="travel-deals-track">
+                        ${rows.map(offer => `
+                            <button type="button" onclick="openDeal('${offer.title}')" class="travel-deal-row w-full text-left">
+                                <div>
+                                    <strong>${offer.title}</strong>
+                                    <span>${offer.tag || 'Featured'}</span>
+                                </div>
+                                <em>${offer.discount || offer.savings || 'Save big'}</em>
+                                <div class="text-right">
+                                    <span>From</span>
+                                    <strong class="text-[11px] font-extrabold">${formatINR(offer.price || offer.deal_price || offer.reference_price || 0)}</strong>
+                                </div>
+                            </button>
+                        `).join('')}
                     </div>
-                    <div class="offer-card-image absolute inset-y-0 right-0 w-[42%] flex items-center justify-center text-3xl">${offer.emoji}</div>
-                </button>
-            `).join('');
+                </div>
+            `;
+            renderQuickDealPills();
+        }
+
+        function renderQuickDealPills() {
+            const pillsContainer = document.getElementById('quick-deal-pills');
+            if (!pillsContainer) return;
+
+            const dealSource = Array.isArray(offersDB) && offersDB.length ? offersDB : [
+                { title: 'Bali Villas' },
+                { title: 'Tomorrowland' },
+                { title: 'Maldives' },
+                { title: 'Paris Escape' }
+            ];
+
+            const dealPills = dealSource.map((offer) => {
+                const title = String(offer.title || 'Travel deal');
+                const normalized = title.toLowerCase();
+                const emoji = normalized.includes('tomorrowland') ? '🎪' : normalized.includes('maldives') ? '🏝️' : normalized.includes('bali') ? '🌴' : normalized.includes('paris') ? '🗼' : '✈️';
+                const label = normalized.includes('tomorrowland') ? 'Tomorrowland Pass' : title;
+                return { title, label: `${emoji} ${label}` };
+            });
+
+            const loopedPills = [...dealPills, ...dealPills];
+            pillsContainer.innerHTML = `
+                <div class="quick-deal-track">
+                    ${loopedPills.map((deal) => `
+                        <button type="button" class="quick-deal-pill" onclick="openQuickDeal('${deal.title}')">
+                            ${deal.label}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function openQuickDeal(title) {
+            const selectedTitle = String(title || '').trim();
+            const normalized = selectedTitle.toLowerCase();
+
+            const destination = normalized.includes('tomorrowland') ? 'Tomorrowland' : selectedTitle;
+            const categoryToSelect = normalized.includes('tomorrowland') ? 'Festivals' : state.category;
+
+            selectCategory(categoryToSelect);
+
+            const destinationInput = document.getElementById('req-dest');
+            if (destinationInput) {
+                destinationInput.value = destination;
+                destinationInput.focus();
+                destinationInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            const checkinInput = document.getElementById('req-checkin');
+            if (checkinInput) {
+                const future = new Date();
+                future.setDate(future.getDate() + 30);
+                const formatDate = (date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+                checkinInput.value = formatDate(future);
+            }
+
+            const checkoutInput = document.getElementById('req-checkout');
+            if (checkoutInput) {
+                const checkout = new Date();
+                checkout.setDate(checkout.getDate() + 33);
+                const formatDate = (date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+                checkoutInput.value = formatDate(checkout);
+            }
+
+            const formBlock = document.getElementById('form-title');
+            if (formBlock) {
+                formBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            const fillTarget = destinationInput ? destinationInput.closest('.field-shell') : null;
+            if (fillTarget) {
+                fillTarget.classList.remove('flash-highlight');
+                void fillTarget.offsetWidth;
+                fillTarget.classList.add('flash-highlight');
+                setTimeout(() => fillTarget.classList.remove('flash-highlight'), 1200);
+            }
+
+            if (safeTg && safeTg.haptic) {
+                safeTg.haptic('notification', 'success');
+            }
         }
 
         async function loadTravelDeals() {
@@ -700,9 +1341,9 @@
         function renderCategories() {
             const container = document.getElementById('categories-container');
             container.innerHTML = categoriesDB.map(cat => `
-                <button onclick="selectCategory('${cat.id}')" id="cat-${cat.id}" class="cat-pill category-tile flex flex-col items-center justify-center gap-3 ${cat.id === state.category ? 'selected' : ''} px-3 py-4">
+                <button onclick="selectCategory('${cat.id}')" id="cat-${cat.id}" class="cat-pill category-tile flex items-center justify-center gap-1 ${cat.id === state.category ? 'selected' : ''}">
                     <span class="category-icon">${cat.icon}</span>
-                    <span class="text-sm font-extrabold">${cat.label}</span>
+                    <span class="font-extrabold leading-none">${cat.label}</span>
                 </button>
             `).join('');
         }
@@ -723,67 +1364,100 @@
 
         function setFieldVisibility(fieldId, visible) {
             const field = document.getElementById(fieldId);
+            if (!field) return;
             field.classList.toggle('hidden', !visible);
-            field.querySelectorAll('input, select').forEach(input => { input.disabled = !visible; });
+            field.querySelectorAll('input, select').forEach(input => {
+                input.disabled = !visible;
+                if (!visible) input.value = ''; 
+            });
         }
+
+        function setFieldError(fieldId, message) {
+            const shell = document.getElementById(fieldId);
+            const input = shell ? shell.querySelector('input, select') : null;
+            if (!shell) return;
+            shell.classList.toggle('invalid', Boolean(message));
+            if (input) input.setAttribute('aria-invalid', Boolean(message) ? 'true' : 'false');
+            const messageEl = document.getElementById(`${fieldId}-error`);
+            if (messageEl) {
+                messageEl.textContent = message || '';
+                messageEl.classList.toggle('visible', Boolean(message));
+            }
+        }
+
+        function clearFieldErrors() {
+            ['field-origin', 'field-checkout', 'field-budget', 'field-notes', 'req-dest', 'req-checkin', 'req-checkout'].forEach(id => {
+                const shell = document.getElementById(id);
+                if (shell) shell.classList.remove('invalid');
+                const input = shell ? shell.querySelector('input, select') : null;
+                if (input) input.setAttribute('aria-invalid', 'false');
+            });
+            const destError = document.getElementById('dest-error');
+            if (destError) {
+                destError.textContent = '';
+                destError.classList.remove('visible');
+            }
+        }
+
+        let allRateEntries = [];
+        let rateShowcaseIndex = 0;
 
         function renderRates() {
             const container = document.getElementById('rates-container');
             clearInterval(showcaseTimer);
-            container.innerHTML = Object.keys(rateCatalog).map(category => `
-                <section class="rate-showcase" id="rate-showcase-${category}">
-                    <div class="flex justify-between items-end mb-2">
-                        <div>
-                            <h3 class="text-sm font-extrabold rate-showcase-title">${category}</h3>
-                            <p class="text-[10px] text-app-secondary">15 reference snapshots · editable in Supabase</p>
-                        </div>
-                        <span class="text-[9px] text-app-secondary">Rotating preview</span>
-                    </div>
-                    <div class="rate-showcase-card"></div>
-                </section>
-            `).join('');
-            Object.keys(rateCatalog).forEach(category => renderRate(category));
-            showcaseTimer = setInterval(advanceRateShowcases, 4500);
+            if (!container) return;
+
+            const categories = Object.keys(rateCatalog || {});
+            const cycleEntries = [];
+            let index = 0;
+
+            while (cycleEntries.length < 15 && index < 1000) {
+                categories.forEach(category => {
+                    const rates = rateCatalog[category] || [];
+                    if (!rates.length) return;
+                    const rate = rates[index % rates.length];
+                    if (cycleEntries.length < 15) {
+                        cycleEntries.push({ category, rate, index: index % rates.length });
+                    }
+                });
+                index += 1;
+            }
+
+            allRateEntries = cycleEntries;
+            rateShowcaseIndex = 0;
+            if (!allRateEntries.length) {
+                container.innerHTML = '';
+                return;
+            }
+
+            renderRateCycle();
+            showcaseTimer = setInterval(() => {
+                rateShowcaseIndex = (rateShowcaseIndex + 1) % allRateEntries.length;
+                renderRateCycle();
+            }, 2600);
         }
 
-        function renderRate(category) {
-            const rates = rateCatalog[category];
-            const rate = rates[showcaseState[category]];
-            const container = document.querySelector(`#rate-showcase-${category} .rate-showcase-card`);
-            if (!container) return;
-            container.innerHTML = `
-                <article class="rate-card p-3" onclick="openRateDeal('${category}', ${showcaseState[category]})" tabindex="0" role="button">
-                    <div class="flex justify-between items-start gap-2 mb-3">
-                        <div>
-                            <h4 class="text-sm font-extrabold capitalize leading-tight">${rate.name}</h4>
-                            <p class="text-[10px] text-app-secondary mt-1">${rate.unit} · ${rate.freshness}</p>
-                        </div>
-                        <span class="text-[9px] text-app-vip font-extrabold whitespace-nowrap">10% less</span>
+        function renderRateCycle() {
+            const container = document.getElementById('rates-container');
+            if (!container || !allRateEntries.length) return;
+            const visibleEntries = [];
+            for (let i = 0; i < 2; i++) {
+                const entry = allRateEntries[(rateShowcaseIndex + i) % allRateEntries.length];
+                visibleEntries.push(entry);
+            }
+
+            container.innerHTML = visibleEntries.map(({ category, rate, index }) => `
+                <article class="compact-rate-card rate-cycle-card" onclick="openRateDeal('${category}', ${index})" tabindex="0" role="button">
+                    <div>
+                        <div class="meta">${category}</div>
+                        <h4>${rate.name}</h4>
                     </div>
-                    <div class="flex items-end justify-between gap-3">
-                        <div>
-                            <p class="text-[9px] text-app-secondary">Reference price</p>
-                            <p class="text-xs font-bold">$${rate.referenceRate}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[9px] text-app-secondary">Secret Miles</p>
-                            <p class="secret-rate">$${rate.ourRate}</p>
-                        </div>
+                    <div class="rate-bottom">
+                        <span class="savings">${Math.max(0, Math.round(((rate.referenceRate - rate.ourRate) / Math.max(rate.referenceRate, 1)) * 100))}% less</span>
+                        <span class="savings-value">${formatINR(rate.ourRate)}</span>
                     </div>
                 </article>
-            `;
-        }
-
-        function advanceRateShowcases() {
-            Object.keys(rateCatalog).forEach(category => {
-                const showcase = document.getElementById(`rate-showcase-${category}`);
-                showcase.classList.add('is-fading');
-                setTimeout(() => {
-                    showcaseState[category] = (showcaseState[category] + 1) % rateCatalog[category].length;
-                    renderRate(category);
-                    showcase.classList.remove('is-fading');
-                }, 260);
-            });
+            `).join('');
         }
 
         async function loadDealRates() {
@@ -883,8 +1557,11 @@
             state.category = catId;
             updateInquiryForm();
             
-            document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('selected'));
-            document.getElementById(`cat-${catId}`).classList.add('selected');
+            const selectedTab = document.getElementById(`cat-${catId}`);
+            if (selectedTab) {
+                document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('selected'));
+                selectedTab.classList.add('selected');
+            }
             
             if(tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
@@ -913,8 +1590,8 @@
                 <div class="bg-app-surface rounded-xl p-3">
                     <p class="text-xs text-app-secondary">${category} · ${rate.unit} · ${rate.freshness}</p>
                     <div class="grid grid-cols-2 gap-y-1 mt-3 text-xs">
-                        <span class="text-app-secondary">Reference price</span><strong class="text-right">$${rate.referenceRate}</strong>
-                        <span class="font-extrabold">Secret Miles</span><strong class="text-right text-app-vip">$${rate.ourRate}</strong>
+                        <span class="text-app-secondary">Reference price</span><strong class="text-right">${formatINR(rate.referenceRate)}</strong>
+                        <span class="font-extrabold">Secret Miles</span><strong class="text-right text-app-vip">${formatINR(rate.ourRate)}</strong>
                     </div>
                 </div>
                 <p class="text-xs text-app-secondary mt-3 leading-relaxed">Illustrative reference rate only, not live availability. Request a current quote for exact dates and guests.</p>
@@ -936,23 +1613,36 @@
         }
 
         function formatInquiryDate(value) {
-            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            if (!value) return 'Just now';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return 'Just now';
+            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+
+        function getLocalInquiryCache() {
+            const cached = getSafeStorageValue('sm_inquiry_cache', []);
+            return Array.isArray(cached) ? cached : [];
+        }
+
+        function saveLocalInquiryCache(inquiries) {
+            setSafeStorageValue('sm_inquiry_cache', Array.isArray(inquiries) ? inquiries : []);
         }
 
         function renderInquiries(inquiries) {
             const container = document.getElementById('inquiries-list');
-            if (!inquiries.length) {
+            const list = Array.isArray(inquiries) ? inquiries : [];
+            if (!list.length) {
                 container.innerHTML = '<p class="text-sm text-app-secondary">Your submitted requests will appear here.</p>';
                 return;
             }
-            container.innerHTML = inquiries.map(inquiry => `
+            container.innerHTML = list.map(inquiry => `
                 <article class="bg-app-card border border-app-border p-4 rounded-[14px] shadow-sm">
                     <div class="flex justify-between items-start gap-3">
                         <div>
-                            <h4 class="text-sm font-extrabold">${inquiry.destination}</h4>
-                            <p class="text-xs text-app-secondary mt-1">${inquiry.category} · ${inquiry.dates}</p>
+                            <h4 class="text-sm font-extrabold">${inquiry.destination || 'Untitled request'}</h4>
+                            <p class="text-xs text-app-secondary mt-1">${inquiry.category || 'Travel'} · ${inquiry.dates || 'Flexible dates'}</p>
                         </div>
-                        <span class="bg-app-vip px-2 py-1 rounded-md text-[9px] font-extrabold uppercase">${inquiry.status}</span>
+                        <span class="bg-app-vip px-2 py-1 rounded-md text-[9px] font-extrabold uppercase">${inquiry.status || 'received'}</span>
                     </div>
                     <p class="text-[10px] text-app-secondary mt-3">Received ${formatInquiryDate(inquiry.created_at)}</p>
                 </article>
@@ -961,65 +1651,138 @@
 
         async function loadInquiries() {
             const initData = tg && tg.initData;
+            const cachedInquiries = getLocalInquiryCache();
+
             if (!initData) {
-                document.getElementById('inquiries-list').innerHTML = '<p class="text-sm text-app-secondary">Open this app in Telegram to view your requests.</p>';
+                renderInquiries(cachedInquiries);
                 return;
             }
+
             try {
-                const response = await fetch('/.netlify/functions/inquiries', {
+                const response = await fetchWithTimeout('/.netlify/functions/inquiries', {
                     headers: { 'X-Telegram-Init-Data': initData }
-                });
+                }, 8000);
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || 'Unable to load requests.');
-                renderInquiries(data.inquiries || []);
+                const inquiries = data.inquiries || [];
+                saveLocalInquiryCache(inquiries);
+                renderInquiries(inquiries);
             } catch (error) {
                 console.error(error);
-                document.getElementById('inquiries-list').innerHTML = '<p class="text-sm text-app-secondary">Requests are temporarily unavailable.</p>';
+                renderInquiries(cachedInquiries);
             }
         }
 
+        function validateInquiryForm() {
+            const dest = document.getElementById('req-dest');
+            const checkin = document.getElementById('req-checkin');
+            const checkout = document.getElementById('req-checkout');
+            const profile = formProfiles[state.category] || formProfiles.Hotels;
+            let isValid = true;
+
+            const trimValue = value => typeof value === 'string' ? value.trim() : '';
+            const destinationValue = trimValue(dest ? dest.value : '');
+            if (!destinationValue) {
+                dest?.parentElement?.classList.add('invalid');
+                const destError = document.getElementById('dest-error');
+                if (destError) {
+                    destError.textContent = 'Destination is required.';
+                    destError.classList.add('visible');
+                }
+                isValid = false;
+            } else {
+                dest?.parentElement?.classList.remove('invalid');
+                const destError = document.getElementById('dest-error');
+                if (destError) {
+                    destError.textContent = '';
+                    destError.classList.remove('visible');
+                }
+            }
+
+            const checkinValue = checkin ? checkin.value : '';
+            const checkoutValue = checkout ? checkout.value : '';
+            if (!checkinValue || (profile.checkout && (!checkoutValue || checkoutValue <= checkinValue))) {
+                const message = profile.checkout ? 'Please add valid dates.' : 'Please add the visit date.';
+                if (checkin) checkin.parentElement?.classList.add('invalid');
+                if (checkout && profile.checkout) checkout.parentElement?.classList.add('invalid');
+                if (!profile.checkout && checkout) checkout.parentElement?.classList.remove('invalid');
+                const dateError = document.getElementById('date-error') || document.createElement('div');
+                if (!document.getElementById('date-error')) {
+                    dateError.id = 'date-error';
+                    dateError.className = 'field-message visible';
+                    const target = document.getElementById('req-checkout').parentElement?.nextElementSibling || document.getElementById('req-checkout').parentElement;
+                    if (target && target.parentNode) target.parentNode.insertBefore(dateError, target.nextSibling);
+                }
+                dateError.textContent = message;
+                isValid = false;
+            } else {
+                if (checkin) checkin.parentElement?.classList.remove('invalid');
+                if (checkout) checkout.parentElement?.classList.remove('invalid');
+                const dateError = document.getElementById('date-error');
+                if (dateError) {
+                    dateError.textContent = '';
+                    dateError.classList.remove('visible');
+                }
+            }
+
+            return isValid;
+        }
+
         async function submitInquiry() {
+            clearFieldErrors();
+            const button = document.getElementById('btn-submit');
+            const originalText = button ? button.innerText : 'Get my free quote';
+
             if (!state.isVIP && state.inquiriesUsed >= 2) {
-                if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+                safeTelegram.haptic('notification', 'warning');
                 switchTab('store');
                 return;
             }
 
-            const dest = document.getElementById('req-dest').value;
-            const origin = document.getElementById('req-origin').value;
-            const checkin = document.getElementById('req-checkin').value;
-            const checkout = document.getElementById('req-checkout').value;
+            const dest = document.getElementById('req-dest');
+            const origin = document.getElementById('req-origin');
+            const checkin = document.getElementById('req-checkin');
+            const checkout = document.getElementById('req-checkout');
             const profile = formProfiles[state.category] || formProfiles.Hotels;
-            const travellers = document.getElementById('req-travellers').value;
-            const budget = document.getElementById('req-budget').value;
-            const notes = document.getElementById('req-notes').value;
-            if (!dest) {
-                if(tg && tg.showAlert) tg.showAlert('Please enter a destination.');
-                else alert('Please enter a destination.');
+            const travellers = document.getElementById('req-travellers');
+            const budget = document.getElementById('req-budget');
+            const notes = document.getElementById('req-notes');
+
+            const destValue = dest ? dest.value.trim() : '';
+            const checkinValue = checkin ? checkin.value : '';
+            const checkoutValue = checkout ? checkout.value : '';
+
+            if (!destValue) {
+                dest?.parentElement?.classList.add('invalid');
+                const destError = document.getElementById('dest-error');
+                if (destError) {
+                    destError.textContent = 'Destination is required.';
+                    destError.classList.add('visible');
+                }
+                dest?.focus();
                 return;
             }
 
-            if (!checkin || (profile.checkout && (!checkout || checkout <= checkin))) {
-                const message = profile.checkout ? 'Please choose valid start and end dates.' : 'Please choose a visit date.';
-                if(tg && tg.showAlert) tg.showAlert(message);
-                else alert(message);
+            if (!checkinValue || (profile.checkout && (!checkoutValue || checkoutValue <= checkinValue))) {
+                const message = profile.checkout ? 'Please choose valid start and end dates.' : 'Please choose a valid date.';
+                if (checkin) checkin.parentElement?.classList.add('invalid');
+                if (checkout && profile.checkout) checkout.parentElement?.classList.add('invalid');
+                safeTelegram.showAlert(message);
                 return;
             }
 
             if (!tg || !tg.initData) {
-                const message = 'Open this app in Telegram to submit a quote.';
-                if(tg && tg.showAlert) tg.showAlert(message);
-                else alert(message);
+                safeTelegram.showAlert('Open this app in Telegram to submit a request.');
                 return;
             }
 
-            const button = document.getElementById('btn-submit');
-            const originalText = button.innerText;
-            button.disabled = true;
-            button.innerText = 'Sending request...';
+            if (button) {
+                button.disabled = true;
+                button.innerText = 'Sending request...';
+            }
 
             try {
-                const response = await fetch('/.netlify/functions/inquiries', {
+                const response = await fetchWithTimeout('/.netlify/functions/inquiries', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1027,31 +1790,80 @@
                     },
                     body: JSON.stringify({
                         category: state.category,
-                        destination: dest,
-                        dates: profile.checkout ? `${checkin} to ${checkout}` : checkin,
-                        details: { origin, travellers, budget, notes }
+                        destination: destValue,
+                        dates: profile.checkout ? `${checkinValue} to ${checkoutValue}` : checkinValue,
+                        details: {
+                            origin: origin ? origin.value.trim() : '',
+                            travellers: travellers ? travellers.value : '',
+                            budget: budget ? budget.value : '',
+                            notes: notes ? notes.value.trim() : ''
+                        }
                     })
-                });
+                }, 12000);
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || 'Unable to send your quote request.');
+
+                const submittedInquiry = {
+                    inquiry_id: data.inquiry?.inquiry_id || crypto.randomUUID(),
+                    telegram_id: data.inquiry?.telegram_id || (tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null),
+                    category: state.category,
+                    destination: destValue,
+                    dates: profile.checkout ? `${checkinValue} to ${checkoutValue}` : checkinValue,
+                    details: {
+                        origin: origin ? origin.value.trim() : '',
+                        travellers: travellers ? travellers.value : '',
+                        budget: budget ? budget.value : '',
+                        notes: notes ? notes.value.trim() : ''
+                    },
+                    status: 'received',
+                    created_at: new Date().toISOString()
+                };
+
+                const cached = getLocalInquiryCache();
+                const merged = [submittedInquiry, ...cached.filter(item => item.inquiry_id !== submittedInquiry.inquiry_id)].slice(0, 25);
+                saveLocalInquiryCache(merged);
+
                 state.inquiriesUsed += state.isVIP ? 0 : 1;
-                localStorage.setItem('sm_inquiries', state.inquiriesUsed);
-                document.getElementById('req-dest').value = '';
-                document.getElementById('req-checkin').value = '';
-                document.getElementById('req-checkout').value = '';
+                setSafeStorageValue('sm_inquiries', String(state.inquiriesUsed));
+
+                if (dest) dest.value = '';
+                if (checkin) checkin.value = '';
+                if (checkout) checkout.value = '';
+                if (origin) origin.value = '';
+                if (notes) notes.value = '';
+
                 updateUI();
+                renderInquiries(merged);
                 await loadInquiries();
-                if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                if(tg && tg.showAlert) tg.showAlert('Your quote request was received.');
+                safeTg.haptic('notification', 'success');
+                safeTg.showAlert('Your quote request was received.');
                 switchTab('vault');
             } catch (error) {
                 console.error(error);
-                if(tg && tg.showAlert) tg.showAlert(error.message);
-                else alert(error.message);
-                button.innerText = originalText;
+                const friendlyMessage = error.name === 'AbortError' ? 'The request timed out. Please try again on a stronger connection.' : (error.message || 'Unable to send your quote request.');
+                const fallbackInquiry = {
+                    inquiry_id: `queued_${Date.now()}`,
+                    category: state.category,
+                    destination: destValue,
+                    dates: profile.checkout ? `${checkinValue} to ${checkoutValue}` : checkinValue,
+                    details: {
+                        origin: origin ? origin.value.trim() : '',
+                        travellers: travellers ? travellers.value : '',
+                        budget: budget ? budget.value : '',
+                        notes: notes ? notes.value.trim() : ''
+                    },
+                    status: 'queued',
+                    created_at: new Date().toISOString()
+                };
+                notifyInquiry(fallbackInquiry);
+                renderInquiries(getLocalInquiryCache());
+                safeTg.showAlert(`${friendlyMessage} Your request has been saved locally and will sync when connected.`);
+                if (button) button.innerText = originalText;
             } finally {
-                button.disabled = false;
-                if (button.innerText === 'Sending request...') button.innerText = originalText;
+                if (button) {
+                    button.disabled = false;
+                    if (button.innerText === 'Sending request...') button.innerText = originalText;
+                }
             }
         }
 
@@ -1074,12 +1886,12 @@
                 if (!response.ok || !data.invoiceUrl) throw new Error(data.error || 'Invoice generation failed.');
                 if (!tg || !tg.openInvoice) throw new Error('Please open in Telegram to pay with Stars.');
 
-                tg.openInvoice(data.invoiceUrl, status => {
+                safeTg.openInvoice(data.invoiceUrl, status => {
                     if (status === 'paid') {
-                        localStorage.setItem('sm_vip', 'true');
+                        setSafeStorageValue('sm_vip', true);
                         state.isVIP = true;
                         updateUI();
-                        if(tg.showAlert) tg.showAlert('🎉 VIP Unlocked! Welcome to Secret Miles Enterprise.');
+                        safeTg.showAlert('🎉 VIP Unlocked! Welcome to Secret Miles Enterprise.');
                         switchTab('home');
                     }
                     btnElement.innerHTML = originalHTML;
@@ -1087,8 +1899,7 @@
                 });
 
             } catch (err) {
-                if(tg && tg.showAlert) tg.showAlert(err.message);
-                else alert(err.message);
+                safeTg.showAlert(err.message);
                 btnElement.innerHTML = originalHTML;
                 btnElement.disabled = false;
             }
