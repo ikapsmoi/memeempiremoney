@@ -62,7 +62,10 @@
         }
 
         body {
-            background: #ffffff !important;
+            background:
+                radial-gradient(circle at top left, rgba(154, 168, 255, 0.12), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(149, 255, 214, 0.14), transparent 30%),
+                #ffffff !important;
             color: var(--app-text);
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
@@ -119,6 +122,65 @@
             background: #ffffff;
         }
 
+        .travel-route-layer {
+            position: fixed;
+            inset: -10% -8% -8% -8%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.82;
+            overflow: hidden;
+            filter: saturate(1.2) contrast(1.08);
+        }
+
+        .travel-route-layer svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            filter: drop-shadow(0 0 22px rgba(95, 120, 255, 0.12));
+        }
+
+        .route-arc {
+            fill: none;
+            stroke: rgba(23, 33, 71, 0.28);
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-dasharray: 10 20;
+            animation: routeFlow 18s linear infinite;
+        }
+
+        .route-arc.alt {
+            stroke: rgba(37, 78, 191, 0.24);
+            stroke-dasharray: 12 22;
+            animation-duration: 22s;
+        }
+
+        .route-arc.accent {
+            stroke: rgba(73, 120, 255, 0.18);
+            animation-duration: 20s;
+        }
+
+        .plane-marker {
+            fill: rgba(17, 17, 21, 0.84);
+            opacity: 0.75;
+        }
+
+        .plane-marker path {
+            fill: rgba(17, 17, 21, 0.8);
+        }
+
+        .plane-marker.alt {
+            fill: rgba(67, 109, 255, 0.8);
+        }
+
+        .plane-marker.accent {
+            fill: rgba(161, 190, 255, 0.92);
+        }
+
+        @keyframes routeFlow {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -260; }
+        }
+
         .app-background::before {
             content: '';
             position: absolute;
@@ -134,8 +196,8 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: rgba(255, 255, 255, 0.72);
-            backdrop-filter: blur(5px);
+            background: linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0.82));
+            backdrop-filter: blur(1.5px);
         }
 
         main { position: relative; z-index: 1; }
@@ -144,14 +206,11 @@
         nav { z-index: 50; }
 
         .app-header {
-            background: color-mix(in srgb, var(--app-bg) 94%, transparent);
-            border-color: var(--app-border);
-        }
-
-        .app-header {
             background: rgba(255, 255, 255, 0.9);
             border-color: rgba(17, 17, 21, 0.08);
             box-shadow: 0 8px 24px rgba(17, 17, 21, 0.06);
+            padding: 10px 12px;
+            min-height: 0;
         }
 
         .app-header h1,
@@ -163,28 +222,32 @@
         }
 
         .brand-mark {
-            width: 38px;
-            height: 38px;
+            width: 28px;
+            height: 28px;
             display: grid;
             place-items: center;
-            border-radius: 12px;
-            background: var(--app-accent);
-            color: var(--app-text);
-            font-size: 21px;
+            border-radius: 9px;
+            background: #111111;
+            color: #ffffff;
+            font-size: 14px;
             font-weight: 800;
-            letter-spacing: -2px;
+            letter-spacing: -1px;
             line-height: 1;
+            border: 1px solid rgba(17, 17, 17, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+            flex-shrink: 0;
         }
-            .brand-mark,
-            .yellow-button {
-                color: #111115 !important;
-            }
 
-            .app-header .brand-mark {
-                background: #2b2e36;
-                color: #ffffff !important;
-                border: 1px solid #5d616c;
-            }
+        .brand-mark,
+        .yellow-button {
+            color: #111115 !important;
+        }
+
+        .app-header .brand-mark {
+            background: #111111;
+            color: #ffffff !important;
+            border: 1px solid rgba(17, 17, 17, 0.12);
+        }
 
         .categories-grid {
             gap: 4px;
@@ -200,6 +263,81 @@
             transition: border-color 180ms ease, background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
             box-shadow: 0 1px 0 rgba(17, 17, 21, 0.02);
             gap: 4px;
+        }
+
+        .magic-compose {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .magic-input-shell {
+            position: relative;
+            background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(245,246,248,0.98));
+            border: 1px solid rgba(17, 17, 21, 0.08);
+            border-radius: 14px;
+            box-shadow: 0 1px 0 rgba(17, 17, 21, 0.02);
+            transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+        }
+
+        .magic-input-shell:focus-within {
+            border-color: rgba(17, 17, 21, 0.18);
+            box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.18);
+        }
+
+        .magic-input-shell textarea {
+            resize: none;
+            min-height: 52px;
+            line-height: 1.45;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            outline: none;
+            color: #111115;
+            font-size: 14px;
+            padding: 4px 4px;
+        }
+
+        .magic-input-shell textarea::placeholder {
+            color: rgba(17, 17, 21, 0.60);
+        }
+
+        .magic-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 12px;
+            background: rgba(204, 255, 0, 0.22);
+            color: #111115;
+            border: 1px solid rgba(17, 17, 21, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        .magic-offer {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(204, 255, 0, 0.12);
+            border: 1px solid rgba(17, 17, 21, 0.06);
+            color: #111115;
+            border-radius: 999px;
+            padding: 7px 10px;
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
+        }
+
+        .magic-submit {
+            display: block;
+            width: auto;
+            min-width: 158px;
+        }
+
+        .magic-toggle-link {
+            color: rgba(17, 17, 21, 0.7);
+            text-decoration: underline;
+            text-underline-offset: 2px;
         }
 
         .category-tile:not(.selected) {
@@ -275,19 +413,19 @@
         .yellow-button {
             background: linear-gradient(180deg, #dfff3a 0%, var(--app-accent) 100%);
             color: var(--app-text);
-            box-shadow: 0 12px 24px rgba(204, 255, 0, 0.28), 0 0 0 1px rgba(17, 17, 21, 0.06);
+            box-shadow: 0 4px 10px rgba(17, 17, 21, 0.08);
             transform: translateY(0);
-            transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease, opacity 150ms ease;
+            transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease, opacity 150ms ease, border-color 150ms ease;
         }
 
         .yellow-button:hover {
             background: linear-gradient(180deg, #e4ff62 0%, #d9ff32 100%);
-            box-shadow: 0 16px 28px rgba(204, 255, 0, 0.34), 0 0 0 1px rgba(17, 17, 21, 0.06);
+            box-shadow: 0 8px 16px rgba(17, 17, 21, 0.08);
         }
 
         .yellow-button:active {
-            transform: translateY(1px) scale(0.995);
-            box-shadow: 0 8px 18px rgba(204, 255, 0, 0.2);
+            transform: translateY(1px) scale(0.95);
+            box-shadow: 0 2px 8px rgba(17, 17, 21, 0.08);
         }
 
         .yellow-button:disabled {
@@ -297,12 +435,17 @@
         }
 
         .app-header .yellow-button {
-            background: #2b2e36;
-            border: 1px solid #5d616c;
-            color: #ffffff !important;
+            background: transparent;
+            border: 1px solid rgba(17, 17, 21, 0.14);
+            color: #111115 !important;
+            box-shadow: none;
+            border-radius: 999px;
         }
 
-        .app-header .yellow-button:hover { background: #3b3f49; }
+        .app-header .yellow-button:hover {
+            background: rgba(17, 17, 21, 0.03);
+            border-color: rgba(17, 17, 21, 0.24);
+        }
 
         .nav-btn .text-xl {
             color: #f4c542;
@@ -642,78 +785,27 @@
 
         .deal-dialog::backdrop { background: rgba(23, 23, 23, 0.35); }
 
-        .header-socials {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .header-socials a {
-            width: 20px;
-            height: 20px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            border: 1px solid rgba(17, 17, 21, 0.12);
-            background: rgba(255, 255, 255, 0.92);
-            color: #111115;
-            text-decoration: none;
-            box-shadow: 0 2px 8px rgba(17, 17, 21, 0.05);
-            transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
-        }
-
-        .header-socials a svg {
-            width: 11px;
-            height: 11px;
-            display: block;
-            filter: drop-shadow(0 0 2px rgba(255,255,255,0.8));
-        }
-
-        .header-socials a:hover,
-        .header-socials a:focus-visible {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(17, 17, 21, 0.08);
-            filter: brightness(1.04);
-        }
-
-        .header-socials .social-site {
-            background: linear-gradient(135deg, rgba(204, 255, 0, 0.95), rgba(166, 220, 0, 0.85));
-            color: #10130d;
-        }
-
-        .header-socials .social-ig {
-            background: linear-gradient(135deg, rgba(255, 148, 108, 0.98), rgba(255, 92, 150, 0.9));
-            color: #fff;
-        }
-
-        .header-socials .social-fb {
-            background: linear-gradient(135deg, rgba(67, 110, 255, 0.96), rgba(31, 78, 213, 0.92));
-            color: #fff;
-        }
-
         .social-proof-ticker {
             position: fixed;
-            right: 12px;
-            bottom: calc(68px + env(safe-area-inset-bottom));
-            left: 12px;
+            right: 14px;
+            bottom: calc(76px + env(safe-area-inset-bottom));
+            left: 14px;
             z-index: 40;
             overflow: hidden;
-            border: 1px solid var(--app-border);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 999px;
-            background: #17181d;
+            background: rgba(17, 17, 21, 0.8);
             color: #ffffff;
-            box-shadow: 0 8px 24px rgba(17, 17, 21, 0.1);
-            backdrop-filter: blur(12px);
+            box-shadow: 0 12px 24px rgba(17, 17, 21, 0.12);
+            backdrop-filter: blur(10px);
         }
 
         .social-proof-ticker .ticker-message { color: #ffffff !important; }
 
         .dark-title-band {
-            background: #17181d;
+            background: linear-gradient(135deg, #17181d 0%, #0d0f13 100%);
             color: #ffffff;
-            border: 1px solid #2f3139;
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 18px;
         }
 
@@ -722,6 +814,37 @@
         .dark-title-band span { color: #ffffff !important; }
 
         .ticker-message { animation: tickerFade 4.8s ease-in-out infinite; }
+
+        nav {
+            position: fixed;
+            left: 12px;
+            right: 12px;
+            bottom: max(10px, env(safe-area-inset-bottom));
+            z-index: 60;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(17, 17, 21, 0.08);
+            border-radius: 999px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 24px rgba(17, 17, 21, 0.06);
+        }
+
+        nav .flex {
+            gap: 0.2rem;
+            padding: 0.28rem;
+        }
+
+        nav .nav-btn {
+            border-radius: 999px;
+            padding: 0.45rem 0.8rem;
+            opacity: 0.72;
+            transition: all 160ms ease;
+        }
+
+        nav .nav-btn.active {
+            opacity: 1;
+            background: rgba(17, 17, 21, 0.04);
+            box-shadow: inset 0 0 0 1px rgba(17, 17, 21, 0.04);
+        }
 
         @keyframes tickerFade {
             0%, 12% { opacity: 0; transform: translateY(5px); }
@@ -760,49 +883,79 @@
 </head>
 <body class="pb-20 bg-app-bg text-neutral-900">
     <div class="app-background" aria-hidden="true"></div>
+    <div class="travel-route-layer" aria-hidden="true">
+        <svg viewBox="0 0 1600 1800" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <linearGradient id="routeGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(17,17,21,0.22)"/>
+                    <stop offset="60%" stop-color="rgba(80,112,255,0.14)"/>
+                    <stop offset="100%" stop-color="rgba(17,17,21,0.08)"/>
+                </linearGradient>
+            </defs>
+
+            <path class="route-arc" d="M-120 540 C 240 180, 520 200, 760 500 S 1220 990, 1720 820"/>
+            <path class="route-arc alt" d="M-40 1120 C 260 820, 430 720, 630 920 S 980 1280, 1600 1180"/>
+            <path class="route-arc accent" d="M160 1680 C 390 1320, 660 1180, 780 980 S 1080 380, 1540 250"/>
+            <path class="route-arc" d="M40 180 C 360 520, 640 620, 900 380 S 1270 140, 1540 380"/>
+
+            <g class="plane-marker">
+                <path d="M0,-6 L10,0 L0,6 L2,0 Z" transform="translate(360 320) rotate(18)"></path>
+                <animateMotion dur="18s" repeatCount="indefinite" rotate="auto">
+                    <mpath href="#routeA"></mpath>
+                </animateMotion>
+            </g>
+            <path id="routeA" d="M-120 540 C 240 180, 520 200, 760 500 S 1220 990, 1720 820" fill="none" stroke="transparent" stroke-width="1"/>
+
+            <g class="plane-marker alt">
+                <path d="M0,-5 L8,0 L0,5 L1.5,0 Z" transform="translate(760 1040) rotate(-24)"></path>
+                <animateMotion dur="20s" repeatCount="indefinite" rotate="auto">
+                    <mpath href="#routeB"></mpath>
+                </animateMotion>
+            </g>
+            <path id="routeB" d="M-40 1120 C 260 820, 430 720, 630 920 S 980 1280, 1600 1180" fill="none" stroke="transparent" stroke-width="1"/>
+
+            <g class="plane-marker accent">
+                <path d="M0,-6 L10,0 L0,6 L2,0 Z" transform="translate(1100 420) rotate(12)"></path>
+                <animateMotion dur="22s" repeatCount="indefinite" rotate="auto">
+                    <mpath href="#routeC"></mpath>
+                </animateMotion>
+            </g>
+            <path id="routeC" d="M160 1680 C 390 1320, 660 1180, 780 980 S 1080 380, 1540 250" fill="none" stroke="transparent" stroke-width="1"/>
+        </svg>
+    </div>
 
     <!-- Sticky Header -->
-    <header class="app-header sticky top-0 z-50 backdrop-blur-lg border-b px-4 py-3">
-        <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-3 min-w-0">
+    <header class="app-header sticky top-0 z-50 backdrop-blur-lg border-b px-3 py-2">
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
                 <div class="brand-mark" aria-label="Travel4life logo">t4</div>
                 <div class="min-w-0">
-                    <h1 class="text-base font-extrabold tracking-tight truncate">T4L <span class="text-app-vip">x</span> Telegram</h1>
-                    <div class="mt-1">
-                        <div class="header-socials mt-1.5" aria-label="Travel4life social links">
-                            <a href="https://www.travel4life.net" target="_blank" rel="noopener" class="social-site" aria-label="Travel4life website">
-                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <circle cx="12" cy="12" r="8.2" stroke="currentColor" stroke-width="1.8"/>
-                                    <path d="M3.8 12H20.2M12 3.8C14.8 6.1 16.4 8.9 16.4 12C16.4 15.1 14.8 17.9 12 20.2C9.2 17.9 7.6 15.1 7.6 12C7.6 8.9 9.2 6.1 12 3.8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </a>
-                            <a href="https://www.instagram.com/travel4life_net" target="_blank" rel="noopener" class="social-ig" aria-label="Instagram">
-                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" stroke-width="1.7"/>
-                                    <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/>
-                                    <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/>
-                                </svg>
-                            </a>
-                            <a href="https://www.facebook.com/travellife2" target="_blank" rel="noopener" class="social-fb" aria-label="Facebook">
-                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <path d="M13.3 21V12.9H15.8L16.2 9.9H13.3V8.1C13.3 7.2 13.6 6.6 14.8 6.6H16.3V4C15.6 3.9 14.9 3.9 14.2 3.9C11.9 3.9 10.3 5.3 10.3 8V9.9H7.7V12.9H10.3V21H13.3Z" fill="currentColor"/>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
+                    <h1 class="text-sm font-extrabold tracking-tight truncate leading-none">T4L <span class="text-app-vip">x</span> Telegram</h1>
                 </div>
             </div>
-            <div class="text-right flex items-center gap-2 shrink-0">
-                <p id="header-user" class="hidden text-xs text-app-secondary font-medium">Hi, traveler</p>
-                <button onclick="switchTab('store')" class="yellow-button rounded-full px-3 py-2 text-[11px] font-extrabold whitespace-nowrap" type="button">Explore membership <span class="text-sm">→</span></button>
+            <div class="flex items-center gap-2 shrink-0">
+                <p id="header-user" class="hidden text-[10px] text-app-secondary font-medium">Hi</p>
+                <button onclick="switchTab('store')" class="yellow-button rounded-full px-2.5 py-1.5 text-[9px] font-extrabold uppercase tracking-[0.08em] whitespace-nowrap" type="button">Membership <span class="text-xs">→</span></button>
                 <div id="status-badge" class="hidden">Free Trial</div>
             </div>
         </div>
     </header>
 
+    <div class="px-3 pb-2 pt-1.5">
+        <div class="rounded-full border border-app-border bg-app-card/90 px-2.5 py-1.5 shadow-sm backdrop-blur-sm">
+            <div class="flex items-center justify-between gap-2 text-[9px] font-extrabold uppercase tracking-[0.12em] text-app-secondary">
+                <span>2 Free Quotes</span>
+                <span id="trial-mini-text">0/2 used</span>
+            </div>
+            <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-black/5">
+                <div id="trial-progress" class="h-full rounded-full bg-app-vip transition-all duration-300" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="px-5 pt-0.5 pb-1.5">
-        <div class="flex items-center justify-between rounded-full border border-app-border bg-app-card px-3 py-2 shadow-sm">
-            <span class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Travel concierge</span>
+        <div class="flex items-center justify-between gap-2 rounded-full border border-app-border bg-app-card px-3 py-2 shadow-sm">
+            <span class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Global travel intelligence</span>
             <a href="https://www.travel4life.net" target="_blank" rel="noopener" class="text-[10px] font-extrabold text-neutral-900 underline">Visit travel4life.net</a>
         </div>
     </div>
@@ -812,92 +965,91 @@
         <!-- VIEW: CONCIERGE (HOME)                     -->
         <!-- ========================================== -->
         <section id="view-home" class="view-section active pt-0.5">
-            <div class="px-5 mb-0.5 flex items-center justify-between gap-2">
-                <h2 class="text-xl font-extrabold leading-none tracking-tight m-0">Plan your next trip</h2>
-                <div id="quick-deal-pills" class="quick-deal-pills" aria-label="Quick travel deal shortcuts"></div>
+            <div class="px-5 mb-3 flex items-center justify-between gap-2">
+                <h2 class="text-xl font-extrabold leading-none tracking-tight m-0">Wholesale Rates</h2>
+                <span class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Concierge AI</span>
             </div>
 
-            <div class="inline-flex mx-5 mb-2 rounded-full border border-app-border bg-app-card px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Zero-Markup Wholesale Travel Desk</div>
-
-            <div class="usp-banner hero-aspiration mx-5 mb-3 shadow-sm">
-                <video autoplay muted loop playsinline preload="auto" aria-hidden="true">
-                    <source src="https://videos.pexels.com/video-files/36720422/36720422-hd_1920_1080_25fps.mp4" type="video/mp4">
-                </video>
-                <div class="hero-aspiration-inner">
-                    <div>
-                        <p class="text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/70">Your advantage</p>
-                        <h3 class="text-2xl font-extrabold leading-none mt-1 text-white">2 free quotes</h3>
-                        <p class="text-[11px] font-semibold mt-1 text-white/90">Before your next adventure.</p>
-                    </div>
-                    <div class="hero-price-anchor" aria-label="Price comparison">
-                        <div class="price-anchor-pill">
-                            <span>Online Hotel</span>
-                            <strong>₹300</strong>
-                        </div>
-                        <div class="price-anchor-pill is-highlight">
-                            <span>Ours</span>
-                            <strong>₹220</strong>
-                        </div>
-                    </div>
-                </div>
+            <div class="mx-5 mb-3 flex items-center justify-between gap-2 rounded-full border border-app-border bg-app-card px-2.5 py-1 shadow-sm">
+                <span class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Zero-markup travel desk for global members</span>
+                <div id="quick-deal-pills" class="quick-deal-pills"></div>
             </div>
 
-            <!-- Sleek Booking Form -->
             <div class="px-5">
-                <div class="bg-app-card border border-app-border rounded-[14px] p-3 shadow-sm">
-                    <div class="flex justify-between items-center mb-3 gap-2">
-                        <h3 id="form-title" class="text-base font-extrabold">Request Stays</h3>
+                <div class="magic-compose bg-app-card border border-app-border rounded-[18px] p-3 shadow-sm">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="magic-icon">✦</span>
+                            <div>
+                                <h3 id="form-title" class="text-base font-extrabold leading-none">Wholesale Rates — Our Secret Your Mile</h3>
+                                <p class="text-[9px] font-bold uppercase tracking-[0.14em] text-app-secondary mt-1">Tailored quotes. No noise.</p>
+                            </div>
+                        </div>
                         <span id="trial-counter" class="text-[9px] bg-app-vip text-neutral-900 px-2 py-1 rounded-md font-bold uppercase">0/2 free</span>
                     </div>
 
-                    <div id="categories-container" class="categories-grid grid grid-cols-3 gap-2 mb-3">
-                        <!-- Categories injected via JS -->
-                    </div>
-                    
-                    <div id="inquiry-fields" class="space-y-2 mb-3">
-                        <div id="field-origin" class="inquiry-field field-shell hidden bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                            <label id="origin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">From</label>
-                            <input type="text" id="req-origin" autocomplete="off" inputmode="text" placeholder="City or airport" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
-                        </div>
-                        <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                            <label id="destination-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Destination / Property</label>
-                            <input type="text" id="req-dest" autocomplete="off" inputmode="text" placeholder="City, hotel, or experience" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
-                        </div>
-                        <div class="field-message" id="dest-error">Please add a destination.</div>
-                        
-                        <div class="grid grid-cols-2 gap-2">
-                            <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                <label id="checkin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Check in</label>
-                                <input type="date" id="req-checkin" autocomplete="off" inputmode="numeric" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
-                            </div>
-                            <div id="field-checkout" class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                <label id="checkout-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Check out</label>
-                                <input type="date" id="req-checkout" autocomplete="off" inputmode="numeric" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                <label id="travellers-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Travellers</label>
-                                <select id="req-travellers" autocomplete="off" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
-                                    <option value="1">1 traveller</option><option value="2" selected>2 travellers</option><option value="3">3 travellers</option><option value="4">4 travellers</option><option value="5">5+ travellers</option>
-                                </select>
-                            </div>
-                            <div id="field-budget" class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                <label class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Budget</label>
-                                <select id="req-budget" autocomplete="off" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
-                                    <option value="">Any budget</option><option value="under-500">Under ₹500</option><option value="500-1500">₹500-₹1,500</option><option value="1500-plus">₹1,500+</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div id="field-notes" class="hidden field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                            <label class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Preferences</label>
-                            <input type="text" id="req-notes" autocomplete="off" inputmode="text" placeholder="Cabin, room, event, or other preference" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
-                        </div>
+                    <div class="magic-input-shell p-2.5 mb-2">
+                        <textarea id="magic-query" rows="2" class="w-full font-medium placeholder:text-app-secondary" placeholder="e.g., I want to go to Bali next month for a week for two people..."></textarea>
                     </div>
 
-                    <button id="btn-submit" onclick="submitInquiry()" class="w-full yellow-button hover:bg-app-vip font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-sm">
-                        Get my free quote
-                    </button>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div id="magic-offer" class="magic-offer">✨ Current offer unlocked: Save starting at 15% on your travel.</div>
+                        <button id="magic-submit" onclick="submitInquiry()" class="magic-submit yellow-button font-bold px-3 py-2 rounded-xl text-[10px] transition active:scale-95 shadow-sm">
+                            Free quote request
+                        </button>
+                    </div>
+
+                    <div class="mt-1 text-center">
+                        <button id="toggle-detailed-form" type="button" class="magic-toggle-link text-[10px] font-bold uppercase tracking-[0.12em] bg-transparent border-0 p-0">Hide detailed form</button>
+                    </div>
+
+                    <div id="structured-form-wrapper" class="mt-3 pt-3 border-t border-app-border">
+                        <div id="inquiry-fields" class="space-y-2 mb-3">
+                            <div id="field-origin" class="inquiry-field field-shell hidden bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                <label id="origin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">From</label>
+                                <input type="text" id="req-origin" autocomplete="off" inputmode="text" placeholder="City or airport" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
+                            </div>
+                            <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                <label id="destination-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Destination / Property</label>
+                                <input type="text" id="req-dest" autocomplete="off" inputmode="text" placeholder="City, hotel, or experience" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
+                            </div>
+                            <div class="field-message" id="dest-error">Please add a destination.</div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                    <label id="checkin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Check in</label>
+                                    <input type="date" id="req-checkin" autocomplete="off" inputmode="numeric" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                                </div>
+                                <div id="field-checkout" class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                    <label id="checkout-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Check out</label>
+                                    <input type="date" id="req-checkout" autocomplete="off" inputmode="numeric" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                    <label id="travellers-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Travellers</label>
+                                    <select id="req-travellers" autocomplete="off" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                                        <option value="1">1 traveller</option><option value="2" selected>2 travellers</option><option value="3">3 travellers</option><option value="4">4 travellers</option><option value="5">5+ travellers</option>
+                                    </select>
+                                </div>
+                                <div id="field-budget" class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                    <label class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Budget</label>
+                                    <select id="req-budget" autocomplete="off" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
+                                        <option value="">Any budget</option><option value="under-500">Under ₹500</option><option value="500-1500">₹500-₹1,500</option><option value="1500-plus">₹1,500+</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="field-notes" class="hidden field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
+                                <label class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Preferences</label>
+                                <input type="text" id="req-notes" autocomplete="off" inputmode="text" placeholder="Cabin, room, event, or other preference" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
+                            </div>
+                        </div>
+
+                        <button id="btn-submit" onclick="submitInquiry()" class="w-full yellow-button hover:bg-app-vip font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-sm">
+                            Get my free quote
+                        </button>
+                    </div>
+
                     <div class="cash-note mt-3 px-3 py-2 rounded-r-lg">
                         <p class="text-[10px] font-extrabold">Cash + Cards + Crypto + Bank Transfers Accepted</p>
                         <p class="text-[10px] text-app-secondary mt-0.5">Choose your preferred payment method when your booking is confirmed.</p>
@@ -977,17 +1129,17 @@
     </div>
 
     <!-- Bottom App Navigation -->
-    <nav class="fixed bottom-0 left-0 w-full bg-app-bg/95 backdrop-blur-xl border-t border-app-border pb-[env(safe-area-inset-bottom)]">
-            <div class="flex justify-around items-center p-1">
-            <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center p-2 opacity-50 [&.active]:opacity-100 transition" data-target="home">
+<nav class="fixed bottom-0 left-0 w-full pb-[env(safe-area-inset-bottom)]">
+        <div class="mx-3 flex justify-around items-center p-1">
+            <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center px-5 py-2 opacity-60 [&.active]:opacity-100 transition" data-target="home">
                 <span class="text-xl mb-1">🧭</span>
                 <span class="text-[10px] font-bold">Explore</span>
             </button>
-            <button onclick="switchTab('store')" class="nav-btn flex flex-col items-center p-2 opacity-50 [&.active]:opacity-100 transition" data-target="store">
+            <button onclick="switchTab('store')" class="nav-btn flex flex-col items-center px-5 py-2 opacity-60 [&.active]:opacity-100 transition" data-target="store">
                 <span class="text-xl mb-1">⭐️</span>
                 <span class="text-[10px] font-bold text-app-vip">VIP Pass</span>
             </button>
-            <button onclick="switchTab('vault')" class="nav-btn flex flex-col items-center p-2 opacity-50 [&.active]:opacity-100 transition" data-target="vault">
+            <button onclick="switchTab('vault')" class="nav-btn flex flex-col items-center px-5 py-2 opacity-60 [&.active]:opacity-100 transition" data-target="vault">
                 <span class="text-xl mb-1">📂</span>
                 <span class="text-[10px] font-bold">Vault</span>
             </button>
@@ -1158,9 +1310,13 @@
         const localUserState = readLocalState();
         state.isVIP = localUserState.isVIP;
 
-        function syncInquiryUsage(inquiries) {
+        function getUsedInquiryCount(inquiries) {
             const list = Array.isArray(inquiries) ? inquiries : [];
-            const nextCount = list.filter(item => !(item && item.status === 'queued')).length;
+            return list.filter(item => item && item.status !== 'queued' && item.status !== 'failed').length;
+        }
+
+        function syncInquiryUsage(inquiries) {
+            const nextCount = getUsedInquiryCount(inquiries);
             state.inquiriesUsed = nextCount;
             setSafeStorageValue('sm_inquiries', String(nextCount));
             updateUI();
@@ -1222,7 +1378,6 @@
 
         function init() {
             renderOffers();
-            renderCategories();
             renderStore();
             renderRates();
             updateInquiryForm();
@@ -1232,6 +1387,8 @@
             loadTravelDeals();
             rotateTicker();
             bindKeyboardSafeScroll();
+            bindMagicInput();
+            bindDetailedFormToggle();
         }
 
         // -----------------------------------------------------
@@ -1327,6 +1484,11 @@
                 destinationInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
+            const magicInput = document.getElementById('magic-query');
+            if (magicInput) {
+                magicInput.value = `I want ${destination} travel with the best value and private concierge support.`;
+            }
+
             const checkinInput = document.getElementById('req-checkin');
             if (checkinInput) {
                 const future = new Date();
@@ -1376,12 +1538,62 @@
 
         function renderCategories() {
             const container = document.getElementById('categories-container');
+            if (!container) return;
             container.innerHTML = categoriesDB.map(cat => `
                 <button onclick="selectCategory('${cat.id}')" id="cat-${cat.id}" class="cat-pill category-tile flex items-center justify-center gap-1 ${cat.id === state.category ? 'selected' : ''}">
                     <span class="category-icon">${cat.icon}</span>
                     <span class="font-extrabold leading-none">${cat.label}</span>
                 </button>
             `).join('');
+        }
+
+        function getMagicOfferText(value) {
+            const clean = (value || '').trim();
+            if (clean.length <= 5) return null;
+
+            const firstSegment = clean.split(/\s+/).slice(0, 5).join(' ');
+            const lower = clean.toLowerCase();
+
+            if (lower.includes('dubai')) return `✨ Unlock 15% off your flights to Dubai`;
+            if (lower.includes('bali')) return `✨ Unlock 15% off your Bali escape`;
+            if (lower.includes('maldives')) return `✨ Unlock 15% off your Maldives getaway`;
+            if (lower.includes('paris')) return `✨ Unlock 15% off your Paris itinerary`;
+            if (lower.includes('flight')) return `✨ Unlock 15% off your flights to ${firstSegment}`;
+            return '✨ Current offer unlocked: Save starting at 15% on your travel.';
+        }
+
+        function bindMagicInput() {
+            const input = document.getElementById('magic-query');
+            const offer = document.getElementById('magic-offer');
+            const submit = document.getElementById('magic-submit');
+            if (!input || !offer || !submit) return;
+
+            const syncMagicState = () => {
+                const value = input.value.trim();
+                const offerText = getMagicOfferText(value);
+                if (value.length > 5 && offerText) {
+                    offer.textContent = offerText;
+                    offer.classList.add('visible');
+                    submit.classList.add('visible');
+                } else {
+                    offer.classList.remove('visible');
+                    submit.classList.remove('visible');
+                }
+            };
+
+            input.addEventListener('input', syncMagicState);
+            syncMagicState();
+        }
+
+        function bindDetailedFormToggle() {
+            const toggle = document.getElementById('toggle-detailed-form');
+            const wrapper = document.getElementById('structured-form-wrapper');
+            if (!toggle || !wrapper) return;
+
+            toggle.addEventListener('click', () => {
+                const isHidden = wrapper.classList.toggle('hidden');
+                toggle.textContent = isHidden ? 'Or use detailed form' : 'Hide detailed form';
+            });
         }
 
         function updateInquiryForm() {
@@ -1546,6 +1758,8 @@
         function updateUI() {
             const btn = document.getElementById('btn-submit');
             const counter = document.getElementById('trial-counter');
+            const miniText = document.getElementById('trial-mini-text');
+            const progress = document.getElementById('trial-progress');
             const badge = document.getElementById('status-badge');
             const membershipButton = document.querySelector('.app-header .yellow-button');
 
@@ -1554,7 +1768,7 @@
                     ? 'VIP active <span class="text-sm">✓</span>'
                     : state.inquiriesUsed >= 2
                         ? 'Subscribe to continue <span class="text-sm">→</span>'
-                        : 'Explore membership <span class="text-sm">→</span>';
+                        : 'Membership <span class="text-sm">→</span>';
             }
 
             if (state.isVIP) {
@@ -1562,10 +1776,16 @@
                 badge.className = 'bg-app-vip border border-app-vip text-black px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase';
                 counter.innerText = 'UNLIMITED';
                 counter.className = 'text-[10px] bg-app-vip/20 text-app-vip px-2.5 py-1 rounded-md font-bold uppercase';
+                if (miniText) miniText.textContent = 'VIP';
+                if (progress) progress.style.width = '100%';
                 btn.innerText = 'Request my VIP quote';
                 btn.className = 'w-full bg-app-vip text-black font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)]';
             } else {
-                counter.innerText = `${state.inquiriesUsed}/2 USED`;
+                const percent = Math.min(100, (state.inquiriesUsed / 2) * 100);
+                const usedText = `${Math.min(state.inquiriesUsed, 2)}/2 used`;
+                counter.innerText = `${state.inquiriesUsed}/2 free`;
+                if (miniText) miniText.textContent = usedText;
+                if (progress) progress.style.width = `${percent}%`;
                 if (state.inquiriesUsed >= 2) {
                     btn.innerText = 'Unlock more quotes';
                     btn.className = 'w-full bg-app-surface border border-app-border text-neutral-900 font-bold py-3 rounded-xl text-xs transition active:scale-95';
@@ -1915,8 +2135,12 @@
 
         async function submitInquiry() {
             clearFieldErrors();
-            const button = document.getElementById('btn-submit');
-            const originalText = button ? button.innerText : 'Get my free quote';
+            const btnSubmit = document.getElementById('btn-submit');
+            const magicSubmit = document.getElementById('magic-submit');
+            const originalText = btnSubmit ? btnSubmit.innerText : 'Get my free quote';
+            const magicInput = document.getElementById('magic-query');
+            const rawQuery = magicInput ? magicInput.value.trim() : '';
+            const isMagicRequest = Boolean(rawQuery && rawQuery.length > 5);
 
             if (!state.isVIP && state.inquiriesUsed >= 2) {
                 safeTg.haptic('notification', 'warning');
@@ -1937,7 +2161,11 @@
             const checkinValue = checkin ? checkin.value : '';
             const checkoutValue = checkout ? checkout.value : '';
 
-            if (!destValue) {
+            const requestCategory = isMagicRequest ? 'Magic Request' : state.category;
+            const requestDestination = isMagicRequest ? 'Magic Request' : destValue;
+            const requestDates = isMagicRequest ? 'Flexible' : (profile.checkout ? `${checkinValue} to ${checkoutValue}` : checkinValue);
+
+            if (!isMagicRequest && !destValue) {
                 dest?.parentElement?.classList.add('invalid');
                 const destError = document.getElementById('dest-error');
                 if (destError) {
@@ -1948,7 +2176,7 @@
                 return;
             }
 
-            if (!checkinValue || (profile.checkout && (!checkoutValue || checkoutValue <= checkinValue))) {
+            if (!isMagicRequest && (!checkinValue || (profile.checkout && (!checkoutValue || checkoutValue <= checkinValue)))) {
                 const message = profile.checkout ? 'Please choose valid start and end dates.' : 'Please choose a valid date.';
                 if (checkin) checkin.parentElement?.classList.add('invalid');
                 if (checkout && profile.checkout) checkout.parentElement?.classList.add('invalid');
@@ -1961,12 +2189,21 @@
                 return;
             }
 
-            if (button) {
-                button.disabled = true;
-                button.innerText = 'Sending request...';
+            const activeButton = btnSubmit || magicSubmit;
+            if (activeButton) {
+                activeButton.disabled = true;
+                activeButton.innerText = 'Sending request...';
             }
 
             try {
+                const details = {
+                    origin: origin ? origin.value.trim() : '',
+                    travellers: travellers ? travellers.value : '',
+                    budget: budget ? budget.value : '',
+                    notes: notes ? notes.value.trim() : '',
+                    raw_query: isMagicRequest ? rawQuery : ''
+                };
+
                 const response = await fetchWithTimeout('/.netlify/functions/inquiries', {
                     method: 'POST',
                     headers: {
@@ -1974,15 +2211,11 @@
                         'X-Telegram-Init-Data': tg.initData
                     },
                     body: JSON.stringify({
-                        category: state.category,
-                        destination: destValue,
-                        dates: profile.checkout ? `${checkinValue} to ${checkoutValue}` : checkinValue,
-                        details: {
-                            origin: origin ? origin.value.trim() : '',
-                            travellers: travellers ? travellers.value : '',
-                            budget: budget ? budget.value : '',
-                            notes: notes ? notes.value.trim() : ''
-                        }
+                        category: requestCategory,
+                        destination: requestDestination,
+                        dates: requestDates,
+                        raw_query: isMagicRequest ? rawQuery : '',
+                        details
                     })
                 }, 12000);
                 const data = await response.json().catch(() => ({}));
@@ -1991,9 +2224,9 @@
                 const supabaseClient = globalThis.supabaseClient || null;
                 const payload = {
                     telegram_id: tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null,
-                    category: state.category,
-                    destination: destValue,
-                    dates: profile.checkout ? `${checkinValue} to ${checkoutValue}` : checkinValue,
+                    category: requestCategory,
+                    destination: requestDestination,
+                    dates: requestDates,
                     status: 'Pending'
                 };
 
@@ -2014,6 +2247,7 @@
                             category: payload.category,
                             destination: payload.destination,
                             dates: JSON.stringify(payload.dates),
+                            details: { raw_query: isMagicRequest ? rawQuery : '' },
                             status: 'Pending'
                         }]);
 
@@ -2026,15 +2260,10 @@
                 const submittedInquiry = {
                     inquiry_id: data.inquiry?.inquiry_id || crypto.randomUUID(),
                     telegram_id: data.inquiry?.telegram_id || (tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null),
-                    category: state.category,
-                    destination: destValue,
-                    dates: profile.checkout ? `${checkinValue} to ${checkoutValue}` : checkinValue,
-                    details: {
-                        origin: origin ? origin.value.trim() : '',
-                        travellers: travellers ? travellers.value : '',
-                        budget: budget ? budget.value : '',
-                        notes: notes ? notes.value.trim() : ''
-                    },
+                    category: requestCategory,
+                    destination: requestDestination,
+                    dates: requestDates,
+                    details,
                     status: 'received',
                     created_at: new Date().toISOString()
                 };
@@ -2042,17 +2271,15 @@
                 const cached = getLocalInquiryCache();
                 const merged = [submittedInquiry, ...cached.filter(item => item.inquiry_id !== submittedInquiry.inquiry_id)].slice(0, 25);
                 saveLocalInquiryCache(merged);
+                syncInquiryUsage(merged);
 
-                state.inquiriesUsed += state.isVIP ? 0 : 1;
-                setSafeStorageValue('sm_inquiries', String(state.inquiriesUsed));
-
+                if (magicInput) magicInput.value = '';
                 if (dest) dest.value = '';
                 if (checkin) checkin.value = '';
                 if (checkout) checkout.value = '';
                 if (origin) origin.value = '';
                 if (notes) notes.value = '';
 
-                updateUI();
                 renderInquiries(merged);
                 await loadInquiries();
                 safeTg.haptic('notification', 'success');
@@ -2063,14 +2290,15 @@
                 const friendlyMessage = error.name === 'AbortError' ? 'The request timed out. Please try again on a stronger connection.' : (error.message || 'Unable to send your quote request.');
                 const fallbackInquiry = {
                     inquiry_id: `queued_${Date.now()}`,
-                    category: state.category,
-                    destination: destValue,
-                    dates: profile.checkout ? `${checkinValue} to ${checkoutValue}` : checkinValue,
+                    category: requestCategory,
+                    destination: requestDestination,
+                    dates: requestDates,
                     details: {
                         origin: origin ? origin.value.trim() : '',
                         travellers: travellers ? travellers.value : '',
                         budget: budget ? budget.value : '',
-                        notes: notes ? notes.value.trim() : ''
+                        notes: notes ? notes.value.trim() : '',
+                        raw_query: isMagicRequest ? rawQuery : ''
                     },
                     status: 'queued',
                     created_at: new Date().toISOString()
@@ -2078,11 +2306,11 @@
                 notifyInquiry(fallbackInquiry);
                 renderInquiries(getVisibleInquiries());
                 safeTg.showAlert(`${friendlyMessage} Your request has been saved locally and will sync when connected.`);
-                if (button) button.innerText = originalText;
+                if (activeButton) activeButton.innerText = originalText;
             } finally {
-                if (button) {
-                    button.disabled = false;
-                    if (button.innerText === 'Sending request...') button.innerText = originalText;
+                if (activeButton) {
+                    activeButton.disabled = false;
+                    if (activeButton.innerText === 'Sending request...') activeButton.innerText = originalText;
                 }
             }
         }
