@@ -1132,10 +1132,9 @@
 
     <script>
         // -----------------------------------------------------
-        // 1. DATABASE STRUCTURES (Ready for Supabase)
+        // 1. DATABASE STRUCTURES
         // -----------------------------------------------------
         
-        // This array represents the rows you will pull from your Supabase `offers` table
         const fallbackOffersDB = [
             { id: 'fallback-bali', title: 'Bali Villas', discount: 'Save 40%', tag: 'Hot Deal', emoji: '🌴', price: 540, deal_price: 540, reference_price: 900, currency: 'USD' },
             { id: 'fallback-tomorrowland', title: 'Tomorrowland', discount: 'VIP Access', tag: 'Music Festival', emoji: '🎪', price: 1080, deal_price: 1080, reference_price: 1200, currency: 'USD' },
@@ -1182,7 +1181,6 @@
         };
 
         let rateCatalog = JSON.parse(JSON.stringify(fallbackRateCatalog));
-
         let showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
         let showcaseTimer;
 
@@ -1192,9 +1190,7 @@
         const tg = window.Telegram && window.Telegram.WebApp;
 
         const safeTg = {
-            expand() {
-                if (tg && typeof tg.expand === 'function') tg.expand();
-            },
+            expand() { if (tg && typeof tg.expand === 'function') tg.expand(); },
             haptic(type, pattern) {
                 if (!tg || !tg.HapticFeedback) return;
                 if (type === 'impact' && typeof tg.HapticFeedback.impactOccurred === 'function') tg.HapticFeedback.impactOccurred(pattern || 'light');
@@ -1218,9 +1214,7 @@
                 storage.setItem(testKey, '1');
                 storage.removeItem(testKey);
                 return storage;
-            } catch (error) {
-                return null;
-            }
+            } catch (error) { return null; }
         }
 
         function getSafeStorageValue(key, fallback = null) {
@@ -1230,9 +1224,7 @@
                 const raw = storage.getItem(key);
                 if (raw === null) return fallback;
                 return JSON.parse(raw);
-            } catch (error) {
-                return fallback;
-            }
+            } catch (error) { return fallback; }
         }
 
         function setSafeStorageValue(key, value) {
@@ -1241,19 +1233,13 @@
             try {
                 storage.setItem(key, JSON.stringify(value));
                 return true;
-            } catch (error) {
-                return false;
-            }
+            } catch (error) { return false; }
         }
 
         function fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-            const requestOptions = {
-                ...options,
-                signal: controller.signal
-            };
-
+            const requestOptions = { ...options, signal: controller.signal };
             return fetch(url, requestOptions).finally(() => clearTimeout(timeoutId));
         }
 
@@ -1266,13 +1252,8 @@
         }
 
         function readLocalState() {
-            try {
-                return {
-                    isVIP: getSafeStorageValue('sm_vip', false) === true
-                };
-            } catch (error) {
-                return { isVIP: false };
-            }
+            try { return { isVIP: getSafeStorageValue('sm_vip', false) === true }; } 
+            catch (error) { return { isVIP: false }; }
         }
 
         let state = {
@@ -1307,9 +1288,7 @@
                         updateUI();
                         return;
                     }
-                } catch (err) {
-                    console.warn('Failed to fetch live count from Supabase, falling back to local array:', err);
-                }
+                } catch (err) { console.warn('Supabase count fallback:', err); }
             }
 
             const list = Array.isArray(inquiriesOrCount) ? inquiriesOrCount : [];
@@ -1333,14 +1312,11 @@
                     .eq('telegram_id', userId);
 
                 if (error) throw error;
-
                 const used = Number.isFinite(Number(count)) ? Math.max(0, Number(count)) : 0;
                 state.inquiriesUsed = used;
-                state.isVIP = Boolean(state.isVIP);
                 updateUI();
                 return used;
             } catch (error) {
-                console.warn('Unable to load live inquiry count from Supabase:', error);
                 state.inquiriesUsed = 0;
                 updateUI();
                 return 0;
@@ -1378,7 +1354,6 @@
 
         function bindKeyboardSafeScroll() {
             const focusable = document.querySelectorAll('input, select, textarea');
-
             focusable.forEach(field => {
                 field.addEventListener('focusin', () => {
                     const active = document.activeElement;
@@ -1453,22 +1428,13 @@
             renderQuickDealPills();
         }
 
-        const quickDealState = {
-            index: 0,
-            timer: null
-        };
+        const quickDealState = { index: 0, timer: null };
 
         function renderQuickDealPills() {
             const pillsContainer = document.getElementById('quick-deal-pills');
             if (!pillsContainer) return;
 
-            const dealSource = Array.isArray(offersDB) && offersDB.length ? offersDB : [
-                { title: 'Bali Villas' },
-                { title: 'Tomorrowland' },
-                { title: 'Maldives' },
-                { title: 'Paris Escape' }
-            ];
-
+            const dealSource = Array.isArray(offersDB) && offersDB.length ? offersDB : fallbackOffersDB;
             const dealPills = dealSource.map((offer) => {
                 const title = String(offer.title || 'Travel deal');
                 const normalized = title.toLowerCase();
@@ -1478,8 +1444,8 @@
             });
 
             if (!dealPills.length) return;
-
             const activeDeal = dealPills[quickDealState.index % dealPills.length];
+            
             pillsContainer.innerHTML = `
                 <button type="button" class="quick-deal-pill" onclick="openQuickDeal('${activeDeal.title}')">
                     ${activeDeal.label}
@@ -1496,7 +1462,6 @@
         function openQuickDeal(title) {
             const selectedTitle = String(title || '').trim();
             const normalized = selectedTitle.toLowerCase();
-
             const destination = normalized.includes('tomorrowland') ? 'Tomorrowland' : selectedTitle;
             const categoryToSelect = normalized.includes('tomorrowland') ? 'Festivals' : state.category;
 
@@ -1518,22 +1483,18 @@
             if (checkinInput) {
                 const future = new Date();
                 future.setDate(future.getDate() + 30);
-                const formatDate = (date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
-                checkinInput.value = formatDate(future);
+                checkinInput.value = new Date(future.getTime() - future.getTimezoneOffset() * 60000).toISOString().split('T')[0];
             }
 
             const checkoutInput = document.getElementById('req-checkout');
             if (checkoutInput) {
                 const checkout = new Date();
                 checkout.setDate(checkout.getDate() + 33);
-                const formatDate = (date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
-                checkoutInput.value = formatDate(checkout);
+                checkoutInput.value = new Date(checkout.getTime() - checkout.getTimezoneOffset() * 60000).toISOString().split('T')[0];
             }
 
             const formBlock = document.getElementById('form-title');
-            if (formBlock) {
-                formBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            if (formBlock) formBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             const fillTarget = destinationInput ? destinationInput.closest('.field-shell') : null;
             if (fillTarget) {
@@ -1542,45 +1503,25 @@
                 fillTarget.classList.add('flash-highlight');
                 setTimeout(() => fillTarget.classList.remove('flash-highlight'), 1200);
             }
-
-            if (safeTg && safeTg.haptic) {
-                safeTg.haptic('notification', 'success');
-            }
+            if (safeTg && safeTg.haptic) safeTg.haptic('notification', 'success');
         }
 
         async function loadTravelDeals() {
             try {
                 const response = await fetch('/.netlify/functions/travelDeals');
-                if (!response.ok) {
-                    throw new Error(`Travel deals request failed: ${response.status} ${response.statusText}`);
-                }
-
+                if (!response.ok) throw new Error('API failed');
                 const data = await response.json();
-                const liveDeals = Array.isArray(data.deals) ? data.deals : [];
-                offersDB = liveDeals.length ? liveDeals : [...fallbackOffersDB];
+                offersDB = Array.isArray(data.deals) && data.deals.length ? data.deals : [...fallbackOffersDB];
                 renderOffers();
             } catch (error) {
-                console.warn('Using fallback travel deals:', error);
                 offersDB = [...fallbackOffersDB];
                 renderOffers();
             }
         }
 
-        function renderCategories() {
-            const container = document.getElementById('categories-container');
-            if (!container) return;
-            container.innerHTML = categoriesDB.map(cat => `
-                <button onclick="selectCategory('${cat.id}')" id="cat-${cat.id}" class="cat-pill category-tile flex items-center justify-center gap-1 ${cat.id === state.category ? 'selected' : ''}">
-                    <span class="category-icon">${cat.icon}</span>
-                    <span class="font-extrabold leading-none">${cat.label}</span>
-                </button>
-            `).join('');
-        }
-
         function getMagicOfferText(value) {
             const clean = (value || '').trim();
             if (clean.length <= 5) return null;
-
             const firstSegment = clean.split(/\s+/).slice(0, 5).join(' ');
             const lower = clean.toLowerCase();
 
@@ -1610,7 +1551,6 @@
                     submit.classList.remove('visible');
                 }
             };
-
             input.addEventListener('input', syncMagicState);
             syncMagicState();
         }
@@ -1634,33 +1574,17 @@
             document.getElementById('origin-label').innerText = profile.originLabel || 'From';
             document.getElementById('checkin-label').innerText = profile.checkin;
             document.getElementById('checkout-label').innerText = profile.checkoutLabel;
-            setFieldVisibility('field-origin', profile.origin);
-            setFieldVisibility('field-checkout', profile.checkout);
-            setFieldVisibility('field-budget', profile.budget);
-            setFieldVisibility('field-notes', profile.notes);
-        }
-
-        function setFieldVisibility(fieldId, visible) {
-            const field = document.getElementById(fieldId);
-            if (!field) return;
-            field.classList.toggle('hidden', !visible);
-            field.querySelectorAll('input, select').forEach(input => {
-                input.disabled = !visible;
-                if (!visible) input.value = ''; 
+            
+            ['field-origin', 'field-checkout', 'field-budget', 'field-notes'].forEach(id => {
+                const field = document.getElementById(id);
+                if (!field) return;
+                const visible = id === 'field-origin' ? profile.origin : id === 'field-checkout' ? profile.checkout : id === 'field-budget' ? profile.budget : profile.notes;
+                field.classList.toggle('hidden', !visible);
+                field.querySelectorAll('input, select').forEach(input => {
+                    input.disabled = !visible;
+                    if (!visible) input.value = ''; 
+                });
             });
-        }
-
-        function setFieldError(fieldId, message) {
-            const shell = document.getElementById(fieldId);
-            const input = shell ? shell.querySelector('input, select') : null;
-            if (!shell) return;
-            shell.classList.toggle('invalid', Boolean(message));
-            if (input) input.setAttribute('aria-invalid', Boolean(message) ? 'true' : 'false');
-            const messageEl = document.getElementById(`${fieldId}-error`);
-            if (messageEl) {
-                messageEl.textContent = message || '';
-                messageEl.classList.toggle('visible', Boolean(message));
-            }
         }
 
         function clearFieldErrors() {
@@ -1693,9 +1617,8 @@
                 categories.forEach(category => {
                     const rates = rateCatalog[category] || [];
                     if (!rates.length) return;
-                    const rate = rates[index % rates.length];
                     if (cycleEntries.length < 15) {
-                        cycleEntries.push({ category, rate, index: index % rates.length });
+                        cycleEntries.push({ category, rate: rates[index % rates.length], index: index % rates.length });
                     }
                 });
                 index += 1;
@@ -1707,7 +1630,6 @@
                 container.innerHTML = '';
                 return;
             }
-
             renderRateCycle();
             showcaseTimer = setInterval(() => {
                 rateShowcaseIndex = (rateShowcaseIndex + 1) % allRateEntries.length;
@@ -1720,10 +1642,8 @@
             if (!container || !allRateEntries.length) return;
             const visibleEntries = [];
             for (let i = 0; i < 2; i++) {
-                const entry = allRateEntries[(rateShowcaseIndex + i) % allRateEntries.length];
-                visibleEntries.push(entry);
+                visibleEntries.push(allRateEntries[(rateShowcaseIndex + i) % allRateEntries.length]);
             }
-
             container.innerHTML = visibleEntries.map(({ category, rate, index }) => `
                 <article class="compact-rate-card rate-cycle-card" onclick="openRateDeal('${category}', ${index})" tabindex="0" role="button">
                     <div>
@@ -1741,15 +1661,12 @@
         async function loadDealRates() {
             try {
                 const response = await fetch('/.netlify/functions/dealRates');
-                if (!response.ok) {
-                    throw new Error(`Deal rates request failed: ${response.status} ${response.statusText}`);
-                }
-
+                if (!response.ok) throw new Error('API failed');
                 const data = await response.json();
                 const liveRates = Array.isArray(data.rates) ? data.rates : [];
+                
                 if (!liveRates.length) {
                     rateCatalog = JSON.parse(JSON.stringify(fallbackRateCatalog));
-                    showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
                     renderRates();
                     return;
                 }
@@ -1759,9 +1676,7 @@
                     const category = rate.category || 'Hotels';
                     if (!databaseCatalog[category]) databaseCatalog[category] = [];
                     databaseCatalog[category].push({
-                        category,
-                        name: rate.title || rate.name || 'Rate',
-                        unit: rate.unit || 'per stay',
+                        category, name: rate.title || rate.name || 'Rate', unit: rate.unit || 'per stay',
                         referenceRate: Number(rate.reference_rate ?? rate.referenceRate ?? 0),
                         ourRate: Number(rate.our_rate ?? rate.ourRate ?? 0),
                         freshness: rate.freshness_label || rate.freshness || 'Reference snapshot'
@@ -1769,12 +1684,9 @@
                 });
 
                 rateCatalog = Object.keys(databaseCatalog).length ? databaseCatalog : JSON.parse(JSON.stringify(fallbackRateCatalog));
-                showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
                 renderRates();
             } catch (error) {
-                console.error('Failed to load live deal rates:', error);
                 rateCatalog = JSON.parse(JSON.stringify(fallbackRateCatalog));
-                showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
                 renderRates();
             }
         }
@@ -1792,9 +1704,7 @@
                         </div>
                     </div>
                     <button onclick="purchasePackage('${pack.id}', this)" class="w-full bg-app-surface border border-app-border hover:border-neutral-900 text-neutral-900 font-bold py-3 rounded-xl text-sm transition flex justify-center items-center gap-2">
-                        <span>Pay</span>
-                        <span class="text-base">⭐️</span>
-                        <span>${pack.price} Stars</span>
+                        <span>Pay</span><span class="text-base">⭐️</span><span>${pack.price} Stars</span>
                     </button>
                 </div>
             `).join('');
@@ -1809,15 +1719,12 @@
             const membershipButton = document.querySelector('.app-header .yellow-button');
             const magicSubmit = document.getElementById('magic-submit');
             const magicQuery = document.getElementById('magic-query');
+            
             const remainingFreeQuotes = !state.isVIP ? Math.max(0, 2 - state.inquiriesUsed) : 2;
             const limitReached = !state.isVIP && remainingFreeQuotes <= 0;
 
             if (membershipButton) {
-                membershipButton.innerHTML = state.isVIP
-                    ? 'VIP active <span class="text-sm">✓</span>'
-                    : limitReached
-                        ? 'Subscribe to continue <span class="text-sm">→</span>'
-                        : 'Membership <span class="text-sm">→</span>';
+                membershipButton.innerHTML = state.isVIP ? 'VIP active <span class="text-sm">✓</span>' : limitReached ? 'Subscribe to continue <span class="text-sm">→</span>' : 'Membership <span class="text-sm">→</span>';
             }
 
             if (magicQuery) {
@@ -1853,26 +1760,22 @@
                 }
             } else {
                 const percent = Math.min(100, (state.inquiriesUsed / 2) * 100);
-                const usedText = `${Math.min(state.inquiriesUsed, 2)}/2 used`;
                 counter.innerText = `${remainingFreeQuotes}/2 free`;
-                if (miniText) miniText.textContent = usedText;
+                if (miniText) miniText.textContent = `${Math.min(state.inquiriesUsed, 2)}/2 used`;
                 if (progress) progress.style.width = `${percent}%`;
+                
                 if (limitReached) {
                     if (btn) {
                         btn.innerText = 'Unlock more quotes';
                         btn.className = 'w-full bg-app-surface border border-app-border text-neutral-900 font-bold py-3 rounded-xl text-xs transition active:scale-95 opacity-50 cursor-not-allowed';
                     }
-                    if (magicSubmit) {
-                        magicSubmit.innerText = 'Free quotes used';
-                    }
+                    if (magicSubmit) magicSubmit.innerText = 'Free quotes used';
                 } else {
                     if (btn) {
                         btn.innerText = 'Get my free quote';
                         btn.className = 'w-full yellow-button hover:bg-app-vip font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-sm';
                     }
-                    if (magicSubmit) {
-                        magicSubmit.innerText = 'Free quote request';
-                    }
+                    if (magicSubmit) magicSubmit.innerText = 'Free quote request';
                 }
             }
         }
@@ -1900,7 +1803,6 @@
                 document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('selected'));
                 selectedTab.classList.add('selected');
             }
-            
             if(tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
@@ -1944,7 +1846,7 @@
         function requestSelectedDeal() {
             if (!state.selectedDeal) return;
             closeDeal();
-            selectCategory('Sightseeing');
+            selectCategory('Sightseeing'); // Change as needed
             document.getElementById('req-dest').value = state.selectedDeal.title;
             document.getElementById('req-dest').focus();
             document.getElementById('req-dest').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1968,40 +1870,25 @@
 
         function getVisibleInquiries() {
             const cached = getLocalInquiryCache();
-            const list = Array.isArray(cached) ? cached : [];
-            return list
+            return (Array.isArray(cached) ? cached : [])
                 .filter(item => item && (item.inquiry_id || item.created_at || item.destination))
-                .sort((a, b) => {
-                    const aTime = new Date(a.created_at || 0).getTime();
-                    const bTime = new Date(b.created_at || 0).getTime();
-                    return bTime - aTime;
-                });
-        }
-
-        function updateInquiryReplyState(inquiryId, nextValue) {
-            if (!inquiryId) return;
-            const item = getVisibleInquiries().find(entry => (entry.inquiry_id || `${entry.created_at || ''}${entry.destination || ''}`) === inquiryId);
-            if (!item) return;
-            const nextList = getVisibleInquiries().map(entry => (
-                (entry.inquiry_id || `${entry.created_at || ''}${entry.destination || ''}`) === inquiryId
-                    ? { ...entry, response: nextValue, response_at: new Date().toISOString() }
-                    : entry
-            ));
-            saveLocalInquiryCache(nextList);
-            renderInquiries(nextList);
+                .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
         }
 
         function renderInquiries(inquiries) {
             const container = document.getElementById('inquiries-list');
             const list = Array.isArray(inquiries) ? inquiries : [];
+            
             if (!list.length) {
                 container.innerHTML = '<p class="text-sm text-app-secondary">No confirmed requests yet. Successful submissions will appear here.</p>';
                 return;
             }
+
             container.innerHTML = list.map((inquiry) => {
                 const inquiryKey = inquiry.inquiry_id || `${inquiry.created_at || 'n/a'}-${inquiry.destination || 'untitled'}`;
                 const isReplyOpen = state.replyingInquiryId === inquiryKey;
                 const responseText = inquiry.response || '';
+                
                 return `
                     <article class="bg-app-card border border-app-border p-4 rounded-[14px] shadow-sm">
                         <div class="flex justify-between items-start gap-3">
@@ -2032,49 +1919,59 @@
             }).join('');
         }
 
-        async function saveInquiryReply(inquiryId, replyText) {
+        // GLOBALLY DEFINED SAVE FUNCTION (Fixes issue #1)
+        window.saveInquiryReply = async function(inquiryId, replyText) {
             const trimmed = (replyText || '').trim();
             if (!trimmed) {
                 safeTg.showAlert('Please add a message before submitting your quote.');
                 return false;
             }
 
-            const nextList = getVisibleInquiries().map(entry => {
-                const entryKey = entry.inquiry_id || `${entry.created_at || 'n/a'}-${entry.destination || 'untitled'}`;
-                if (entryKey !== inquiryId) return entry;
-                return {
-                    ...entry,
-                    response: trimmed,
-                    response_at: new Date().toISOString(),
-                    status: entry.status === 'queued' ? 'queued' : 'responded'
-                };
-            });
-
-            // Sync to Supabase directly
-            if (window.supabaseClient && inquiryId) {
-                try {
-                    const { error } = await window.supabaseClient
-                        .from('inquiries')
-                        .update({
-                            response: trimmed,
-                            response_at: new Date().toISOString(),
-                            status: 'responded'
-                        })
-                        .eq('inquiry_id', inquiryId);
-
-                    if (error) {
-                        console.warn('Supabase reply sync failed:', error);
-                    }
-                } catch (error) {
-                    console.warn('Reply sync error:', error);
-                }
+            if (!window.supabaseClient) {
+                safeTg.showAlert('Database connection missing.');
+                return false;
             }
 
-            saveLocalInquiryCache(nextList);
-            state.replyingInquiryId = null;
-            renderInquiries(nextList);
-            return true;
-        }
+            try {
+                // 1. Insert into reply_inquiries (Assuming this is your new table)
+                const { error: replyError } = await window.supabaseClient
+                    .from('reply_inquiries')
+                    .insert([{
+                        inquiry_id: inquiryId,
+                        response: trimmed
+                    }]);
+
+                if (replyError) throw replyError;
+
+                // 2. Update local state ONLY after success (Fixes issue #2)
+                const nextList = getVisibleInquiries().map(entry => {
+                    const entryKey = entry.inquiry_id || `${entry.created_at || 'n/a'}-${entry.destination || 'untitled'}`;
+                    if (entryKey !== inquiryId) return entry;
+                    return {
+                        ...entry,
+                        response: trimmed,
+                        response_at: new Date().toISOString(),
+                        status: 'responded'
+                    };
+                }); 
+
+                // 3. Update original inquiry table as well (Optional but recommended)
+                await window.supabaseClient
+                    .from('inquiries')
+                    .update({ status: 'responded', response: trimmed })
+                    .eq('inquiry_id', inquiryId);
+
+                saveLocalInquiryCache(nextList);
+                state.replyingInquiryId = null; 
+                renderInquiries(nextList); 
+                return true;
+
+            } catch (error) {
+                console.error('Reply sync error:', error);
+                safeTg.showAlert(`Failed to save reply: ${error.message}`);
+                return false;
+            }
+        };
 
         async function loadInquiries() {
             const initData = tg && tg.initData;
@@ -2094,9 +1991,7 @@
                         await syncInquiryUsage(data);
                         return;
                     }
-                } catch (err) {
-                    console.warn('Supabase direct load failed, trying cache:', err);
-                }
+                } catch (err) { console.warn('Supabase direct load failed, trying cache:', err); }
             }
 
             const localVisibleInquiries = getVisibleInquiries();
@@ -2120,6 +2015,7 @@
 
             const trimValue = value => typeof value === 'string' ? value.trim() : '';
             const destinationValue = trimValue(dest ? dest.value : '');
+            
             if (!destinationValue) {
                 dest?.parentElement?.classList.add('invalid');
                 const destError = document.getElementById('dest-error');
@@ -2128,24 +2024,19 @@
                     destError.classList.add('visible');
                 }
                 isValid = false;
-            } else {
-                dest?.parentElement?.classList.remove('invalid');
-                const destError = document.getElementById('dest-error');
-                if (destError) {
-                    destError.textContent = '';
-                    destError.classList.remove('visible');
-                }
             }
 
             const checkinValue = checkin ? checkin.value : '';
             const checkoutValue = checkout ? checkout.value : '';
+            
             if (!checkinValue || (profile.checkout && (!checkoutValue || checkoutValue <= checkinValue))) {
                 const message = profile.checkout ? 'Please add valid dates.' : 'Please add the visit date.';
                 if (checkin) checkin.parentElement?.classList.add('invalid');
                 if (checkout && profile.checkout) checkout.parentElement?.classList.add('invalid');
-                if (!profile.checkout && checkout) checkout.parentElement?.classList.remove('invalid');
-                const dateError = document.getElementById('date-error') || document.createElement('div');
-                if (!document.getElementById('date-error')) {
+                
+                let dateError = document.getElementById('date-error');
+                if (!dateError) {
+                    dateError = document.createElement('div');
                     dateError.id = 'date-error';
                     dateError.className = 'field-message visible';
                     const target = document.getElementById('req-checkout').parentElement?.nextElementSibling || document.getElementById('req-checkout').parentElement;
@@ -2153,21 +2044,13 @@
                 }
                 dateError.textContent = message;
                 isValid = false;
-            } else {
-                if (checkin) checkin.parentElement?.classList.remove('invalid');
-                if (checkout) checkout.parentElement?.classList.remove('invalid');
-                const dateError = document.getElementById('date-error');
-                if (dateError) {
-                    dateError.textContent = '';
-                    dateError.classList.remove('visible');
-                }
             }
 
             return isValid;
         }
 
         function bindInquiryReplyActions() {
-            document.addEventListener('click', (event) => {
+            document.addEventListener('click', async (event) => {
                 const replyButton = event.target.closest('[data-action="reply-inquiry"]');
                 if (replyButton) {
                     state.replyingInquiryId = replyButton.dataset.id || null;
@@ -2187,8 +2070,18 @@
                     const inquiryId = submitButton.dataset.id || null;
                     const textarea = inquiryId ? document.getElementById(`reply-text-${inquiryId}`) : null;
                     const replyText = textarea ? textarea.value : '';
-                    if (saveInquiryReply(inquiryId, replyText)) {
+                    
+                    submitButton.disabled = true;
+                    submitButton.innerText = 'Saving...';
+
+                    // Call the globally bound function
+                    const success = await window.saveInquiryReply(inquiryId, replyText);
+                    
+                    if (success) {
                         safeTg.showAlert('Your quote reply was saved.');
+                    } else {
+                        submitButton.disabled = false;
+                        submitButton.innerText = 'Submit quote';
                     }
                 }
             });
@@ -2272,11 +2165,8 @@
                 const telegramId = tg.initDataUnsafe?.user?.id || null;
                 const inquiryId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'inq-' + Date.now();
 
-                if (!window.supabaseClient) {
-                    throw new Error('Supabase client is not initialized.');
-                }
+                if (!window.supabaseClient) throw new Error('Supabase client is not initialized.');
 
-                // 1. Direct Insertion to Supabase
                 const { error: dbError } = await window.supabaseClient
                     .from('inquiries')
                     .insert([{
@@ -2290,12 +2180,8 @@
                         status: 'received'
                     }]);
 
-                if (dbError) {
-                    console.error('Supabase Insert Error:', dbError);
-                    throw new Error(dbError.message || 'Database error occurred.');
-                }
+                if (dbError) throw new Error(dbError.message || 'Database error occurred.');
 
-                // 2. Fire and forget netlify notification (doesn't block completion)
                 fetchWithTimeout('/.netlify/functions/inquiries', {
                     method: 'POST',
                     headers: {
@@ -2312,11 +2198,8 @@
                     })
                 }, 5000).catch(() => {});
 
-                // 3. Complete and Refresh UI
                 const nextCount = await refreshTrialUsageFromSupabase();
                 syncInquiryUsage(nextCount);
-
-                // Fetch new vault list directly from DB
                 await loadInquiries();
 
                 if (magicInput) magicInput.value = '';
@@ -2331,9 +2214,7 @@
                 switchTab('vault');
 
             } catch (error) {
-                console.error('Submission Error:', error);
-                const friendlyError = error && error.message ? error.message : 'Unable to send your quote request.';
-                safeTg.showAlert(`Error: ${friendlyError}`);
+                safeTg.showAlert(`Error: ${error.message || 'Unable to send request.'}`);
             } finally {
                 if (activeButton) {
                     activeButton.disabled = false;
