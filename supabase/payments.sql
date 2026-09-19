@@ -60,11 +60,25 @@ create table if not exists public.deal_rates (
     updated_at timestamptz not null default now()
 );
 
+create table if not exists public.hot_package_rates (
+    id uuid primary key default gen_random_uuid(),
+    destination text not null,
+    nights integer not null check (nights > 0),
+    days integer not null check (days > 0),
+    price numeric(12, 2) not null check (price >= 0),
+    tag text not null default 'Hot',
+    note text not null default 'Live deal',
+    is_active boolean not null default true,
+    sort_order integer not null default 0,
+    created_at timestamptz not null default now()
+);
+
 alter table public.inquiries add column if not exists details jsonb not null default '{}'::jsonb;
 alter table public.users enable row level security;
 alter table public.inquiries enable row level security;
 alter table public.payments_log enable row level security;
 alter table public.deal_rates enable row level security;
+alter table public.hot_package_rates enable row level security;
 
 create or replace function public.create_inquiry(
     p_telegram_id bigint,

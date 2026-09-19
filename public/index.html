@@ -87,7 +87,7 @@
 
             body,
             .app-background { background: var(--app-bg); color: var(--app-text); }
-            .app-background::after { background: rgba(23, 24, 29, 0.9); }
+            .app-background::after { background: rgba(23, 24, 29, 0.58); }
             .app-header { background: rgba(23, 24, 29, 0.94); border-color: var(--app-border); }
             .app-header .text-app-secondary { color: #c5c7cf !important; }
             .app-header .text-app-vip,
@@ -118,6 +118,24 @@
             pointer-events: none;
             overflow: hidden;
             background: #ffffff;
+        }
+
+        .app-background video {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            opacity: 0.46;
+            filter: saturate(0.86) contrast(0.92) brightness(1.04);
+            animation: villaDrift 18s ease-in-out infinite alternate;
+        }
+
+        @keyframes villaDrift {
+            from { transform: scale(1.03) translate3d(-0.5%, 0, 0); }
+            to { transform: scale(1.08) translate3d(0.5%, -0.5%, 0); }
         }
 
         .travel-route-layer {
@@ -183,6 +201,7 @@
             content: '';
             position: absolute;
             inset: -10px;
+            z-index: 1;
             background-image: url('https://media.giphy.com/media/l0HlNaQ6gWfllcjDO/giphy.gif');
             background-size: cover;
             background-position: center;
@@ -194,7 +213,8 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0.82));
+            z-index: 2;
+            background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.66));
             backdrop-filter: blur(1.5px);
         }
 
@@ -236,6 +256,57 @@
             flex-shrink: 0;
         }
 
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+        }
+
+        .header-brand-copy {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .brand-social-links,
+        .footer-social-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .social-link-icon {
+            width: 18px;
+            height: 18px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(17, 17, 21, 0.16);
+            border-radius: 50%;
+            background: var(--app-accent);
+            color: #111115;
+            transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+        }
+
+        .social-link-icon:hover,
+        .social-link-icon:focus-visible {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(17, 17, 21, 0.16);
+            filter: brightness(1.04);
+        }
+
+        .social-link-icon svg {
+            width: 10px;
+            height: 10px;
+            display: block;
+            fill: currentColor;
+        }
+
+        .footer-social-links { margin-bottom: 6px; }
+
         .brand-mark,
         .yellow-button {
             color: #111115 !important;
@@ -245,6 +316,11 @@
             background: #111111;
             color: #ffffff !important;
             border: 1px solid rgba(17, 17, 17, 0.12);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .brand-social-icon,
+            .social-link-icon { border-color: rgba(255, 255, 255, 0.2); }
         }
 
         .categories-grid {
@@ -470,6 +546,8 @@
 
         .section-label { color: #777872; }
 
+        .travel-deals-heading { color: #777872 !important; }
+
         .usp-banner {
             position: relative;
             overflow: hidden;
@@ -646,6 +724,25 @@
             line-height: 1;
         }
 
+        .travel-deals-box .hot-deals-ticker {
+            background: rgba(255, 255, 255, 0.82);
+            border-color: rgba(17, 17, 21, 0.1);
+        }
+
+        .travel-deals-box .hot-deal-ticker-item {
+            color: #777872;
+        }
+
+        .travel-deals-box .hot-deal-ticker-item .ticker-tag,
+        .travel-deals-box .hot-deal-ticker-item > span {
+            color: #777872;
+        }
+
+        .travel-deals-box .hot-deal-ticker-item .ticker-tag {
+            background: rgba(204, 255, 0, 0.34);
+            border-color: rgba(17, 17, 21, 0.12);
+        }
+
         .hot-package-table {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -675,6 +772,14 @@
             transform: translateY(0);
             box-shadow: 0 10px 22px rgba(17, 17, 21, 0.08);
             border-color: rgba(17, 17, 21, 0.14);
+        }
+
+        .hot-package-row.is-visible,
+        .hot-package-row.is-visible strong,
+        .hot-package-row.is-visible .meta-row,
+        .hot-package-row.is-visible .duration,
+        .hot-package-row.is-visible .price-tag {
+            color: #777872 !important;
         }
 
         .hot-package-row .meta-row {
@@ -999,10 +1104,308 @@
         @media (prefers-color-scheme: dark) {
             input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
         }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html { min-width: 320px; }
+
+        body {
+            min-width: 320px;
+            overflow-x: hidden;
+            line-height: 1.4;
+        }
+
+        button,
+        a,
+        input,
+        select,
+        textarea { touch-action: manipulation; }
+
+        button,
+        [role="button"] { min-height: 44px; }
+
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid var(--app-accent);
+            outline-offset: 2px;
+        }
+
+        input,
+        select,
+        textarea {
+            min-width: 0;
+            line-height: 1.35;
+        }
+
+        input::placeholder,
+        textarea::placeholder { opacity: 0.72; }
+
+        .app-header,
+        .app-header > div,
+        .view-section,
+        .magic-compose,
+        .dark-title-band,
+        #offers-container,
+        #rates-container,
+        #store-grid,
+        #inquiries-list { min-width: 0; }
+
+        .app-header { padding-top: max(8px, env(safe-area-inset-top)); }
+
+        .app-header .yellow-button {
+            min-height: 44px;
+            padding-inline: 12px;
+        }
+
+        .magic-compose > .flex,
+        .magic-compose > .flex > * { min-width: 0; }
+
+        .magic-compose > .flex:nth-of-type(2) { align-items: stretch; }
+
+        .magic-offer {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .magic-submit,
+        #btn-submit,
+        #store-grid button,
+        .deal-dialog button { min-height: 44px; }
+
+        .field-shell {
+            min-height: 60px;
+            scroll-margin-block: 96px;
+        }
+
+        .field-shell input,
+        .field-shell select { min-height: 28px; }
+
+        .hot-deals-ticker { height: 44px; min-height: 44px; }
+
+        .hot-deal-ticker-item {
+            min-width: 0;
+            white-space: nowrap;
+        }
+
+        .hot-deal-ticker-item > span:not(.ticker-tag) {
+            min-width: 0;
+            flex: 0 1 auto;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hot-deal-ticker-item .ticker-tag { flex: 0 0 auto; }
+
+        .hot-package-row {
+            min-width: 0;
+            min-height: 132px;
+        }
+
+        .hot-package-row .meta-row,
+        .hot-package-row strong,
+        .hot-package-row .duration,
+        .hot-package-row .price-tag,
+        .compact-rate-card h4,
+        .compact-rate-card .savings,
+        .compact-rate-card .savings-value { overflow-wrap: anywhere; }
+
+        .hot-package-row .meta-row > span:first-child,
+        .hot-package-row .meta-row > span:last-child { min-width: 0; }
+
+        .hot-package-row .meta-row > span:last-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .compact-rate-card {
+            min-width: 0;
+            min-height: 96px;
+        }
+
+        .compact-rate-card .rate-bottom { min-height: 22px; }
+
+        .quick-deal-pill {
+            min-height: 44px;
+            text-align: center;
+            overflow-wrap: anywhere;
+        }
+
+        .social-proof-ticker {
+            height: 42px;
+            min-height: 42px;
+        }
+
+        .ticker-message {
+            height: 40px;
+            display: grid;
+            place-items: center;
+            line-height: 1.25;
+        }
+
+        nav { bottom: max(8px, env(safe-area-inset-bottom)); }
+
+        nav .flex { min-height: 68px; }
+
+        nav .nav-btn {
+            min-width: 76px;
+            min-height: 56px;
+            justify-content: center;
+            padding: 7px 10px;
+        }
+
+        @media (max-width: 380px) {
+            .app-header .yellow-button {
+                max-width: 132px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .magic-compose > .flex:nth-of-type(2) { flex-direction: column; }
+
+            .magic-submit { width: 100%; }
+
+            .hot-deal-ticker-item {
+                gap: 5px;
+                padding-inline: 8px;
+                font-size: 9px;
+                letter-spacing: 0.02em;
+            }
+
+            .hot-package-table,
+            #rates-container { gap: 6px; }
+
+            .hot-package-row { padding-inline: 9px; }
+
+            nav { left: 8px; right: 8px; }
+            nav .nav-btn { min-width: 0; flex: 1 1 0%; }
+        }
+
+        @media (max-width: 350px) {
+            .categories-grid { gap: 5px; }
+
+            .category-tile {
+                min-height: 44px;
+                padding-inline: 6px;
+            }
+
+            #inquiry-fields > .grid { grid-template-columns: minmax(0, 1fr); }
+
+            .hot-package-table,
+            #rates-container { grid-template-columns: minmax(0, 1fr); }
+
+            .hot-package-row { min-height: 112px; }
+
+            .compact-rate-card { min-height: 88px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body,
+            main,
+            .view-section,
+            .view-section h1,
+            .view-section h2,
+            .view-section h3,
+            .view-section h4,
+            .view-section p,
+            .view-section label,
+            .view-section .text-neutral-900,
+            .view-section .text-black,
+            .view-section .text-black\/70,
+            .view-section .text-black\/80 {
+                color: var(--app-text);
+            }
+
+            .app-header h1,
+            .app-header p,
+            .app-header .text-app-secondary,
+            .app-header .text-app-vip,
+            nav .nav-btn span:last-child:not(.text-app-vip) {
+                color: var(--app-text) !important;
+            }
+
+            .app-header h1 .text-app-vip,
+            nav .nav-btn span.text-app-vip {
+                color: var(--app-accent) !important;
+            }
+
+            .bg-app-vip,
+            .bg-app-vip .text-black,
+            .yellow-button,
+            .yellow-button .text-black {
+                color: #111115 !important;
+            }
+
+            .magic-compose,
+            .deal-dialog,
+            .bg-app-card { color: var(--app-text); }
+
+            .magic-input-shell textarea,
+            input,
+            select,
+            textarea,
+            .text-neutral-900 { color: var(--app-text) !important; }
+
+            input::placeholder,
+            textarea::placeholder { color: var(--app-muted) !important; }
+
+            .section-label { color: var(--app-muted); }
+
+            .hot-package-row,
+            .hot-package-row strong,
+            .hot-package-row .price-tag,
+            .compact-rate-card .meta,
+            .compact-rate-card h4,
+            .compact-rate-card .savings,
+            .compact-rate-card .savings-value {
+                color: var(--app-text);
+            }
+
+            .hot-package-row .meta-row,
+            .hot-package-row .duration { color: var(--app-muted); }
+
+            .quick-deal-pill {
+                background: var(--app-card);
+                color: var(--app-text);
+                border-color: var(--app-border);
+            }
+
+            nav {
+                background: rgba(23, 24, 29, 0.88);
+                border-color: var(--app-border);
+            }
+
+            nav .nav-btn.active {
+                background: rgba(255, 255, 255, 0.08);
+                box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+            }
+
+            #inquiries-list textarea {
+                background: var(--app-card);
+                color: var(--app-text) !important;
+            }
+        }
     </style>
 </head>
 <body class="pb-20 bg-app-bg text-neutral-900">
-    <div class="app-background" aria-hidden="true"></div>
+    <div class="app-background" aria-hidden="true">
+        <video autoplay muted loop playsinline preload="metadata" poster="https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&w=1920&q=80">
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-bungalow-in-a-lagoon-12173-large.mp4" type="video/mp4">
+            <source src="https://cdn.coverr.co/videos/coverr-aerial-view-of-a-tropical-resort-1574/1080p.mp4" type="video/mp4">
+        </video>
+    </div>
     <div class="travel-route-layer" aria-hidden="true">
         <svg viewBox="0 0 1600 1800" preserveAspectRatio="xMidYMid slice">
             <defs>
@@ -1047,9 +1450,16 @@
     <header class="app-header sticky top-0 z-50 backdrop-blur-lg border-b px-3 py-2">
         <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-                <div class="brand-mark" aria-label="Travel4life logo">t4</div>
-                <div class="min-w-0">
+                <div class="brand-lockup">
+                    <div class="brand-mark" aria-label="Travel4life logo">t4</div>
+                </div>
+                <div class="header-brand-copy">
                     <h1 class="text-sm font-extrabold tracking-tight truncate leading-none">T4L <span class="text-app-vip">x</span> Telegram</h1>
+                    <div class="brand-social-links" aria-label="Travel4life social links">
+                        <a class="social-link-icon" href="https://www.travel4life.net" target="_blank" rel="noopener noreferrer" aria-label="Travel4life website" title="Travel4life website"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.9 9h-3a15.7 15.7 0 0 0-1.2-5A8.1 8.1 0 0 1 18.9 11ZM12 4c.8 1.1 1.7 3.4 2 7h-4c.3-3.6 1.2-5.9 2-7ZM7.3 6a15.7 15.7 0 0 0-1.2 5h-3A8.1 8.1 0 0 1 7.3 6ZM3.1 13h3a15.7 15.7 0 0 0 1.2 5A8.1 8.1 0 0 1 3.1 13Zm8.9 7c-.8-1.1-1.7-3.4-2-7h4c-.3 3.6-1.2 5.9-2 7Zm2.7-2a15.7 15.7 0 0 0 1.2-5h3a8.1 8.1 0 0 1-4.2 5Z"/></svg></a>
+                        <a class="social-link-icon" href="https://instagram.com/travel4life_net" target="_blank" rel="noopener noreferrer" aria-label="Travel4life on Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 12 16.5 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 12 14.5 2.5 2.5 0 0 0 12 9.5ZM17.5 6A1.5 1.5 0 1 1 17.5 9 1.5 1.5 0 0 1 17.5 6Z"/></svg></a>
+                        <a class="social-link-icon" href="https://facebook.com/travellife2" target="_blank" rel="noopener noreferrer" aria-label="Travel4life on Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 22v-8h2.8l.4-3h-3.2V9.1c0-.9.3-1.6 1.7-1.6h1.8V4.8c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.5V11H7.2v3h2.8v8h3.5Z"/></svg></a>
+                    </div>
                 </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
@@ -1082,12 +1492,12 @@
     <main>
         <section id="view-home" class="view-section active pt-0.5">
                 <div class="px-5 mb-2">
-                <h2 class="text-2xl font-black uppercase tracking-[-0.06em] leading-none text-black m-0">Wholesale Rates</h2>
+                <h2 class="text-2xl font-black tracking-[-0.06em] leading-none text-black m-0">Our secret - your Free Miles</h2>
             </div>
 
             <div class="mx-5 mb-3 overflow-hidden rounded-[18px] border border-black/10 bg-[#0d0d0d] p-2 shadow-[0_18px_32px_rgba(0,0,0,0.12)]">
                 <div class="flex items-center justify-between gap-2 px-1 pb-1">
-                    <span class="text-[9px] font-black uppercase tracking-[0.16em] text-white/80">Hot Deals</span>
+                    <span class="travel-deals-heading text-[9px] font-black uppercase tracking-[0.16em]">Hot Deals</span>
                     <span class="text-[9px] font-black uppercase tracking-[0.14em] text-[#ccff00]">Dropped rates</span>
                 </div>
                 <div id="hot-deals-ticker" class="hot-deals-ticker"></div>
@@ -1193,6 +1603,17 @@
                 </div>
 
             <footer class="px-5 pb-4 text-center">
+                <div class="footer-social-links" aria-label="Travel4life social links">
+                    <a class="social-link-icon" href="https://www.travel4life.net" target="_blank" rel="noopener noreferrer" aria-label="Travel4life website" title="Travel4life website">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.9 9h-3a15.7 15.7 0 0 0-1.2-5A8.1 8.1 0 0 1 18.9 11ZM12 4c.8 1.1 1.7 3.4 2 7h-4c.3-3.6 1.2-5.9 2-7ZM7.3 6a15.7 15.7 0 0 0-1.2 5h-3A8.1 8.1 0 0 1 7.3 6ZM3.1 13h3a15.7 15.7 0 0 0 1.2 5A8.1 8.1 0 0 1 3.1 13Zm8.9 7c-.8-1.1-1.7-3.4-2-7h4c-.3 3.6-1.2 5.9-2 7Zm2.7-2a15.7 15.7 0 0 0 1.2-5h3a8.1 8.1 0 0 1-4.2 5Z"/></svg>
+                    </a>
+                    <a class="social-link-icon" href="https://instagram.com/travel4life_net" target="_blank" rel="noopener noreferrer" aria-label="Travel4life on Instagram" title="Instagram">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 12 16.5 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 12 14.5 2.5 2.5 0 0 0 12 9.5ZM17.5 6A1.5 1.5 0 1 1 17.5 9 1.5 1.5 0 0 1 17.5 6Z"/></svg>
+                    </a>
+                    <a class="social-link-icon" href="https://facebook.com/travellife2" target="_blank" rel="noopener noreferrer" aria-label="Travel4life on Facebook" title="Facebook">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 22v-8h2.8l.4-3h-3.2V9.1c0-.9.3-1.6 1.7-1.6h1.8V4.8c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.5V11H7.2v3h2.8v8h3.5Z"/></svg>
+                    </a>
+                </div>
                 <p class="text-[9px] text-app-secondary mt-1">T4L x Telegram · Our Secret Your Miles</p>
             </footer>
         </section>
@@ -1276,8 +1697,10 @@
         ];
 
         let hotPackagesDB = [...fallbackHotPackagesDB];
+        let travelDealsDB = [...fallbackOffersDB];
         let offersDB = [...fallbackOffersDB];
         let hotDealsTickerIndex = 0;
+        let travelDealsLoaded = false;
 
         const categoriesDB = [
             { id: 'Hotels', label: 'Stays', icon: '🏨' }, { id: 'Flights', label: 'Flights', icon: '✈️' },
@@ -1574,63 +1997,75 @@ function init() {
     const tickerContainer = document.getElementById('hot-deals-ticker');
     if (!container) return;
 
-    // Fallback if hotPackagesDB is empty
-    const deals = Array.isArray(hotPackagesDB) && hotPackagesDB.length ? hotPackagesDB : [...fallbackHotPackagesDB];
+    const dealSource = Array.isArray(travelDealsDB) && travelDealsDB.length ? travelDealsDB : [...fallbackOffersDB];
+     hotDealsTickerIndex = hotDealsTickerIndex % dealSource.length;
 
-    // 1. Render the Hot Deals Ticker
     if (tickerContainer) {
-        tickerContainer.innerHTML = deals.map((deal, index) => `
+        tickerContainer.innerHTML = dealSource.map((deal, index) => {
+            const destination = deal.destination || deal.title || 'Destination';
+            const nights = Number(deal.nights || 3);
+            const days = Number(deal.days || deal.nights || 4);
+            const price = Number(deal.price || deal.deal_price || deal.reference_price || 0);
+            return `
             <div class="hot-deal-ticker-item ${index === hotDealsTickerIndex ? 'is-visible' : ''}">
-                <span class="ticker-tag">${deal.tag || 'Hot'}</span>
-                <span>${deal.destination}</span>
-                <span class="text-[#ccff00]">${deal.nights}N/${deal.days}D</span>
-                <span>${formatINR(deal.price)}</span>
+                <span class="ticker-tag">${deal.tag || deal.discount || 'Hot'}</span>
+                <span>${destination}</span>
+                <span class="text-[#ccff00]">${nights}N/${days}D</span>
+                <span>${formatINR(price)}</span>
             </div>
-        `).join('');
+        `;
+        }).join('');
     }
 
-    // 2. Render the Package Cards Grid below it
     container.innerHTML = `
         <div class="travel-deals-box">
             <div id="hot-deal-ticker-panel" class="hot-deals-ticker mb-2">
                 ${tickerContainer ? tickerContainer.innerHTML : ''}
             </div>
             <div class="hot-package-table">
-                ${deals.map((deal, index) => `
-                    <button type="button" class="hot-package-row ${index === hotDealsTickerIndex ? 'is-visible' : ''}" onclick="setHotPackageInForm({ destination: '${deal.destination}', nights:${deal.nights}, days: ${deal.days}, price:${deal.price} })">
+                ${dealSource.map((deal, index) => {
+                    const destination = deal.destination || deal.title || 'Destination';
+                    const nights = Number(deal.nights || 3);
+                    const days = Number(deal.days || deal.nights || 4);
+                    const price = Number(deal.price || deal.deal_price || deal.reference_price || 0);
+                    const summary = deal.summary || deal.note || deal.tag || 'Wholesale rate';
+                    return `
+                    <button type="button" class="hot-package-row ${index === hotDealsTickerIndex ? 'is-visible' : ''}" onclick="setHotPackageInForm({ destination: '${destination.replace(/'/g, "\\'")}', nights:${nights}, days: ${days}, price:${price} })">
                         <div class="meta-row">
-                            <span>${deal.tag || 'Hot'}</span>
-                            <span>${deal.note || 'Wholesale rate'}</span>
+                            <span>${deal.tag || deal.discount || 'Hot'}</span>
+                            <span>${summary}</span>
                         </div>
-                        <strong>${deal.destination}</strong>
+                        <strong>${destination}</strong>
                         <div class="package-summary">
-                            <span class="duration">${deal.nights} nights / ${deal.days} days</span>
-                            <span class="price-tag">${formatINR(deal.price)}</span>
+                            <span class="duration">${nights} nights / ${days} days</span>
+                            <span class="price-tag">${formatINR(price)}</span>
                         </div>
                     </button>
-                `).join('')}
+                `;
+                }).join('')}
             </div>
         </div>
     `;
 
-    // 3. Reset/Initialize Ticker Interval cleanly
     if (window._tickerInterval) clearInterval(window._tickerInterval);
-    
+
     const tickerPanel = document.getElementById('hot-deal-ticker-panel') || tickerContainer;
-    if (tickerPanel) {
-        const items = tickerPanel.querySelectorAll('.hot-deal-ticker-item');
-        if (items.length > 1) {
-            window._tickerInterval = setInterval(() => {
-                hotDealsTickerIndex = (hotDealsTickerIndex + 1) % items.length;
-                
-                // Toggle ticker items
-                items.forEach((item, idx) => item.classList.toggle('is-visible', idx === hotDealsTickerIndex));
-                
-                // Toggle grid package rows
-                const rows = document.querySelectorAll('.hot-package-row');
-                rows.forEach((row, idx) => row.classList.toggle('is-visible', idx === hotDealsTickerIndex));
-            }, 2200);
-        }
+    const tickerGroups = [tickerContainer, tickerPanel]
+        .filter((ticker, index, group) => ticker && group.indexOf(ticker) === index)
+        .map(ticker => Array.from(ticker.querySelectorAll('.hot-deal-ticker-item')));
+    const rows = Array.from(container.querySelectorAll('.hot-package-row'));
+    const dealCount = Math.min(rows.length, ...tickerGroups.map(group => group.length));
+
+    if (dealCount > 1) {
+        const showHotDeal = () => {
+            hotDealsTickerIndex = (hotDealsTickerIndex + 1) % dealCount;
+            tickerGroups.forEach(items => {
+                items.forEach((item, index) => item.classList.toggle('is-visible', index === hotDealsTickerIndex));
+            });
+            rows.forEach((row, index) => row.classList.toggle('is-visible', index === hotDealsTickerIndex));
+        };
+
+        window._tickerInterval = setInterval(showHotDeal, 2200);
     }
 
     renderQuickDealPills();
@@ -1715,28 +2150,107 @@ function init() {
         }
 
        async function loadTravelDeals() {
+    const client = window.supabaseClient;
+    if (client) {
+        try {
+            const { data, error } = await client
+                .from('travel_deals')
+                .select('*')
+                .order('updated_at', { ascending: false });
+
+            if (!error && Array.isArray(data) && data.length) {
+                travelDealsDB = data.map((deal) => ({
+                    id: deal.deal_id || deal.id || String(deal.title || deal.destination || 'travel-deal'),
+                    title: deal.title || deal.destination || 'Travel deal',
+                    discount: deal.tag || 'Live deal',
+                    tag: deal.tag || 'Live deal',
+                    emoji: deal.emoji || '✈️',
+                    price: Number(deal.deal_price ?? deal.price ?? deal.reference_price ?? 0),
+                    deal_price: Number(deal.deal_price ?? deal.price ?? deal.reference_price ?? 0),
+                    reference_price: Number(deal.reference_price ?? deal.deal_price ?? 0),
+                    currency: deal.currency || 'USD',
+                    destination: deal.destination || deal.title || 'Destination',
+                    summary: deal.summary || deal.note || 'Limited-time rate',
+                    nights: Number(deal.nights ?? 3),
+                    days: Number(deal.days ?? 4)
+                }));
+
+                offersDB = travelDealsDB.map((deal) => ({
+                    ...deal,
+                    title: deal.title || deal.destination || 'Travel deal',
+                    discount: deal.tag || 'Live deal',
+                    tag: deal.tag || 'Live deal',
+                    price: Number(deal.deal_price ?? deal.price ?? deal.reference_price ?? 0)
+                }));
+
+                hotPackagesDB = travelDealsDB.map((deal) => ({
+                    destination: deal.destination || deal.title || 'Destination',
+                    title: deal.title || deal.destination || 'Destination',
+                    nights: Number(deal.nights || 3),
+                    days: Number(deal.days || deal.nights || 4),
+                    price: Number(deal.deal_price ?? deal.price ?? deal.reference_price ?? 0),
+                    tag: deal.tag || 'Hot',
+                    note: deal.summary || deal.note || 'Limited-time rate',
+                    summary: deal.summary || deal.note || 'Limited-time rate'
+                }));
+
+                renderQuickDealPills();
+                renderOffers();
+                return;
+            }
+        } catch (error) {
+            console.warn('Travel deals direct Supabase load failed, trying API fallback:', error);
+        }
+    }
+
     try {
         const response = await fetch('/.netlify/functions/travelDeals');
         if (!response.ok) throw new Error('API failed');
         const data = await response.json();
-        const deals = Array.isArray(data.deals) && data.deals.length ? data.deals : [...fallbackHotPackagesDB];
+        const deals = Array.isArray(data.deals) && data.deals.length ? data.deals : [...fallbackOffersDB];
 
-        hotPackagesDB = deals.map((deal) => {
-            // Check all possible price keys from API payloads
-            const rawPrice = Number(deal.price ?? deal.deal_price ?? deal.reference_price ?? 0);
-            return {
-                destination: deal.destination || deal.title || 'Destination',
-                nights: Number(deal.nights || 3),
-                days: Number(deal.days || deal.nights || 4),
-                price: rawPrice > 0 ? rawPrice : 540, // Ensure it never defaults to 0
-                tag: deal.tag || 'Hot',
-                note: deal.note || 'Limited-time rate'
-            };
-        });
+        travelDealsDB = deals.map((deal) => ({
+            id: deal.deal_id || deal.id || String(deal.title || deal.destination || 'travel-deal'),
+            title: deal.title || deal.destination || 'Travel deal',
+            discount: deal.tag || 'Live deal',
+            tag: deal.tag || 'Live deal',
+            emoji: deal.emoji || '✈️',
+            price: Number(deal.deal_price ?? deal.price ?? deal.reference_price ?? 0),
+            deal_price: Number(deal.deal_price ?? deal.price ?? deal.reference_price ?? 0),
+            reference_price: Number(deal.reference_price ?? deal.deal_price ?? 0),
+            currency: deal.currency || 'USD',
+            destination: deal.destination || deal.title || 'Destination',
+            summary: deal.summary || deal.note || 'Limited-time rate',
+            nights: Number(deal.nights ?? 3),
+            days: Number(deal.days ?? 4)
+        }));
 
+        offersDB = travelDealsDB.map((deal) => ({
+            ...deal,
+            title: deal.title || deal.destination || 'Travel deal',
+            discount: deal.tag || 'Live deal',
+            tag: deal.tag || 'Live deal',
+            price: Number(deal.deal_price ?? deal.price ?? deal.reference_price ?? 0)
+        }));
+
+        hotPackagesDB = travelDealsDB.map((deal) => ({
+            destination: deal.destination || deal.title || 'Destination',
+            title: deal.title || deal.destination || 'Destination',
+            nights: Number(deal.nights || 3),
+            days: Number(deal.days || deal.nights || 4),
+            price: Number(deal.deal_price ?? deal.price ?? deal.reference_price ?? 0),
+            tag: deal.tag || 'Hot',
+            note: deal.summary || deal.note || 'Limited-time rate',
+            summary: deal.summary || deal.note || 'Limited-time rate'
+        }));
+
+        renderQuickDealPills();
         renderOffers();
     } catch (error) {
+        travelDealsDB = [...fallbackOffersDB];
+        offersDB = [...fallbackOffersDB];
         hotPackagesDB = [...fallbackHotPackagesDB];
+        renderQuickDealPills();
         renderOffers();
     }
 }
@@ -1747,8 +2261,8 @@ function init() {
         if (!response.ok) throw new Error('Failed to load hot packages');
         const data = await response.json();
         const packages = Array.isArray(data.hotPackages) ? data.hotPackages : [];
-        
-        if (packages.length > 0) {
+
+        if (packages.length > 0 && !travelDealsDB.length) {
             hotPackagesDB = packages.map(deal => ({
                 destination: deal.destination || 'Destination',
                 nights: Number(deal.nights || 3),
@@ -1757,14 +2271,13 @@ function init() {
                 tag: deal.tag || 'Hot',
                 note: deal.note || 'Hot Deal'
             }));
-        } else {
-            hotPackagesDB = [...fallbackHotPackagesDB];
+            renderOffers();
         }
     } catch (error) {
-        console.warn('Using fallback hot packages due to error:', error);
-        hotPackagesDB = [...fallbackHotPackagesDB];
-    } finally {
-        renderOffers(); // Ensures UI updates whether API succeeds or fails
+        if (!travelDealsDB.length) {
+            hotPackagesDB = [...fallbackHotPackagesDB];
+            renderOffers();
+        }
     }
 }
 
@@ -1908,6 +2421,37 @@ function init() {
         }
 
         async function loadDealRates() {
+            if (window.supabaseClient) {
+                try {
+                    const { data, error } = await window.supabaseClient
+                        .from('deal_rates')
+                        .select('*')
+                        .order('updated_at', { ascending: false });
+
+                    if (!error && Array.isArray(data) && data.length) {
+                        const databaseCatalog = {};
+                        data.forEach(rate => {
+                            const category = rate.category || 'Hotels';
+                            if (!databaseCatalog[category]) databaseCatalog[category] = [];
+                            databaseCatalog[category].push({
+                                category,
+                                name: rate.title || rate.name || 'Rate',
+                                unit: rate.unit || 'per stay',
+                                referenceRate: Number(rate.reference_rate ?? rate.referenceRate ?? 0),
+                                ourRate: Number(rate.our_rate ?? rate.ourRate ?? 0),
+                                freshness: rate.freshness_label || rate.freshness || 'Reference snapshot'
+                            });
+                        });
+
+                        rateCatalog = Object.keys(databaseCatalog).length ? databaseCatalog : JSON.parse(JSON.stringify(fallbackRateCatalog));
+                        renderRates();
+                        return;
+                    }
+                } catch (error) {
+                    console.warn('Deal rates direct Supabase load failed, trying API fallback:', error);
+                }
+            }
+
             try {
                 const response = await fetch('/.netlify/functions/dealRates');
                 if (!response.ok) throw new Error('API failed');
@@ -1925,7 +2469,9 @@ function init() {
                     const category = rate.category || 'Hotels';
                     if (!databaseCatalog[category]) databaseCatalog[category] = [];
                     databaseCatalog[category].push({
-                        category, name: rate.title || rate.name || 'Rate', unit: rate.unit || 'per stay',
+                        category,
+                        name: rate.title || rate.name || 'Rate',
+                        unit: rate.unit || 'per stay',
                         referenceRate: Number(rate.reference_rate ?? rate.referenceRate ?? 0),
                         ourRate: Number(rate.our_rate ?? rate.ourRate ?? 0),
                         freshness: rate.freshness_label || rate.freshness || 'Reference snapshot'

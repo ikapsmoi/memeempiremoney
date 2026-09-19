@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node -e \"console.log('Static Netlify build ready')\"",
     "start": "netlify dev",
-    "test": "node --check netlify/functions/createInvoice.js && node --check netlify/functions/webhook.js && node --check netlify/functions/inquiries.js && node --check netlify/functions/dealRates.js && node --check netlify/functions/travelDeals.js"
+    "test": "node --check netlify/functions/createInvoice.js && node --check netlify/functions/webhook.js && node --check netlify/functions/inquiries.js && node --check netlify/functions/dealRates.js && node --check netlify/functions/travelDeals.js && node tests/hot-package-rates.test.js"
   },
   "repository": {
     "type": "git",
