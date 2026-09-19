@@ -598,14 +598,136 @@
             min-width: 0;
         }
 
+        .hot-deals-ticker {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-height: 42px;
+            overflow: hidden;
+            border-radius: 13px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .hot-deal-ticker-item {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 0 16px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 420ms ease, transform 420ms ease;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .hot-deal-ticker-item.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hot-deal-ticker-item .ticker-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: rgba(204,255,0,0.18);
+            border: 1px solid rgba(204,255,0,0.35);
+            color: #ccff00;
+            font-size: 9px;
+            line-height: 1;
+        }
+
+        .hot-package-table {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .hot-package-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            border: 1px solid rgba(17, 17, 21, 0.08);
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(244,246,248,0.98));
+            padding: 12px 12px 10px;
+            text-align: left;
+            color: #111115;
+            box-shadow: 0 8px 22px rgba(17, 17, 21, 0.04);
+            opacity: 0.55;
+            transform: translateY(5px);
+            transition: opacity 320ms ease, transform 320ms ease, box-shadow 320ms ease, border-color 320ms ease;
+        }
+
+        .hot-package-row.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+            box-shadow: 0 10px 22px rgba(17, 17, 21, 0.08);
+            border-color: rgba(17, 17, 21, 0.14);
+        }
+
+        .hot-package-row .meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: rgba(17, 17, 21, 0.62);
+        }
+
+        .hot-package-row strong {
+            display: block;
+            font-size: 12px;
+            font-weight: 900;
+            line-height: 1.2;
+            color: #111115;
+        }
+
+        .hot-package-row .package-summary {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .hot-package-row .duration {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: rgba(17, 17, 21, 0.74);
+        }
+
+        .hot-package-row .price-tag {
+            font-size: 12px;
+            font-weight: 900;
+            color: #111115;
+        }
+
         .travel-deals-box {
             position: relative;
-            height: 190px;
+            height: auto;
             overflow: hidden;
             border: 1px solid rgba(17, 17, 21, 0.08);
             border-radius: 16px;
             background: linear-gradient(180deg, rgba(204,255,0,0.18), rgba(255,255,255,0.9));
             box-shadow: inset 0 0 0 1px rgba(204,255,0,0.18), 0 10px 22px rgba(17, 17, 21, 0.03);
+            padding: 10px;
         }
 
         .travel-deals-track {
@@ -959,14 +1081,16 @@
 
     <main>
         <section id="view-home" class="view-section active pt-0.5">
-            <div class="px-5 mb-3 flex items-center justify-between gap-2">
-                <h2 class="text-xl font-extrabold leading-none tracking-tight m-0">Wholesale Rates</h2>
-                <span class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Concierge AI</span>
+            <div class="px-5 mb-2">
+                <h2 class="text-2xl font-black uppercase tracking-[-0.06em] leading-none text-black m-0">Wholesale Rates</h2>
             </div>
 
-            <div class="mx-5 mb-3 flex items-center justify-between gap-2 rounded-full border border-app-border bg-app-card px-2.5 py-1 shadow-sm">
-                <span class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Zero-markup travel desk for global members</span>
-                <div id="quick-deal-pills" class="quick-deal-pills"></div>
+            <div class="mx-5 mb-3 overflow-hidden rounded-[18px] border border-black/10 bg-[#0d0d0d] p-2 shadow-[0_18px_32px_rgba(0,0,0,0.12)]">
+                <div class="flex items-center justify-between gap-2 px-1 pb-1">
+                    <span class="text-[9px] font-black uppercase tracking-[0.16em] text-white/80">Hot Deals</span>
+                    <span class="text-[9px] font-black uppercase tracking-[0.14em] text-[#ccff00]">Dropped rates</span>
+                </div>
+                <div id="hot-deals-ticker" class="hot-deals-ticker"></div>
             </div>
 
             <div class="px-5">
@@ -1142,6 +1266,16 @@
             { id: 'fallback-paris', title: 'Paris Escape', discount: 'Private concierge', tag: 'City Break', emoji: '🗼', price: 740, deal_price: 740, reference_price: 980, currency: 'USD' }
         ];
 
+        const fallbackHotPackageDB = [
+            { destination: 'Bali', nights: 5, days: 6, price: 620, tag: 'Hot', note: 'Beach + stay combo' },
+            { destination: 'Dubai', nights: 3, days: 4, price: 480, tag: 'Hot', note: 'Luxury city break' },
+            { destination: 'Paris', nights: 4, days: 5, price: 710, tag: 'Hot', note: 'Weekend escape' },
+            { destination: 'Maldives', nights: 6, days: 7, price: 990, tag: 'Hot', note: 'Island retreat' },
+            { destination: 'Singapore', nights: 4, days: 5, price: 540, tag: 'Hot', note: 'City + food' },
+            { destination: 'Rome', nights: 3, days: 4, price: 430, tag: 'Hot', note: 'Culture & charm' }
+        ];
+
+        let hotPackagesDB = [...fallbackHotPackageDB];
         let offersDB = [...fallbackOffersDB];
 
         const categoriesDB = [
@@ -1403,6 +1537,36 @@
             })}`;
         }
 
+        function renderHotDealsTicker(items) {
+            const ticker = document.getElementById('hot-deals-ticker');
+            if (!ticker) return;
+
+            const itemList = Array.isArray(items) && items.length ? items : fallbackHotPackageDB;
+            const displayItems = itemList.slice(0, 6);
+
+            displayItems.forEach((item, index) => {
+                item.tag = item.tag || 'Hot';
+            });
+
+            ticker.innerHTML = displayItems.map((item, index) => `
+                <div class="hot-deal-ticker-item ${index === 0 ? 'is-visible' : ''}">
+                    <span class="ticker-tag">${item.tag}</span>
+                    <span>${item.destination}</span>
+                    <span class="text-[#ccff00]">${item.nights}N/${item.days}D</span>
+                    <span>${formatINR(item.price)}</span>
+                </div>
+            `).join('');
+
+            const visibleItems = ticker.querySelectorAll('.hot-deal-ticker-item');
+            if (visibleItems.length > 1) {
+                let currentIndex = 0;
+                setInterval(() => {
+                    currentIndex = (currentIndex + 1) % visibleItems.length;
+                    visibleItems.forEach((node, idx) => node.classList.toggle('is-visible', idx === currentIndex));
+                }, 2200);
+            }
+        }
+
         function renderOffers() {
             const container = document.getElementById('offers-container');
             const rows = [...offersDB, ...offersDB].slice(0, 10);
@@ -1508,13 +1672,38 @@
 
         async function loadTravelDeals() {
             try {
-                const response = await fetch('/.netlify/functions/travelDeals');
+                const response = await fetch('/.netlify/functions/hotPackageRates');
                 if (!response.ok) throw new Error('API failed');
                 const data = await response.json();
-                offersDB = Array.isArray(data.deals) && data.deals.length ? data.deals : [...fallbackOffersDB];
+                const hotDeals = Array.isArray(data.hotPackages) && data.hotPackages.length ? data.hotPackages : fallbackHotPackageDB;
+
+                hotPackagesDB = hotDeals.map((deal) => ({
+                    destination: deal.destination || 'Destination',
+                    nights: Number(deal.nights || 3),
+                    days: Number(deal.days || deal.nights || 4),
+                    price: Number(deal.price || 0),
+                    tag: deal.tag || 'Hot',
+                    note: deal.note || 'Limited-time rate'
+                }));
+
+                offersDB = hotPackagesDB.map((deal, index) => ({
+                    id: `${(deal.destination || 'deal').toLowerCase().replace(/\s+/g, '-')}-${index}`,
+                    title: deal.destination,
+                    discount: `${deal.tag || 'Hot'} deal`,
+                    tag: deal.note || 'Hot Deal',
+                    emoji: deal.destination.toLowerCase().includes('bali') ? '🌴' : deal.destination.toLowerCase().includes('dubai') ? '🏙️' : deal.destination.toLowerCase().includes('paris') ? '🗼' : deal.destination.toLowerCase().includes('maldives') ? '🏝️' : '✈️',
+                    price: deal.price,
+                    deal_price: deal.price,
+                    reference_price: Math.max(deal.price + 200, deal.price * 1.25),
+                    currency: 'USD'
+                }));
+
+                renderHotDealsTicker(hotPackagesDB);
                 renderOffers();
             } catch (error) {
+                hotPackagesDB = [...fallbackHotPackageDB];
                 offersDB = [...fallbackOffersDB];
+                renderHotDealsTicker(hotPackagesDB);
                 renderOffers();
             }
         }

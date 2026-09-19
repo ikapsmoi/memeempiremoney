@@ -10,7 +10,6 @@ exports.handler = async (event, context) => {
             throw new Error('Missing Supabase environment variables');
         }
 
-        // Initialized safely inside the handler scope
         const supabase = createClient(supabaseUrl, supabaseKey, {
             auth: { persistSession: false },
             realtime: { transport: WebSocket }
