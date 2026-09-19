@@ -1825,6 +1825,143 @@
             .app-background video { animation: none; }
         }
 
+        /* Readability restore: keep task content light and text dark over motion. */
+        .explore-hero-heading { font-size: 1.2rem !important; }
+
+        .app-background::after {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(238, 241, 244, 0.82));
+            backdrop-filter: blur(2px);
+        }
+
+        #view-home > .px-5:first-child,
+        .explore-section-heading {
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(17, 17, 21, 0.12);
+            border-radius: 14px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        #view-home > .px-5:first-child h2,
+        .explore-section-heading h2,
+        .explore-section-heading p,
+        .explore-section-heading span,
+        #view-home > footer p {
+            color: #1f2024 !important;
+            text-shadow: none;
+        }
+
+        .magic-compose,
+        .travel-deals-box,
+        #rates-container .compact-rate-card,
+        #store-grid > div,
+        #inquiries-list > article,
+        .deal-dialog {
+            background: rgba(255, 255, 255, 0.99) !important;
+            color: #1f2024 !important;
+        }
+
+        .magic-compose h3,
+        .magic-compose label,
+        .magic-compose p,
+        .magic-compose .magic-toggle-link,
+        .travel-deals-box,
+        .travel-deals-box strong,
+        .travel-deals-box span,
+        #rates-container .compact-rate-card,
+        #rates-container .compact-rate-card *,
+        #store-grid > div,
+        #store-grid > div p,
+        #store-grid > div h3,
+        #inquiries-list > article,
+        #inquiries-list > article p,
+        #inquiries-list > article h4,
+        .deal-dialog,
+        .deal-dialog h2,
+        .deal-dialog p {
+            color: #1f2024 !important;
+        }
+
+        .magic-compose .text-app-secondary,
+        .cash-note .text-app-secondary,
+        #store-grid > div .text-app-secondary,
+        #inquiries-list > article .text-app-secondary { color: #62666d !important; }
+
+        .hot-package-row {
+            opacity: 1 !important;
+            background: #f7f7f8 !important;
+            color: #1f2024 !important;
+        }
+
+        .hot-package-row strong,
+        .hot-package-row .meta-row,
+        .hot-package-row .duration,
+        .hot-package-row .price-tag { color: #1f2024 !important; }
+
+        .hot-deals-ticker {
+            background: #202126 !important;
+            border-color: #4b4e56 !important;
+        }
+
+        .hot-deal-ticker-item,
+        .hot-deal-ticker-item > span { color: #f7f7f8 !important; }
+
+        .hot-deal-ticker-item .ticker-tag {
+            color: #111115 !important;
+            background: var(--app-accent) !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .app-background::after {
+                background: linear-gradient(180deg, rgba(23, 24, 29, 0.72), rgba(23, 24, 29, 0.84));
+            }
+
+            #view-home > .px-5:first-child,
+            .explore-section-heading {
+                background: rgba(34, 36, 43, 0.98);
+                border-color: var(--app-border);
+            }
+
+            #view-home > .px-5:first-child h2,
+            .explore-section-heading h2,
+            .explore-section-heading p,
+            .explore-section-heading span,
+            #view-home > footer p,
+            .magic-compose h3,
+            .magic-compose label,
+            .magic-compose p,
+            .magic-compose .magic-toggle-link,
+            .travel-deals-box,
+            .travel-deals-box strong,
+            .travel-deals-box span,
+            #rates-container .compact-rate-card,
+            #rates-container .compact-rate-card *,
+            #store-grid > div,
+            #store-grid > div p,
+            #store-grid > div h3,
+            #inquiries-list > article,
+            #inquiries-list > article p,
+            #inquiries-list > article h4,
+            .deal-dialog,
+            .deal-dialog h2,
+            .deal-dialog p {
+                color: var(--app-text) !important;
+            }
+
+            .magic-compose,
+            .travel-deals-box,
+            #rates-container .compact-rate-card,
+            #store-grid > div,
+            #inquiries-list > article,
+            .deal-dialog { background: rgba(34, 36, 43, 0.98) !important; }
+
+            .hot-package-row { background: #2c2e36 !important; }
+            .hot-package-row strong,
+            .hot-package-row .meta-row,
+            .hot-package-row .duration,
+            .hot-package-row .price-tag { color: var(--app-text) !important; }
+        }
+
         /* Mobile production pass: reserve fixed-ui space and protect readable words. */
         @media (max-width: 600px) {
             body {
@@ -2091,7 +2228,7 @@
     <main>
         <section id="view-home" class="view-section active pt-0.5">
                 <div class="px-5 mb-2">
-                <h2 class="text-2xl font-black tracking-[-0.06em] leading-none text-black m-0">Our secret - your free Miles</h2>
+                <h2 class="explore-hero-heading text-2xl font-black tracking-[-0.06em] leading-none text-black m-0">Our secret - your free miles</h2>
             </div>
 
             <div class="mx-5 mb-3 overflow-hidden rounded-[18px] border border-black/10 bg-[#0d0d0d] p-2 shadow-[0_18px_32px_rgba(0,0,0,0.12)]">
