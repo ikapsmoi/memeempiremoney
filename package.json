@@ -21,8 +21,9 @@
   },
   "homepage": "https://github.com/ikapsmoi/memeempiremoney#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.115.0",
-    "node-fetch": "^2.7.0"
+    "@supabase/supabase-js": "^2.116.0",
+    "node-fetch": "^2.7.0",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "netlify-cli": "^23.7.0"

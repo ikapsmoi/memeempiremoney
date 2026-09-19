@@ -1,9 +1,10 @@
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
+const { getSupabaseServiceKey } = require('../lib/supabase');
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
+    getSupabaseServiceKey()
 );
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -12,7 +13,7 @@ exports.handler = async (event) => {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    if (!BOT_TOKEN || !process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    if (!BOT_TOKEN || !process.env.SUPABASE_URL || !getSupabaseServiceKey()) {
         return {
             statusCode: 500,
             body: JSON.stringify({ error: 'Server environment is not configured.' })

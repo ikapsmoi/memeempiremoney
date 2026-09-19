@@ -1,9 +1,10 @@
 const { createClient } = require('@supabase/supabase-js');
 const fetch = global.fetch || require('node-fetch');
+const { getSupabaseServiceKey } = require('../lib/supabase');
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
+    getSupabaseServiceKey()
 );
 const botToken = process.env.TELEGRAM_BOT_TOKEN;
 const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
@@ -37,7 +38,7 @@ exports.handler = async (event) => {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    if (!botToken || !process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    if (!botToken || !process.env.SUPABASE_URL || !getSupabaseServiceKey()) {
         return { statusCode: 500, body: JSON.stringify({ error: 'Webhook is not configured.' }) };
     }
 

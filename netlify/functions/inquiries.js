@@ -1,14 +1,16 @@
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
+const { getSupabaseServiceKey } = require('../lib/supabase');
 
 function getSupabaseClient() {
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    const serviceKey = getSupabaseServiceKey();
+    if (!process.env.SUPABASE_URL || !serviceKey) {
         return null;
     }
 
     return createClient(
         process.env.SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_KEY
+        serviceKey
     );
 }
 
@@ -28,39 +30,46 @@ const reply = (statusCode, body) => ({
 function validateTelegramInitData(initData) {
     if (!initData || !process.env.TELEGRAM_BOT_TOKEN) return null;
 
-    const params = new URLSearchParams(initData);
-    const receivedHash = params.get('hash');
-    params.delete('hash');
-    params.sort();
-
-    if (!receivedHash) return null;
-
-    const dataCheckString = [...params.entries()]
-        .map(([key, value]) => `${key}=${value}`)
-        .join('\n');
-    const secretKey = crypto
-        .createHmac('sha256', 'WebAppData')
-        .update(process.env.TELEGRAM_BOT_TOKEN)
-        .digest();
-    const calculatedHash = crypto
-        .createHmac('sha256', secretKey)
-        .update(dataCheckString)
-        .digest('hex');
-
-    const received = Buffer.from(receivedHash, 'hex');
-    const calculated = Buffer.from(calculatedHash, 'hex');
-    if (received.length !== calculated.length || !crypto.timingSafeEqual(received, calculated)) return null;
-
-    const userData = params.get('user');
-    if (!userData) return null;
-
-    const authDate = Number(params.get('auth_date'));
-    if (!Number.isFinite(authDate) || Math.abs(Date.now() / 1000 - authDate) > 86400) return null;
-
     try {
+        const params = new URLSearchParams(initData);
+        const receivedHash = String(params.get('hash') || '').trim();
+        params.delete('hash');
+        params.sort();
+
+        if (!receivedHash) return null;
+
+        const dataCheckString = [...params.entries()]
+            .map(([key, value]) => `${key}=${value}`)
+            .join('\n');
+
+        const secretKey = crypto
+            .createHmac('sha256', 'WebAppData')
+            .update(process.env.TELEGRAM_BOT_TOKEN)
+            .digest();
+
+        const calculatedHash = crypto
+            .createHmac('sha256', secretKey)
+            .update(dataCheckString)
+            .digest('hex');
+
+        const received = Buffer.from(receivedHash.toLowerCase(), 'hex');
+        const calculated = Buffer.from(calculatedHash.toLowerCase(), 'hex');
+
+        if (received.length !== calculated.length || !crypto.timingSafeEqual(received, calculated)) {
+            console.warn('Telegram init-data validation failed for inquiry request.');
+            return null;
+        }
+
+        const userData = params.get('user');
+        if (!userData) return null;
+
+        const authDate = Number(params.get('auth_date'));
+        if (!Number.isFinite(authDate) || Math.abs(Date.now() / 1000 - authDate) > 86400) return null;
+
         const user = JSON.parse(userData);
         return user && user.id !== undefined ? user : null;
     } catch (error) {
+        console.warn('Telegram init-data validation threw:', error.message);
         return null;
     }
 }
@@ -72,6 +81,32 @@ function getInitData(event) {
 
     const query = event.queryStringParameters || {};
     return query.initData;
+}
+
+async function sendCustomerReplyNotification({ botToken, telegramId, inquiryId, replyText, inquiryDestination }) {
+    if (!botToken || !telegramId) return;
+
+    const safeDestination = String(inquiryDestination || 'your request').slice(0, 200);
+    const payload = {
+        chat_id: telegramId,
+        text: `<b>✈️ Travel4Life reply</b>\n\n` +
+            `<b>Request:</b> ${safeDestination}\n` +
+            `<b>Reply:</b> ${replyText}\n\n` +
+            `We have updated your request. If you need anything else, send another message and our concierge team will help.`,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
+    };
+
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.text().catch(() => '');
+        console.warn(`Customer reply notification failed for inquiry ${inquiryId}: ${response.status} ${errorBody}`);
+    }
 }
 
 exports.handler = async (event) => {
@@ -115,7 +150,7 @@ exports.handler = async (event) => {
 
             const { data: inquiryData, error: inquiryLookupError } = await supabase
                 .from('inquiries')
-                .select('inquiry_id')
+                .select('inquiry_id, telegram_id, destination, status')
                 .eq('inquiry_id', inquiryId)
                 .eq('telegram_id', user.id)
                 .single();
@@ -135,6 +170,20 @@ exports.handler = async (event) => {
                 .single();
 
             if (replyError) throw replyError;
+
+            await supabase
+                .from('inquiries')
+                .update({ status: 'responded' })
+                .eq('inquiry_id', inquiryId)
+                .eq('telegram_id', user.id);
+
+            await sendCustomerReplyNotification({
+                botToken: process.env.TELEGRAM_BOT_TOKEN,
+                telegramId: inquiryData.telegram_id,
+                inquiryId,
+                replyText,
+                inquiryDestination: inquiryData.destination
+            });
 
             return reply(201, { reply: replyData });
         }

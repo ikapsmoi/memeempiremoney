@@ -1,37 +1,37 @@
 const { createClient } = require('@supabase/supabase-js');
+const WebSocket = require('ws');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
-);
-
-const headers = {
-    'Access-Control-Allow-Origin': process.env.APP_ORIGIN || '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json'
-};
-
-exports.handler = async (event) => {
-    if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers, body: '' };
-    if (event.httpMethod !== 'GET') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
-
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: 'Deal rates service is not configured.' }) };
-    }
-
+exports.handler = async (event, context) => {
     try {
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+        if (!supabaseUrl || !supabaseKey) {
+            throw new Error('Missing Supabase environment variables');
+        }
+
+        // Initialized safely inside the handler scope
+        const supabase = createClient(supabaseUrl, supabaseKey, {
+            auth: { persistSession: false },
+            realtime: { transport: WebSocket }
+        });
+
         const { data, error } = await supabase
             .from('deal_rates')
-            .select('rate_id, category, title, unit, reference_rate, our_rate, reference_source, freshness_label, updated_at')
-            .eq('is_active', true)
-            .order('category')
-            .order('title');
+            .select('*');
 
         if (error) throw error;
-        return { statusCode: 200, headers, body: JSON.stringify({ rates: data || [] }) };
+
+        return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rates: data })
+        };
     } catch (error) {
-        console.error('Deal rates service error:', error);
-        return { statusCode: 500, headers, body: JSON.stringify({ error: 'Unable to load deal rates.' }) };
+        console.error('dealRates crash:', error.message);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: error.message })
+        };
     }
 };
