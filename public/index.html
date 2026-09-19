@@ -2318,8 +2318,8 @@
 
             } catch (error) {
                 console.error('Submission Error:', error);
-                const friendlyMessage = error.message || 'Unable to send your quote request.';
-                safeTg.showAlert(`Error: ${friendlyMessage}`);
+                const backendError = error && error.message ? error.message : 'Unable to send your quote request.';
+                safeTg.showAlert(backendError);
                 if (activeButton) activeButton.innerText = originalText;
             } finally {
                 if (activeButton) {
