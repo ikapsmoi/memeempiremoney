@@ -1340,21 +1340,20 @@
             }
 
             try {
-                const { data, error } = await window.supabaseClient
-                    .from('users')
-                    .select('trial_count, is_vip')
-                    .eq('telegram_id', userId)
-                    .maybeSingle();
+                const { count, error } = await window.supabaseClient
+                    .from('inquiries')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('telegram_id', userId);
 
                 if (error) throw error;
 
-                const used = Number(data && data.trial_count !== null && data.trial_count !== undefined ? data.trial_count : 0) || 0;
+                const used = Number.isFinite(Number(count)) ? Math.max(0, Number(count)) : 0;
                 state.inquiriesUsed = used;
-                state.isVIP = Boolean(data && data.is_vip);
+                state.isVIP = Boolean(state.isVIP);
                 updateUI();
                 return used;
             } catch (error) {
-                console.warn('Unable to load Supabase trial usage:', error);
+                console.warn('Unable to load live inquiry count from Supabase:', error);
                 state.inquiriesUsed = 0;
                 updateUI();
                 return 0;
@@ -1803,7 +1802,7 @@
             const membershipButton = document.querySelector('.app-header .yellow-button');
             const magicSubmit = document.getElementById('magic-submit');
             const magicQuery = document.getElementById('magic-query');
-            const remainingFreeQuotes = Math.max(0, 2 - state.inquiriesUsed);
+            const remainingFreeQuotes = !state.isVIP ? Math.max(0, 2 - state.inquiriesUsed) : 2;
             const limitReached = !state.isVIP && remainingFreeQuotes <= 0;
 
             if (membershipButton) {
@@ -2214,10 +2213,12 @@
             }
 
             const currentUsage = await refreshTrialUsageFromSupabase();
-            if (!state.isVIP && currentUsage >= 2) {
+            const remainingFreeQuotes = !state.isVIP ? Math.max(0, 2 - currentUsage) : 2;
+            if (!state.isVIP && remainingFreeQuotes <= 0) {
                 safeTg.haptic('notification', 'warning');
                 updateUI();
                 switchTab('store');
+                safeTg.showAlert('Your two free quotes have been used. Upgrade to continue.');
                 return;
             }
 
