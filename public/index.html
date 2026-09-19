@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <title>T4L x Telegram | Our Secret Your Miles</title>
     
-    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -22,10 +21,8 @@
         }
     </script>
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -925,7 +922,6 @@
         </svg>
     </div>
 
-    <!-- Sticky Header -->
     <header class="app-header sticky top-0 z-50 backdrop-blur-lg border-b px-3 py-2">
         <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
@@ -962,9 +958,6 @@
     </div>
 
     <main>
-        <!-- ========================================== -->
-        <!-- VIEW: CONCIERGE (HOME)                     -->
-        <!-- ========================================== -->
         <section id="view-home" class="view-section active pt-0.5">
             <div class="px-5 mb-3 flex items-center justify-between gap-2">
                 <h2 class="text-xl font-extrabold leading-none tracking-tight m-0">Wholesale Rates</h2>
@@ -1063,8 +1056,7 @@
                 <span class="text-[10px] text-app-secondary">Live savings</span>
             </div>
             <div id="offers-container" class="px-5 pb-5">
-                <!-- Offers injected via JS -->
-            </div>
+                </div>
 
             <div class="px-5 mb-2 flex justify-between items-end">
                 <div>
@@ -1074,17 +1066,13 @@
                 <span class="text-[10px] text-app-vip font-bold">2 per row</span>
             </div>
             <div id="rates-container" class="px-5 pb-5">
-                <!-- Rate showcases injected via JS -->
-            </div>
+                </div>
 
             <footer class="px-5 pb-4 text-center">
                 <p class="text-[9px] text-app-secondary mt-1">T4L x Telegram · Our Secret Your Miles</p>
             </footer>
         </section>
 
-        <!-- ========================================== -->
-        <!-- VIEW: VIP STORE                            -->
-        <!-- ========================================== -->
         <section id="view-store" class="view-section pt-6">
             <div class="dark-title-band mx-5 mb-5 px-4 py-5 text-center">
                 <span class="inline-block bg-app-vip/10 text-app-vip px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-app-vip/20 mb-3">Enterprise Access</span>
@@ -1093,13 +1081,9 @@
             </div>
 
             <div id="store-grid" class="px-5 space-y-4">
-                <!-- VIP Packages Injected via JS -->
-            </div>
+                </div>
         </section>
 
-        <!-- ========================================== -->
-        <!-- VIEW: VAULT (HISTORY)                      -->
-        <!-- ========================================== -->
         <section id="view-vault" class="view-section pt-6 px-5">
             <div class="dark-title-band px-4 py-3 mb-5">
                 <h2 class="text-2xl font-bold tracking-tight text-black">Your Vault</h2>
@@ -1129,8 +1113,7 @@
         <p id="ticker-message" class="ticker-message px-4 py-2 text-[10px] font-bold text-center">Member savings are updated regularly.</p>
     </div>
 
-    <!-- Bottom App Navigation -->
-<nav class="fixed bottom-0 left-0 w-full pb-[env(safe-area-inset-bottom)]">
+    <nav class="fixed bottom-0 left-0 w-full pb-[env(safe-area-inset-bottom)]">
         <div class="mx-3 flex justify-around items-center p-1">
             <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center px-5 py-2 opacity-60 [&.active]:opacity-100 transition" data-target="home">
                 <span class="text-xl mb-1">🧭</span>
@@ -1147,7 +1130,6 @@
         </div>
     </nav>
 
-    <!-- Application Logic -->
     <script>
         // -----------------------------------------------------
         // 1. DATABASE STRUCTURES (Ready for Supabase)
@@ -2056,32 +2038,21 @@
                 };
             });
 
-            const shouldSyncToBackend = Boolean(tg && tg.initData && inquiryId && String(inquiryId).includes('-'));
-
-            if (shouldSyncToBackend) {
+            // Sync to Supabase directly
+            if (window.supabaseClient && inquiryId) {
                 try {
-                    const backendResponse = await fetchWithTimeout('/.netlify/functions/inquiries', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Telegram-Init-Data': tg.initData
-                        },
-                        body: JSON.stringify({
-                            action: 'reply',
-                            inquiry_id: inquiryId,
-                            reply_text: trimmed
+                    const { error } = await window.supabaseClient
+                        .from('inquiries')
+                        .update({
+                            response: trimmed,
+                            response_at: new Date().toISOString(),
+                            status: 'responded'
                         })
-                    }, 12000);
+                        .eq('inquiry_id', inquiryId);
 
-                    const backendData = await backendResponse.json().catch(() => ({}));
-                    if (backendResponse.ok) {
-                        saveLocalInquiryCache(nextList);
-                        state.replyingInquiryId = null;
-                        renderInquiries(nextList);
-                        return true;
+                    if (error) {
+                        console.warn('Supabase reply sync failed:', error);
                     }
-
-                    console.warn('Reply sync failed:', backendData.error || backendResponse.statusText);
                 } catch (error) {
                     console.warn('Reply sync error:', error);
                 }
@@ -2286,35 +2257,55 @@
                     raw_query: isMagicRequest ? rawQuery : ''
                 };
 
-                const response = await fetchWithTimeout('/.netlify/functions/inquiries', {
+                const telegramId = tg.initDataUnsafe?.user?.id || null;
+                const inquiryId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'inq-' + Date.now();
+
+                if (!window.supabaseClient) {
+                    throw new Error('Supabase client is not initialized.');
+                }
+
+                // 1. Direct Insertion to Supabase
+                const { error: dbError } = await window.supabaseClient
+                    .from('inquiries')
+                    .insert([{
+                        inquiry_id: inquiryId,
+                        telegram_id: telegramId,
+                        category: requestCategory,
+                        destination: requestDestination,
+                        dates: requestDates,
+                        details: details,
+                        raw_query: isMagicRequest ? rawQuery : '',
+                        status: 'received'
+                    }]);
+
+                if (dbError) {
+                    console.error('Supabase Insert Error:', dbError);
+                    throw new Error(dbError.message || 'Database error occurred.');
+                }
+
+                // 2. Fire and forget netlify notification (doesn't block completion)
+                fetchWithTimeout('/.netlify/functions/inquiries', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Telegram-Init-Data': tg.initData || ''
                     },
                     body: JSON.stringify({
+                        action: 'new_inquiry',
                         category: requestCategory,
                         destination: requestDestination,
                         dates: requestDates,
                         details,
                         raw_query: isMagicRequest ? rawQuery : ''
                     })
-                }, 12000);
+                }, 5000).catch(() => {});
 
-                const data = await response.json().catch(() => ({}));
-                if (!response.ok) {
-                    if (data.code === 'TRIAL_LIMIT_REACHED') {
-                        await refreshTrialUsageFromSupabase();
-                        safeTg.haptic('notification', 'warning');
-                        safeTg.showAlert('Your two free quotes have been used. Upgrade to continue.');
-                        switchTab('store');
-                        return;
-                    }
-                    throw new Error(data.error || 'Unable to send your quote request.');
-                }
-
+                // 3. Complete and Refresh UI
                 const nextCount = await refreshTrialUsageFromSupabase();
                 syncInquiryUsage(nextCount);
+
+                // Fetch new vault list directly from DB
+                await loadInquiries();
 
                 if (magicInput) magicInput.value = '';
                 if (dest) dest.value = '';
@@ -2323,17 +2314,14 @@
                 if (origin) origin.value = '';
                 if (notes) notes.value = '';
 
-                const localVisible = getVisibleInquiries();
-                renderInquiries(localVisible);
                 safeTg.haptic('notification', 'success');
                 safeTg.showAlert('Your quote request was securely received.');
                 switchTab('vault');
 
             } catch (error) {
                 console.error('Submission Error:', error);
-                const backendError = error && error.message ? error.message : 'Unable to send your quote request.';
-                safeTg.showAlert(backendError);
-                if (activeButton) activeButton.innerText = originalText;
+                const friendlyError = error && error.message ? error.message : 'Unable to send your quote request.';
+                safeTg.showAlert(`Error: ${friendlyError}`);
             } finally {
                 if (activeButton) {
                     activeButton.disabled = false;
