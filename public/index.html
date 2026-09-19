@@ -38,7 +38,7 @@
     <style>
         :root {
             color-scheme: light;
-            --app-bg: #f9f9fb;
+            --app-bg: #ffffff;
             --app-card: #ffffff;
             --app-surface: #f1f1f4;
             --app-border: #e5e5ea;
@@ -49,10 +49,14 @@
         }
 
         body {
-            background: var(--app-bg);
+            background: #ffffff !important;
             color: var(--app-text);
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
+        }
+
+        .bg-app-bg {
+            background-color: #ffffff !important;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -80,7 +84,8 @@
             .deal-dialog,
             .bg-app-card { background: var(--app-card); color: var(--app-text); border-color: var(--app-border); }
             .bg-app-surface { background: var(--app-surface); }
-            .category-tile.selected { color: #111115; }
+            .category-tile { background: #f3f4f6; color: #111115; border-color: rgba(17, 17, 21, 0.08); }
+            .category-tile.selected { background: var(--app-accent); color: #111115; }
             .rate-showcase-title,
             .rate-card dd,
             .rate-showcase-card,
@@ -98,7 +103,7 @@
             z-index: 0;
             pointer-events: none;
             overflow: hidden;
-            background: var(--app-bg);
+            background: #ffffff;
         }
 
         .app-background::before {
@@ -116,7 +121,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: rgba(247, 247, 245, 0.62);
+            background: rgba(255, 255, 255, 0.72);
             backdrop-filter: blur(5px);
         }
 
@@ -175,12 +180,19 @@
         .category-tile {
             min-height: 30px;
             padding: 5px 8px;
-            border: 1px solid var(--app-border);
+            border: 1px solid rgba(17, 17, 21, 0.08);
             border-radius: 999px;
-            background: color-mix(in srgb, var(--app-card) 94%, transparent);
+            background: #f3f4f6;
+            color: #111115;
             transition: border-color 180ms ease, background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
             box-shadow: 0 1px 0 rgba(17, 17, 21, 0.02);
             gap: 4px;
+        }
+
+        .category-tile:not(.selected) {
+            background: #f3f4f6 !important;
+            color: #111115 !important;
+            border-color: rgba(17, 17, 21, 0.08) !important;
         }
 
         .category-tile:hover,
@@ -189,6 +201,7 @@
             border-color: rgba(17, 17, 21, 0.2);
             background: var(--app-accent);
             box-shadow: 0 8px 18px rgba(17, 17, 21, 0.06);
+            color: #111115;
         }
 
         .category-tile:active { transform: scale(0.98); }
@@ -200,10 +213,11 @@
         }
 
         .category-tile span:last-child {
-            font-size: 8px;
+            font-size: 10px;
             line-height: 1.1;
             letter-spacing: -0.02em;
             white-space: nowrap;
+            color: #111115;
         }
 
         .field-shell {
@@ -982,7 +996,7 @@
 
         const categoriesDB = [
             { id: 'Hotels', label: 'Stays', icon: '🏨' }, { id: 'Flights', label: 'Flights', icon: '✈️' },
-            { id: 'Transfers', label: 'Rental Cars & Transfers', icon: '🚘' }, { id: 'Packages', label: 'Packages', icon: '🧳' },
+            { id: 'Transfers', label: 'Transfers', icon: '🚘' }, { id: 'Packages', label: 'Packages', icon: '🧳' },
             { id: 'Sightseeing', label: 'Sightseeing', icon: '🎟️' }, { id: 'Cruises', label: 'Cruises', icon: '🛳️' },
             { id: 'Festivals', label: 'Music Festivals', icon: '🎶' }
         ];
@@ -1135,7 +1149,7 @@
         const formProfiles = {
             Hotels: { title: 'Request Stays', destination: 'Destination / property', placeholder: 'City, hotel, or property', origin: false, checkout: true, budget: false, notes: false, checkin: 'Check in', checkoutLabel: 'Check out' },
             Flights: { title: 'Request Flights', destination: 'To', placeholder: 'Destination city or airport', origin: true, originLabel: 'From', checkout: true, budget: false, notes: true, checkin: 'Departure', checkoutLabel: 'Return' },
-            Transfers: { title: 'Request Rental Cars & Transfers', destination: 'Drop-off / destination', placeholder: 'Airport, hotel, or address', origin: true, originLabel: 'Pick-up / collection', checkout: true, budget: true, notes: true, checkin: 'Start date', checkoutLabel: 'End date' },
+            Transfers: { title: 'Request Transfers', destination: 'Drop-off / destination', placeholder: 'Airport, hotel, or address', origin: true, originLabel: 'Pick-up / collection', checkout: true, budget: true, notes: true, checkin: 'Start date', checkoutLabel: 'End date' },
             Packages: { title: 'Request Packages', destination: 'Destination', placeholder: 'Where would you like to go?', origin: false, checkout: true, budget: true, notes: true, checkin: 'Start date', checkoutLabel: 'End date' },
             Sightseeing: { title: 'Request Sightseeing', destination: 'Event / tour name', placeholder: 'Tour, attraction, or city', origin: false, checkout: false, budget: false, notes: true, checkin: 'Visit date', checkoutLabel: 'End date' },
             Cruises: { title: 'Request Cruises', destination: 'Route / arrival port', placeholder: 'Port, route, or destination', origin: true, originLabel: 'Departure port', checkout: true, budget: true, notes: true, checkin: 'Sail date', checkoutLabel: 'Return date' },
@@ -1630,6 +1644,25 @@
             setSafeStorageValue('sm_inquiry_cache', Array.isArray(inquiries) ? inquiries : []);
         }
 
+        function getVisibleInquiries() {
+            const cached = getLocalInquiryCache();
+            const queued = getSafeStorageValue('sm_inquiry_queue', []);
+            const merged = [...(Array.isArray(queued) ? queued : []), ...(Array.isArray(cached) ? cached : [])];
+            const deduped = new Map();
+            merged.forEach((inquiry) => {
+                const key = inquiry && (inquiry.inquiry_id || inquiry.destination || inquiry.created_at || `${Math.random()}`);
+                if (!key) return;
+                if (!deduped.has(key)) {
+                    deduped.set(key, inquiry);
+                }
+            });
+            return [...deduped.values()].sort((a, b) => {
+                const aTime = new Date(a.created_at || a.queuedAt || 0).getTime();
+                const bTime = new Date(b.created_at || b.queuedAt || 0).getTime();
+                return bTime - aTime;
+            });
+        }
+
         function renderInquiries(inquiries) {
             const container = document.getElementById('inquiries-list');
             const list = Array.isArray(inquiries) ? inquiries : [];
@@ -1646,17 +1679,17 @@
                         </div>
                         <span class="bg-app-vip px-2 py-1 rounded-md text-[9px] font-extrabold uppercase">${inquiry.status || 'received'}</span>
                     </div>
-                    <p class="text-[10px] text-app-secondary mt-3">Received ${formatInquiryDate(inquiry.created_at)}</p>
+                    <p class="text-[10px] text-app-secondary mt-3">Received ${formatInquiryDate(inquiry.created_at || inquiry.queuedAt)}</p>
                 </article>
             `).join('');
         }
 
         async function loadInquiries() {
             const initData = tg && tg.initData;
-            const cachedInquiries = getLocalInquiryCache();
+            const localVisibleInquiries = getVisibleInquiries();
 
             if (!initData) {
-                renderInquiries(cachedInquiries);
+                renderInquiries(localVisibleInquiries);
                 return;
             }
 
@@ -1665,13 +1698,18 @@
                     headers: { 'X-Telegram-Init-Data': initData }
                 }, 8000);
                 const data = await response.json().catch(() => ({}));
-                if (!response.ok) throw new Error(data.error || 'Unable to load requests.');
-                const inquiries = data.inquiries || [];
+                if (!response.ok) {
+                    console.warn('Inquiry fetch failed:', data.error || response.statusText);
+                    renderInquiries(localVisibleInquiries);
+                    return;
+                }
+
+                const inquiries = Array.isArray(data.inquiries) && data.inquiries.length ? data.inquiries : localVisibleInquiries;
                 saveLocalInquiryCache(inquiries);
-                renderInquiries(inquiries);
+                renderInquiries(getVisibleInquiries());
             } catch (error) {
                 console.error(error);
-                renderInquiries(cachedInquiries);
+                renderInquiries(localVisibleInquiries);
             }
         }
 
@@ -1858,7 +1896,7 @@
                     created_at: new Date().toISOString()
                 };
                 notifyInquiry(fallbackInquiry);
-                renderInquiries(getLocalInquiryCache());
+                renderInquiries(getVisibleInquiries());
                 safeTg.showAlert(`${friendlyMessage} Your request has been saved locally and will sync when connected.`);
                 if (button) button.innerText = originalText;
             } finally {
