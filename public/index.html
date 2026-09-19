@@ -1081,7 +1081,7 @@
 
     <main>
         <section id="view-home" class="view-section active pt-0.5">
-            <div class="px-5 mb-2">
+                <div class="px-5 mb-2">
                 <h2 class="text-2xl font-black uppercase tracking-[-0.06em] leading-none text-black m-0">Wholesale Rates</h2>
             </div>
 
@@ -1266,7 +1266,7 @@
             { id: 'fallback-paris', title: 'Paris Escape', discount: 'Private concierge', tag: 'City Break', emoji: '🗼', price: 740, deal_price: 740, reference_price: 980, currency: 'USD' }
         ];
 
-        const fallbackHotPackageDB = [
+        const fallbackHotPackagesDB = [
             { destination: 'Bali', nights: 5, days: 6, price: 620, tag: 'Hot', note: 'Beach + stay combo' },
             { destination: 'Dubai', nights: 3, days: 4, price: 480, tag: 'Hot', note: 'Luxury city break' },
             { destination: 'Paris', nights: 4, days: 5, price: 710, tag: 'Hot', note: 'Weekend escape' },
@@ -1275,8 +1275,9 @@
             { destination: 'Rome', nights: 3, days: 4, price: 430, tag: 'Hot', note: 'Culture & charm' }
         ];
 
-        let hotPackagesDB = [...fallbackHotPackageDB];
+        let hotPackagesDB = [...fallbackHotPackagesDB];
         let offersDB = [...fallbackOffersDB];
+        let hotDealsTickerIndex = 0;
 
         const categoriesDB = [
             { id: 'Hotels', label: 'Stays', icon: '🏨' }, { id: 'Flights', label: 'Flights', icon: '✈️' },
@@ -1519,6 +1520,7 @@
             loadInquiries();
             loadDealRates();
             loadTravelDeals();
+            loadHotPackages();
             rotateTicker();
             bindKeyboardSafeScroll();
             bindMagicInput();
@@ -1537,58 +1539,87 @@
             })}`;
         }
 
-        function renderHotDealsTicker(items) {
-            const ticker = document.getElementById('hot-deals-ticker');
-            if (!ticker) return;
+        function setHotPackageInForm(deal) {
+            const destinationInput = document.getElementById('req-dest');
+            const magicField = document.getElementById('magic-query');
+            const checkinInput = document.getElementById('req-checkin');
+            const checkoutInput = document.getElementById('req-checkout');
 
-            const itemList = Array.isArray(items) && items.length ? items : fallbackHotPackageDB;
-            const displayItems = itemList.slice(0, 6);
+            if (destinationInput) destinationInput.value = deal.destination;
+            if (magicField) magicField.value = `I want ${deal.destination} for ${deal.nights} nights / ${deal.days} days with wholesale pricing.`;
 
-            displayItems.forEach((item, index) => {
-                item.tag = item.tag || 'Hot';
-            });
-
-            ticker.innerHTML = displayItems.map((item, index) => `
-                <div class="hot-deal-ticker-item ${index === 0 ? 'is-visible' : ''}">
-                    <span class="ticker-tag">${item.tag}</span>
-                    <span>${item.destination}</span>
-                    <span class="text-[#ccff00]">${item.nights}N/${item.days}D</span>
-                    <span>${formatINR(item.price)}</span>
-                </div>
-            `).join('');
-
-            const visibleItems = ticker.querySelectorAll('.hot-deal-ticker-item');
-            if (visibleItems.length > 1) {
-                let currentIndex = 0;
-                setInterval(() => {
-                    currentIndex = (currentIndex + 1) % visibleItems.length;
-                    visibleItems.forEach((node, idx) => node.classList.toggle('is-visible', idx === currentIndex));
-                }, 2200);
+            if (checkinInput) {
+                const checkinDate = new Date();
+                checkinDate.setDate(checkinDate.getDate() + 18);
+                checkinInput.value = new Date(checkinDate.getTime() - checkinDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
             }
+
+            if (checkoutInput) {
+                const checkoutDate = new Date();
+                checkoutDate.setDate(checkoutDate.getDate() + 18 + Number(deal.days || 4));
+                checkoutInput.value = new Date(checkoutDate.getTime() - checkoutDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            }
+
+            if (destinationInput) {
+                destinationInput.focus();
+                destinationInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                destinationInput.classList.add('flash-highlight');
+                setTimeout(() => destinationInput.classList.remove('flash-highlight'), 1200);
+            }
+
+            safeTg.haptic('notification', 'success');
         }
 
         function renderOffers() {
             const container = document.getElementById('offers-container');
-            const rows = [...offersDB, ...offersDB].slice(0, 10);
+            if (!container) return;
+
+            const deals = [...hotPackagesDB].slice(0, 6);
+            const tickerItems = deals.map((deal, index) => `
+                <div class="hot-deal-ticker-item ${index === hotDealsTickerIndex ? 'is-visible' : ''}">
+                    <span class="ticker-tag">${deal.tag}</span>
+                    <span>${deal.destination}</span>
+                    <span class="text-[#ccff00]">${deal.nights}N/${deal.days}D</span>
+                    <span>${formatINR(deal.price)}</span>
+                </div>
+            `).join('');
+
             container.innerHTML = `
                 <div class="travel-deals-box">
-                    <div class="travel-deals-track">
-                        ${rows.map(offer => `
-                            <button type="button" onclick="openDeal('${offer.title}')" class="travel-deal-row w-full text-left">
-                                <div>
-                                    <strong>${offer.title}</strong>
-                                    <span>${offer.tag || 'Featured'}</span>
+                    <div id="hot-deal-ticker-panel" class="hot-deals-ticker mb-2">
+                        ${tickerItems}
+                    </div>
+                    <div class="hot-package-table">
+                        ${deals.map((deal, index) => `
+                            <button type="button" class="hot-package-row ${index === hotDealsTickerIndex ? 'is-visible' : ''}" data-destination="${deal.destination}" data-nights="${deal.nights}" data-days="${deal.days}" data-price="${deal.price}" onclick="setHotPackageInForm({ destination: '${deal.destination}', nights: ${deal.nights}, days: ${deal.days}, price: ${deal.price} })">
+                                <div class="meta-row">
+                                    <span>${deal.tag}</span>
+                                    <span>${deal.note}</span>
                                 </div>
-                                <em>${offer.discount || offer.savings || 'Save big'}</em>
-                                <div class="text-right">
-                                    <span>From</span>
-                                    <strong class="text-[11px] font-extrabold">${formatINR(offer.price || offer.deal_price || offer.reference_price || 0)}</strong>
+                                <strong>${deal.destination}</strong>
+                                <div class="package-summary">
+                                    <span class="duration">${deal.nights} nights / ${deal.days} days</span>
+                                    <span class="price-tag">${formatINR(deal.price)}</span>
                                 </div>
                             </button>
                         `).join('')}
                     </div>
                 </div>
             `;
+
+            const tickerPanel = document.getElementById('hot-deal-ticker-panel');
+            if (tickerPanel) {
+                const items = tickerPanel.querySelectorAll('.hot-deal-ticker-item');
+                if (items.length) {
+                    setInterval(() => {
+                        hotDealsTickerIndex = (hotDealsTickerIndex + 1) % items.length;
+                        items.forEach((item, idx) => item.classList.toggle('is-visible', idx === hotDealsTickerIndex));
+                        const rows = document.querySelectorAll('.hot-package-row');
+                        rows.forEach((row, idx) => row.classList.toggle('is-visible', idx === hotDealsTickerIndex));
+                    }, 1800);
+                }
+            }
+
             renderQuickDealPills();
         }
 
@@ -1672,12 +1703,12 @@
 
         async function loadTravelDeals() {
             try {
-                const response = await fetch('/.netlify/functions/hotPackageRates');
+                const response = await fetch('/.netlify/functions/travelDeals');
                 if (!response.ok) throw new Error('API failed');
                 const data = await response.json();
-                const hotDeals = Array.isArray(data.hotPackages) && data.hotPackages.length ? data.hotPackages : fallbackHotPackageDB;
+                const deals = Array.isArray(data.deals) && data.deals.length ? data.deals : [...fallbackHotPackagesDB];
 
-                hotPackagesDB = hotDeals.map((deal) => ({
+                hotPackagesDB = deals.map((deal) => ({
                     destination: deal.destination || 'Destination',
                     nights: Number(deal.nights || 3),
                     days: Number(deal.days || deal.nights || 4),
@@ -1698,13 +1729,33 @@
                     currency: 'USD'
                 }));
 
-                renderHotDealsTicker(hotPackagesDB);
                 renderOffers();
             } catch (error) {
-                hotPackagesDB = [...fallbackHotPackageDB];
+                hotPackagesDB = [...fallbackHotPackagesDB];
                 offersDB = [...fallbackOffersDB];
-                renderHotDealsTicker(hotPackagesDB);
                 renderOffers();
+            }
+        }
+
+        async function loadHotPackages() {
+            try {
+                const response = await fetch('/.netlify/functions/hotPackageRates');
+                if (!response.ok) throw new Error('Failed to load hot packages');
+                const data = await response.json();
+                const packages = Array.isArray(data.hotPackages) ? data.hotPackages : [];
+                if (packages.length > 0) {
+                    hotPackagesDB = packages.map(deal => ({
+                        destination: deal.destination || 'Destination',
+                        nights: Number(deal.nights || 3),
+                        days: Number(deal.days || deal.nights || 4),
+                        price: Number(deal.price || 0),
+                        tag: deal.tag || 'Hot',
+                        note: deal.note || 'Hot Deal'
+                    }));
+                    renderOffers();
+                }
+            } catch (error) {
+                console.warn('Using fallback hot packages:', error);
             }
         }
 
@@ -2109,51 +2160,51 @@
         }
 
         // GLOBALLY DEFINED SAVE FUNCTION (Fixes issue #1)
-window.saveInquiryReply = async function(inquiryId, replyText) {
-    const trimmed = (replyText || '').trim();
-    if (!trimmed) {
-        safeTg.showAlert('Please add a message before submitting your quote.');
-        return false;
-    }
+        window.saveInquiryReply = async function(inquiryId, replyText) {
+            const trimmed = (replyText || '').trim();
+            if (!trimmed) {
+                safeTg.showAlert('Please add a message before submitting your quote.');
+                return false;
+            }
 
-    try {
-        // Send request to your Netlify function handler
-        const response = await fetch('/.netlify/functions/replyInquiry', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                inquiryId: inquiryId,
-                replyText: trimmed
-            })
-        });
+            try {
+                // Send request to your Netlify function handler
+                const response = await fetch('/.netlify/functions/replyInquiry', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        inquiryId: inquiryId,
+                        replyText: trimmed
+                    })
+                });
 
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Failed to save reply');
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to save reply');
 
-        // Update local state and UI upon success
-        const nextList = getVisibleInquiries().map(entry => {
-            const entryKey = entry.inquiry_id || `${entry.created_at || 'n/a'}-${entry.destination || 'untitled'}`;
-            if (entryKey !== inquiryId) return entry;
-            return {
-                ...entry,
-                response: trimmed,
-                response_at: new Date().toISOString(),
-                status: 'responded'
-            };
-        });
+                // Update local state and UI upon success
+                const nextList = getVisibleInquiries().map(entry => {
+                    const entryKey = entry.inquiry_id || `${entry.created_at || 'n/a'}-${entry.destination || 'untitled'}`;
+                    if (entryKey !== inquiryId) return entry;
+                    return {
+                        ...entry,
+                        response: trimmed,
+                        response_at: new Date().toISOString(),
+                        status: 'responded'
+                    };
+                });
 
-        saveLocalInquiryCache(nextList);
-        state.replyingInquiryId = null;
-        renderInquiries(nextList);
-        safeTg.showAlert('Your quote reply was saved and sent to the client.');
-        return true;
+                saveLocalInquiryCache(nextList);
+                state.replyingInquiryId = null;
+                renderInquiries(nextList);
+                safeTg.showAlert('Your quote reply was saved and sent to the client.');
+                return true;
 
-    } catch (error) {
-        console.error('Reply sync error:', error);
-        safeTg.showAlert(`Failed to save reply: ${error.message}`);
-        return false;
-    }
-};
+            } catch (error) {
+                console.error('Reply sync error:', error);
+                safeTg.showAlert(`Failed to save reply: ${error.message}`);
+                return false;
+            }
+        };
 
         async function loadInquiries() {
             const initData = tg && tg.initData;
