@@ -1127,11 +1127,10 @@
         function readLocalState() {
             try {
                 return {
-                    inquiriesUsed: Number.parseInt(getSafeStorageValue('sm_inquiries', '0'), 10) || 0,
                     isVIP: getSafeStorageValue('sm_vip', false) === true
                 };
             } catch (error) {
-                return { inquiriesUsed: 0, isVIP: false };
+                return { isVIP: false };
             }
         }
 
@@ -1143,8 +1142,15 @@
         };
 
         const localUserState = readLocalState();
-        state.inquiriesUsed = localUserState.inquiriesUsed;
         state.isVIP = localUserState.isVIP;
+
+        function syncInquiryUsage(inquiries) {
+            const list = Array.isArray(inquiries) ? inquiries : [];
+            const nextCount = list.length;
+            state.inquiriesUsed = nextCount;
+            setSafeStorageValue('sm_inquiries', String(nextCount));
+            updateUI();
+        }
 
         const formProfiles = {
             Hotels: { title: 'Request Stays', destination: 'Destination / property', placeholder: 'City, hotel, or property', origin: false, checkout: true, budget: false, notes: false, checkin: 'Check in', checkoutLabel: 'Check out' },
@@ -1689,7 +1695,13 @@
             const localVisibleInquiries = getVisibleInquiries();
 
             if (!initData) {
-                renderInquiries(localVisibleInquiries);
+                const container = document.getElementById('inquiries-list');
+                if (container && !localVisibleInquiries.length) {
+                    container.innerHTML = '<p class="text-sm text-app-secondary">Open this app in Telegram to sync your live requests.</p>';
+                } else {
+                    renderInquiries(localVisibleInquiries);
+                }
+                syncInquiryUsage(localVisibleInquiries);
                 return;
             }
 
@@ -1701,15 +1713,18 @@
                 if (!response.ok) {
                     console.warn('Inquiry fetch failed:', data.error || response.statusText);
                     renderInquiries(localVisibleInquiries);
+                    syncInquiryUsage(localVisibleInquiries);
                     return;
                 }
 
-                const inquiries = Array.isArray(data.inquiries) && data.inquiries.length ? data.inquiries : localVisibleInquiries;
+                const inquiries = Array.isArray(data.inquiries) ? data.inquiries : localVisibleInquiries;
                 saveLocalInquiryCache(inquiries);
                 renderInquiries(getVisibleInquiries());
+                syncInquiryUsage(inquiries);
             } catch (error) {
                 console.error(error);
                 renderInquiries(localVisibleInquiries);
+                syncInquiryUsage(localVisibleInquiries);
             }
         }
 
@@ -1774,7 +1789,7 @@
             const originalText = button ? button.innerText : 'Get my free quote';
 
             if (!state.isVIP && state.inquiriesUsed >= 2) {
-                safeTelegram.haptic('notification', 'warning');
+                safeTg.haptic('notification', 'warning');
                 switchTab('store');
                 return;
             }
@@ -1812,7 +1827,7 @@
             }
 
             if (!tg || !tg.initData) {
-                safeTelegram.showAlert('Open this app in Telegram to submit a request.');
+                safeTg.showAlert('Open this app in Telegram to submit a request.');
                 return;
             }
 
