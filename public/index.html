@@ -12,8 +12,9 @@
         window.supabaseClient = null;
         try {
             const supabaseUrl = 'https://kaiqftrzoocqcmqtikua.supabase.co';
-            const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
-            if (supabaseUrl && supabaseAnonKey && supabaseUrl !== 'https://YOUR_PROJECT_REF.supabase.co' && supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY') {
+            const supabaseAnonKey = 'sb_publishable_OdJsOx6kA7SVlFWJTCgFtg_mpi_QB7u'; 
+            
+            if (supabaseUrl && supabaseAnonKey) {
                 window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
             }
         } catch (error) {
@@ -2185,26 +2186,52 @@
                     raw_query: isMagicRequest ? rawQuery : ''
                 };
 
-                const response = await fetchWithTimeout('/.netlify/functions/inquiries', {
+                const telegramId = tg.initDataUnsafe?.user?.id || null;
+                const inquiryId = crypto.randomUUID();
+
+                // 1. DIRECT SUPABASE INSERTION
+                if (window.supabaseClient) {
+                    const { error: dbError } = await window.supabaseClient
+                        .from('inquiries')
+                        .insert([{
+                            inquiry_id: inquiryId,
+                            telegram_id: telegramId,
+                            category: requestCategory,
+                            destination: requestDestination,
+                            dates: requestDates,
+                            raw_query: isMagicRequest ? rawQuery : '',
+                            status: 'received'
+                        }]);
+
+                    if (dbError) {
+                        console.error('Supabase Error:', dbError);
+                        throw new Error(`Database connection failed: ${dbError.message}`);
+                    }
+                } else {
+                    throw new Error('Supabase client is offline. Check API keys.');
+                }
+
+                // 2. BACKGROUND NOTIFICATION (Netlify)
+                fetchWithTimeout('/.netlify/functions/inquiries', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Telegram-Init-Data': tg.initData
+                        'X-Telegram-Init-Data': tg.initData || ''
                     },
                     body: JSON.stringify({
+                        action: 'new_inquiry',
                         category: requestCategory,
                         destination: requestDestination,
                         dates: requestDates,
                         raw_query: isMagicRequest ? rawQuery : '',
                         details
                     })
-                }, 12000);
-                const data = await response.json().catch(() => ({}));
-                if (!response.ok) throw new Error(data.error || 'Unable to send your quote request.');
+                }, 5000).catch(err => console.warn('Netlify notification skipped:', err));
 
+                // 3. UPDATE UI ON SUCCESS
                 const submittedInquiry = {
-                    inquiry_id: data.inquiry?.inquiry_id || crypto.randomUUID(),
-                    telegram_id: data.inquiry?.telegram_id || (tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null),
+                    inquiry_id: inquiryId,
+                    telegram_id: telegramId,
                     category: requestCategory,
                     destination: requestDestination,
                     dates: requestDates,
@@ -2213,7 +2240,7 @@
                     created_at: new Date().toISOString()
                 };
 
-                const nextList = [submittedInquiry];
+                const nextList = [submittedInquiry, ...getVisibleInquiries()];
                 saveLocalInquiryCache(nextList);
                 syncInquiryUsage(nextList);
 
@@ -2225,16 +2252,15 @@
                 if (notes) notes.value = '';
 
                 renderInquiries(nextList);
-                await loadInquiries();
                 safeTg.haptic('notification', 'success');
-                safeTg.showAlert('Your quote request was received.');
+                safeTg.showAlert('Your quote request was securely received.');
                 switchTab('vault');
+
             } catch (error) {
-                console.error(error);
-                const friendlyMessage = error.name === 'AbortError' ? 'The request timed out. Please try again on a stronger connection.' : (error.message || 'Unable to send your quote request.');
-                renderInquiries([]);
-                syncInquiryUsage([]);
-                safeTg.showAlert(`${friendlyMessage} Your request was not submitted.`);
+                console.error('Submission Error:', error);
+                const friendlyMessage = error.message || 'Unable to send your quote request.';
+                
+                safeTg.showAlert(`Error: ${friendlyMessage}`);
                 if (activeButton) activeButton.innerText = originalText;
             } finally {
                 if (activeButton) {
@@ -2250,7 +2276,6 @@
             btnElement.disabled = true;
 
             try {
-                // Exact Netlify /createInvoice fetch logic preserved
                 const response = await fetch('/.netlify/functions/createInvoice', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
