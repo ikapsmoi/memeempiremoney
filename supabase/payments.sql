@@ -27,6 +27,17 @@ create table if not exists public.inquiries (
     created_at timestamptz not null default now()
 );
 
+create table if not exists public.inquiry_replies (
+    reply_id uuid primary key default gen_random_uuid(),
+    inquiry_id uuid not null references public.inquiries(inquiry_id) on delete cascade,
+    telegram_id bigint not null,
+    reply_text text not null,
+    created_at timestamptz not null default now()
+);
+
+create index if not exists inquiry_replies_inquiry_idx
+    on public.inquiry_replies (inquiry_id, created_at desc);
+
 create table if not exists public.payments_log (
     charge_id text primary key,
     telegram_id bigint not null,
@@ -217,54 +228,3 @@ $$;
 
 revoke execute on function public.grant_vip_access(bigint, text, integer, text, text) from public, anon, authenticated;
 grant execute on function public.grant_vip_access(bigint, text, integer, text, text) to service_role;
-
-create or replace function public.grant_meme_pack(
-    p_telegram_id bigint,
-    p_meme_amount integer,
-    p_payload text,
-    p_charge_id text
-)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-    insert into public.telegram_payments (telegram_payment_charge_id, telegram_id, payload)
-    values (p_charge_id, p_telegram_id, p_payload)
-    on conflict (telegram_payment_charge_id) do nothing;
-
-    if found then
-        insert into public.players (telegram_id, meme_balance, updated_at)
-        values (p_telegram_id, p_meme_amount, now())
-        on conflict (telegram_id) do update
-        set meme_balance = players.meme_balance + excluded.meme_balance,
-            updated_at = now();
-    end if;
-end;
-$$;
-
-create or replace function public.grant_energy_pack(
-    p_telegram_id bigint,
-    p_energy integer,
-    p_charge_id text
-)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-    insert into public.telegram_payments (telegram_payment_charge_id, telegram_id, payload)
-    values (p_charge_id, p_telegram_id, 'energy_pack_5000')
-    on conflict (telegram_payment_charge_id) do nothing;
-
-    if found then
-        insert into public.players (telegram_id, energy, updated_at)
-        values (p_telegram_id, p_energy, now())
-        on conflict (telegram_id) do update
-        set energy = players.energy + excluded.energy,
-            updated_at = now();
-    end if;
-end;
-$$;

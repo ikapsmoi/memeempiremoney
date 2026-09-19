@@ -1,10 +1,16 @@
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
-);
+function getSupabaseClient() {
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+        return null;
+    }
+
+    return createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_KEY
+    );
+}
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': process.env.APP_ORIGIN || '*',
@@ -72,7 +78,8 @@ exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') return reply(204, {});
     if (!['GET', 'POST'].includes(event.httpMethod)) return reply(405, { error: 'Method Not Allowed' });
 
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY || !process.env.TELEGRAM_BOT_TOKEN) {
+    const supabase = getSupabaseClient();
+    if (!supabase || !process.env.TELEGRAM_BOT_TOKEN) {
         return reply(500, { error: 'Inquiry service is not configured.' });
     }
 
@@ -96,6 +103,40 @@ exports.handler = async (event) => {
             body = JSON.parse(event.body || '{}');
         } catch (error) {
             return reply(400, { error: 'Request body must be valid JSON.' });
+        }
+
+        if (body.action === 'reply') {
+            const inquiryId = typeof body.inquiry_id === 'string' ? body.inquiry_id.trim() : '';
+            const replyText = typeof body.reply_text === 'string' ? body.reply_text.trim() : '';
+
+            if (!inquiryId || !replyText) {
+                return reply(400, { error: 'Inquiry id and reply text are required.' });
+            }
+
+            const { data: inquiryData, error: inquiryLookupError } = await supabase
+                .from('inquiries')
+                .select('inquiry_id')
+                .eq('inquiry_id', inquiryId)
+                .eq('telegram_id', user.id)
+                .single();
+
+            if (inquiryLookupError || !inquiryData) {
+                return reply(404, { error: 'Inquiry not found for this account.' });
+            }
+
+            const { data: replyData, error: replyError } = await supabase
+                .from('inquiry_replies')
+                .insert({
+                    inquiry_id: inquiryId,
+                    telegram_id: user.id,
+                    reply_text: replyText
+                })
+                .select()
+                .single();
+
+            if (replyError) throw replyError;
+
+            return reply(201, { reply: replyData });
         }
 
         const category = typeof body.category === 'string' ? body.category.trim() : '';
