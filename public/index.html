@@ -1136,11 +1136,14 @@
         // -----------------------------------------------------
         
         // This array represents the rows you will pull from your Supabase `offers` table
-        let offersDB = [
-            { id: 1, title: 'Bali Villas', discount: 'Save 40%', tag: 'Hot Deal', emoji: '🌴' },
-            { id: 2, title: 'Tomorrowland', discount: 'VIP Access', tag: 'Music Festival', emoji: '🎪' },
-            { id: 3, title: 'Maldives', discount: 'Wholesale Rates', tag: 'Luxury', emoji: '🚤' }
+        const fallbackOffersDB = [
+            { id: 'fallback-bali', title: 'Bali Villas', discount: 'Save 40%', tag: 'Hot Deal', emoji: '🌴', price: 540, deal_price: 540, reference_price: 900, currency: 'USD' },
+            { id: 'fallback-tomorrowland', title: 'Tomorrowland', discount: 'VIP Access', tag: 'Music Festival', emoji: '🎪', price: 1080, deal_price: 1080, reference_price: 1200, currency: 'USD' },
+            { id: 'fallback-maldives', title: 'Maldives Escape', discount: 'Wholesale Rates', tag: 'Luxury', emoji: '🚤', price: 1620, deal_price: 1620, reference_price: 1800, currency: 'USD' },
+            { id: 'fallback-paris', title: 'Paris Escape', discount: 'Private concierge', tag: 'City Break', emoji: '🗼', price: 740, deal_price: 740, reference_price: 980, currency: 'USD' }
         ];
+
+        let offersDB = [...fallbackOffersDB];
 
         const categoriesDB = [
             { id: 'Hotels', label: 'Stays', icon: '🏨' }, { id: 'Flights', label: 'Flights', icon: '✈️' },
@@ -1169,7 +1172,7 @@
             });
         }
 
-        let rateCatalog = {
+        const fallbackRateCatalog = {
             Hotels: makeDemoRates(['Lisbon', 'Bali', 'Dubai', 'Tokyo', 'Paris', 'Cancun', 'Bangkok', 'Rome', 'Maldives', 'Barcelona', 'Athens', 'Marrakech', 'Sydney', 'Istanbul', 'Cape Town'], 'Hotels', 180, 'per stay'),
             Transfers: makeDemoRates(['Lisbon Airport', 'Denpasar Airport', 'Dubai Airport', 'Haneda Airport', 'Charles de Gaulle', 'Cancun Airport', 'Suvarnabhumi Airport', 'Fiumicino Airport', 'Velana Airport', 'Barcelona Airport', 'Athens Airport', 'Marrakech Airport', 'Sydney Airport', 'Istanbul Airport', 'Cape Town Airport'], 'Transfers', 35, 'airport transfer'),
             Sightseeing: makeDemoRates(['Lisbon city tour', 'Bali temple day', 'Dubai skyline tour', 'Tokyo food walk', 'Paris museum pass', 'Cancun reef trip', 'Bangkok river tour', 'Rome Colosseum visit', 'Maldives island day', 'Barcelona Gaudi tour', 'Athens Acropolis visit', 'Marrakech souk tour', 'Sydney harbour cruise', 'Istanbul Bosphorus tour', 'Cape Town peninsula tour'], 'Sightseeing', 60, 'per person'),
@@ -1177,6 +1180,8 @@
             Packages: makeDemoRates(['Portugal escape', 'Bali wellness week', 'Dubai city break', 'Japan highlights', 'Paris weekend', 'Cancun beach week', 'Thailand discovery', 'Italy essentials', 'Maldives retreat', 'Spain explorer', 'Greece islands', 'Morocco discovery', 'Australia essentials', 'Turkey culture trip', 'South Africa escape'], 'Packages', 850, 'per package'),
             Festivals: makeDemoRates(['Lisbon music week', 'Bali festival pass', 'Dubai live weekend', 'Tokyo summer shows', 'Paris concert break', 'Cancun beach festival', 'Bangkok music nights', 'Rome live events', 'Maldives sounds', 'Barcelona festival', 'Athens music week', 'Marrakech live nights', 'Sydney festival pass', 'Istanbul music week', 'Cape Town live'], 'Festivals', 120, 'per pass')
         };
+
+        let rateCatalog = JSON.parse(JSON.stringify(fallbackRateCatalog));
 
         let showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
         let showcaseTimer;
@@ -1546,13 +1551,18 @@
         async function loadTravelDeals() {
             try {
                 const response = await fetch('/.netlify/functions/travelDeals');
-                if (!response.ok) return;
+                if (!response.ok) {
+                    throw new Error(`Travel deals request failed: ${response.status} ${response.statusText}`);
+                }
+
                 const data = await response.json();
-                if (!Array.isArray(data.deals) || !data.deals.length) return;
-                offersDB = data.deals;
+                const liveDeals = Array.isArray(data.deals) ? data.deals : [];
+                offersDB = liveDeals.length ? liveDeals : [...fallbackOffersDB];
                 renderOffers();
             } catch (error) {
-                console.warn('Using local travel deals:', error);
+                console.warn('Using fallback travel deals:', error);
+                offersDB = [...fallbackOffersDB];
+                renderOffers();
             }
         }
 
@@ -1736,33 +1746,35 @@
                 }
 
                 const data = await response.json();
-                if (!Array.isArray(data.rates) || !data.rates.length) {
-                    rateCatalog = {};
-                    showcaseState = {};
+                const liveRates = Array.isArray(data.rates) ? data.rates : [];
+                if (!liveRates.length) {
+                    rateCatalog = JSON.parse(JSON.stringify(fallbackRateCatalog));
+                    showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
                     renderRates();
                     return;
                 }
 
                 const databaseCatalog = {};
-                data.rates.forEach(rate => {
-                    if (!databaseCatalog[rate.category]) databaseCatalog[rate.category] = [];
-                    databaseCatalog[rate.category].push({
-                        category: rate.category,
-                        name: rate.title,
-                        unit: rate.unit,
-                        referenceRate: Number(rate.reference_rate),
-                        ourRate: Number(rate.our_rate),
-                        freshness: rate.freshness_label || 'Reference snapshot'
+                liveRates.forEach(rate => {
+                    const category = rate.category || 'Hotels';
+                    if (!databaseCatalog[category]) databaseCatalog[category] = [];
+                    databaseCatalog[category].push({
+                        category,
+                        name: rate.title || rate.name || 'Rate',
+                        unit: rate.unit || 'per stay',
+                        referenceRate: Number(rate.reference_rate ?? rate.referenceRate ?? 0),
+                        ourRate: Number(rate.our_rate ?? rate.ourRate ?? 0),
+                        freshness: rate.freshness_label || rate.freshness || 'Reference snapshot'
                     });
                 });
 
-                rateCatalog = databaseCatalog;
+                rateCatalog = Object.keys(databaseCatalog).length ? databaseCatalog : JSON.parse(JSON.stringify(fallbackRateCatalog));
                 showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
                 renderRates();
             } catch (error) {
                 console.error('Failed to load live deal rates:', error);
-                rateCatalog = {};
-                showcaseState = {};
+                rateCatalog = JSON.parse(JSON.stringify(fallbackRateCatalog));
+                showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
                 renderRates();
             }
         }
