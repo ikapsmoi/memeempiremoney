@@ -1510,22 +1510,21 @@
                 syncViewport();
             }
         }
-
-        function init() {
-            renderOffers();
-            renderStore();
-            renderRates();
-            updateInquiryForm();
-            updateUI();
-            loadInquiries();
-            loadDealRates();
-            loadTravelDeals();
-            loadHotPackages();
-            rotateTicker();
-            bindKeyboardSafeScroll();
-            bindMagicInput();
-            bindDetailedFormToggle();
-        }
+function init() {
+    renderOffers(); // Renders default fallback immediately so it's never blank on load
+    loadHotPackages(); // Fetches live backend data and re-renders upon completion
+    renderStore();
+    renderRates();
+    updateInquiryForm();
+    updateUI();
+    loadInquiries();
+    loadDealRates();
+    loadTravelDeals();
+    rotateTicker();
+    bindKeyboardSafeScroll();
+    bindMagicInput();
+    bindDetailedFormToggle();
+}
 
         // -----------------------------------------------------
         // 3. UI RENDERING FUNCTIONS
@@ -1570,58 +1569,72 @@
             safeTg.haptic('notification', 'success');
         }
 
-        function renderOffers() {
-            const container = document.getElementById('offers-container');
-            if (!container) return;
+       function renderOffers() {
+    const container = document.getElementById('offers-container');
+    const tickerContainer = document.getElementById('hot-deals-ticker');
+    if (!container) return;
 
-            const deals = [...hotPackagesDB].slice(0, 6);
-            const tickerItems = deals.map((deal, index) => `
-                <div class="hot-deal-ticker-item ${index === hotDealsTickerIndex ? 'is-visible' : ''}">
-                    <span class="ticker-tag">${deal.tag}</span>
-                    <span>${deal.destination}</span>
-                    <span class="text-[#ccff00]">${deal.nights}N/${deal.days}D</span>
-                    <span>${formatINR(deal.price)}</span>
-                </div>
-            `).join('');
+    // Fallback if hotPackagesDB is empty
+    const deals = Array.isArray(hotPackagesDB) && hotPackagesDB.length ? hotPackagesDB : [...fallbackHotPackagesDB];
 
-            container.innerHTML = `
-                <div class="travel-deals-box">
-                    <div id="hot-deal-ticker-panel" class="hot-deals-ticker mb-2">
-                        ${tickerItems}
-                    </div>
-                    <div class="hot-package-table">
-                        ${deals.map((deal, index) => `
-                            <button type="button" class="hot-package-row ${index === hotDealsTickerIndex ? 'is-visible' : ''}" data-destination="${deal.destination}" data-nights="${deal.nights}" data-days="${deal.days}" data-price="${deal.price}" onclick="setHotPackageInForm({ destination: '${deal.destination}', nights: ${deal.nights}, days: ${deal.days}, price: ${deal.price} })">
-                                <div class="meta-row">
-                                    <span>${deal.tag}</span>
-                                    <span>${deal.note}</span>
-                                </div>
-                                <strong>${deal.destination}</strong>
-                                <div class="package-summary">
-                                    <span class="duration">${deal.nights} nights / ${deal.days} days</span>
-                                    <span class="price-tag">${formatINR(deal.price)}</span>
-                                </div>
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
+    // 1. Render the Hot Deals Ticker
+    if (tickerContainer) {
+        tickerContainer.innerHTML = deals.map((deal, index) => `
+            <div class="hot-deal-ticker-item ${index === hotDealsTickerIndex ? 'is-visible' : ''}">
+                <span class="ticker-tag">${deal.tag || 'Hot'}</span>
+                <span>${deal.destination}</span>
+                <span class="text-[#ccff00]">${deal.nights}N/${deal.days}D</span>
+                <span>${formatINR(deal.price)}</span>
+            </div>
+        `).join('');
+    }
 
-            const tickerPanel = document.getElementById('hot-deal-ticker-panel');
-            if (tickerPanel) {
-                const items = tickerPanel.querySelectorAll('.hot-deal-ticker-item');
-                if (items.length) {
-                    setInterval(() => {
-                        hotDealsTickerIndex = (hotDealsTickerIndex + 1) % items.length;
-                        items.forEach((item, idx) => item.classList.toggle('is-visible', idx === hotDealsTickerIndex));
-                        const rows = document.querySelectorAll('.hot-package-row');
-                        rows.forEach((row, idx) => row.classList.toggle('is-visible', idx === hotDealsTickerIndex));
-                    }, 1800);
-                }
-            }
+    // 2. Render the Package Cards Grid below it
+    container.innerHTML = `
+        <div class="travel-deals-box">
+            <div id="hot-deal-ticker-panel" class="hot-deals-ticker mb-2">
+                ${tickerContainer ? tickerContainer.innerHTML : ''}
+            </div>
+            <div class="hot-package-table">
+                ${deals.map((deal, index) => `
+                    <button type="button" class="hot-package-row ${index === hotDealsTickerIndex ? 'is-visible' : ''}" onclick="setHotPackageInForm({ destination: '${deal.destination}', nights:${deal.nights}, days: ${deal.days}, price:${deal.price} })">
+                        <div class="meta-row">
+                            <span>${deal.tag || 'Hot'}</span>
+                            <span>${deal.note || 'Wholesale rate'}</span>
+                        </div>
+                        <strong>${deal.destination}</strong>
+                        <div class="package-summary">
+                            <span class="duration">${deal.nights} nights / ${deal.days} days</span>
+                            <span class="price-tag">${formatINR(deal.price)}</span>
+                        </div>
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
 
-            renderQuickDealPills();
+    // 3. Reset/Initialize Ticker Interval cleanly
+    if (window._tickerInterval) clearInterval(window._tickerInterval);
+    
+    const tickerPanel = document.getElementById('hot-deal-ticker-panel') || tickerContainer;
+    if (tickerPanel) {
+        const items = tickerPanel.querySelectorAll('.hot-deal-ticker-item');
+        if (items.length > 1) {
+            window._tickerInterval = setInterval(() => {
+                hotDealsTickerIndex = (hotDealsTickerIndex + 1) % items.length;
+                
+                // Toggle ticker items
+                items.forEach((item, idx) => item.classList.toggle('is-visible', idx === hotDealsTickerIndex));
+                
+                // Toggle grid package rows
+                const rows = document.querySelectorAll('.hot-package-row');
+                rows.forEach((row, idx) => row.classList.toggle('is-visible', idx === hotDealsTickerIndex));
+            }, 2200);
         }
+    }
+
+    renderQuickDealPills();
+}
 
         const quickDealState = { index: 0, timer: null };
 
@@ -1738,26 +1751,31 @@
         }
 
         async function loadHotPackages() {
-            try {
-                const response = await fetch('/.netlify/functions/hotPackageRates');
-                if (!response.ok) throw new Error('Failed to load hot packages');
-                const data = await response.json();
-                const packages = Array.isArray(data.hotPackages) ? data.hotPackages : [];
-                if (packages.length > 0) {
-                    hotPackagesDB = packages.map(deal => ({
-                        destination: deal.destination || 'Destination',
-                        nights: Number(deal.nights || 3),
-                        days: Number(deal.days || deal.nights || 4),
-                        price: Number(deal.price || 0),
-                        tag: deal.tag || 'Hot',
-                        note: deal.note || 'Hot Deal'
-                    }));
-                    renderOffers();
-                }
-            } catch (error) {
-                console.warn('Using fallback hot packages:', error);
-            }
+    try {
+        const response = await fetch('/.netlify/functions/hotPackageRates');
+        if (!response.ok) throw new Error('Failed to load hot packages');
+        const data = await response.json();
+        const packages = Array.isArray(data.hotPackages) ? data.hotPackages : [];
+        
+        if (packages.length > 0) {
+            hotPackagesDB = packages.map(deal => ({
+                destination: deal.destination || 'Destination',
+                nights: Number(deal.nights || 3),
+                days: Number(deal.days || deal.nights || 4),
+                price: Number(deal.price || 0),
+                tag: deal.tag || 'Hot',
+                note: deal.note || 'Hot Deal'
+            }));
+        } else {
+            hotPackagesDB = [...fallbackHotPackagesDB];
         }
+    } catch (error) {
+        console.warn('Using fallback hot packages due to error:', error);
+        hotPackagesDB = [...fallbackHotPackagesDB];
+    } finally {
+        renderOffers(); // Ensures UI updates whether API succeeds or fails
+    }
+}
 
         function getMagicOfferText(value) {
             const clean = (value || '').trim();
