@@ -1920,58 +1920,51 @@
         }
 
         // GLOBALLY DEFINED SAVE FUNCTION (Fixes issue #1)
-        window.saveInquiryReply = async function(inquiryId, replyText) {
-            const trimmed = (replyText || '').trim();
-            if (!trimmed) {
-                safeTg.showAlert('Please add a message before submitting your quote.');
-                return false;
-            }
+window.saveInquiryReply = async function(inquiryId, replyText) {
+    const trimmed = (replyText || '').trim();
+    if (!trimmed) {
+        safeTg.showAlert('Please add a message before submitting your quote.');
+        return false;
+    }
 
-            if (!window.supabaseClient) {
-                safeTg.showAlert('Database connection missing.');
-                return false;
-            }
+    try {
+        // Send request to your Netlify function handler
+        const response = await fetch('/.netlify/functions/replyInquiry', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                inquiryId: inquiryId,
+                replyText: trimmed
+            })
+        });
 
-            try {
-                // 1. Insert into reply_inquiries (Assuming this is your new table)
-                const { error: replyError } = await window.supabaseClient
-                    .from('reply_inquiries')
-                    .insert([{
-                        inquiry_id: inquiryId,
-                        response: trimmed
-                    }]);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to save reply');
 
-                if (replyError) throw replyError;
+        // Update local state and UI upon success
+        const nextList = getVisibleInquiries().map(entry => {
+            const entryKey = entry.inquiry_id || `${entry.created_at || 'n/a'}-${entry.destination || 'untitled'}`;
+            if (entryKey !== inquiryId) return entry;
+            return {
+                ...entry,
+                response: trimmed,
+                response_at: new Date().toISOString(),
+                status: 'responded'
+            };
+        });
 
-                // 2. Update local state ONLY after success (Fixes issue #2)
-                const nextList = getVisibleInquiries().map(entry => {
-                    const entryKey = entry.inquiry_id || `${entry.created_at || 'n/a'}-${entry.destination || 'untitled'}`;
-                    if (entryKey !== inquiryId) return entry;
-                    return {
-                        ...entry,
-                        response: trimmed,
-                        response_at: new Date().toISOString(),
-                        status: 'responded'
-                    };
-                }); 
+        saveLocalInquiryCache(nextList);
+        state.replyingInquiryId = null;
+        renderInquiries(nextList);
+        safeTg.showAlert('Your quote reply was saved and sent to the client.');
+        return true;
 
-                // 3. Update original inquiry table as well (Optional but recommended)
-                await window.supabaseClient
-                    .from('inquiries')
-                    .update({ status: 'responded', response: trimmed })
-                    .eq('inquiry_id', inquiryId);
-
-                saveLocalInquiryCache(nextList);
-                state.replyingInquiryId = null; 
-                renderInquiries(nextList); 
-                return true;
-
-            } catch (error) {
-                console.error('Reply sync error:', error);
-                safeTg.showAlert(`Failed to save reply: ${error.message}`);
-                return false;
-            }
-        };
+    } catch (error) {
+        console.error('Reply sync error:', error);
+        safeTg.showAlert(`Failed to save reply: ${error.message}`);
+        return false;
+    }
+};
 
         async function loadInquiries() {
             const initData = tg && tg.initData;
