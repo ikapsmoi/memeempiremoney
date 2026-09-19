@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <title>Travel4life x Telegram | Our Secret Your Miles</title>
+    <title>T4L x Telegram | Our Secret Your Miles</title>
     
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -25,7 +25,7 @@
                             surface: '#f0f0ee',
                             border: '#deded9',
                             primary: '#171717',
-                            secondary: '#777872',
+                            secondary: '#9aa0a8',
                             accent: '#c8ff00',
                             vip: '#c8ff00'
                         }
@@ -43,7 +43,7 @@
             --app-surface: #f1f1f4;
             --app-border: #e5e5ea;
             --app-text: #111115;
-            --app-muted: #73737d;
+            --app-muted: #a0a6ad;
             --app-accent: #ccff00;
             --app-accent-soft: rgba(204, 255, 0, 0.16);
         }
@@ -116,7 +116,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: color-mix(in srgb, var(--app-bg) 90%, transparent);
+            background: rgba(247, 247, 245, 0.62);
             backdrop-filter: blur(5px);
         }
 
@@ -131,9 +131,9 @@
         }
 
         .app-header {
-            background: rgba(23, 24, 29, 0.98);
-            border-color: rgba(47, 49, 57, 0.9);
-            box-shadow: 0 8px 24px rgba(17, 17, 21, 0.08);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(17, 17, 21, 0.08);
+            box-shadow: 0 8px 24px rgba(17, 17, 21, 0.06);
         }
 
         .app-header h1,
@@ -141,7 +141,7 @@
         .app-header p,
         .app-header .text-app-secondary,
         .app-header .text-app-vip {
-            color: #ffffff !important;
+            color: #111115 !important;
         }
 
         .brand-mark {
@@ -485,32 +485,19 @@
         }
 
         .quick-deal-pills {
-            position: relative;
-            overflow: hidden;
-            padding: 0 20px 10px;
-            margin-top: 2px;
-            mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
-            -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
-        }
-
-        .quick-deal-track {
             display: flex;
             align-items: center;
-            gap: 8px;
-            width: max-content;
-            animation: quickDealScroll 30s linear infinite;
-            will-change: transform;
-        }
-
-        .quick-deal-track:hover {
-            animation-play-state: paused;
+            justify-content: flex-end;
+            padding: 0;
+            margin: 0;
+            min-height: 0;
         }
 
         .quick-deal-pill {
             flex-shrink: 0;
             border: 1px solid rgba(17, 17, 21, 0.08);
-            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(245,245,243,0.92));
-            color: #18181b;
+            background: rgba(255, 255, 255, 0.9);
+            color: #111115;
             border-radius: 999px;
             padding: 7px 12px;
             font-size: 10px;
@@ -518,11 +505,16 @@
             letter-spacing: 0.02em;
             line-height: 1.2;
             box-shadow: 0 6px 14px rgba(17, 17, 21, 0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 100%;
+            margin: 0;
         }
 
-        @keyframes quickDealScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+        .quick-deal-pill:active {
+            transform: scale(0.98);
         }
 
         .field-shell.flash-highlight {
@@ -563,7 +555,7 @@
             font-size: 8px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: var(--app-muted);
+            color: #111115;
             font-weight: 800;
         }
 
@@ -577,6 +569,7 @@
             line-clamp: 2;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+            color: #111115;
         }
 
         .compact-rate-card .rate-bottom {
@@ -590,12 +583,12 @@
         .compact-rate-card .savings {
             font-size: 10px;
             font-weight: 900;
-            color: var(--app-text);
+            color: #111115;
         }
 
         .compact-rate-card .savings-value {
             font-size: 10px;
-            color: var(--app-text);
+            color: #111115;
             font-weight: 900;
         }
 
@@ -747,7 +740,7 @@
             <div class="flex items-center gap-3 min-w-0">
                 <div class="brand-mark" aria-label="Travel4life logo">t4</div>
                 <div class="min-w-0">
-                    <h1 class="text-base font-extrabold tracking-tight truncate">Travel4life <span class="text-app-vip">x</span> Telegram</h1>
+                    <h1 class="text-base font-extrabold tracking-tight truncate">T4L <span class="text-app-vip">x</span> Telegram</h1>
                     <div class="mt-1">
                         <div class="header-socials mt-1.5" aria-label="Travel4life social links">
                             <a href="https://www.travel4life.net" target="_blank" rel="noopener" class="social-site" aria-label="Travel4life website">
@@ -792,12 +785,12 @@
         <!-- VIEW: CONCIERGE (HOME)                     -->
         <!-- ========================================== -->
         <section id="view-home" class="view-section active pt-0.5">
-            <div class="px-5 mb-0.5">
-                <div class="inline-flex items-center rounded-full border border-app-border bg-app-card px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Zero-Markup Wholesale Travel Desk</div>
-                <h2 class="mt-1 text-xl font-extrabold leading-tight tracking-tight">Plan your next trip</h2>
+            <div class="px-5 mb-0.5 flex items-center justify-between gap-2">
+                <h2 class="text-xl font-extrabold leading-none tracking-tight m-0">Plan your next trip</h2>
+                <div id="quick-deal-pills" class="quick-deal-pills" aria-label="Quick travel deal shortcuts"></div>
             </div>
 
-            <div id="quick-deal-pills" class="quick-deal-pills" aria-label="Quick travel deal shortcuts"></div>
+            <div class="inline-flex mx-5 mb-2 rounded-full border border-app-border bg-app-card px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.14em] text-app-secondary">Zero-Markup Wholesale Travel Desk</div>
 
             <div class="usp-banner hero-aspiration mx-5 mb-3 shadow-sm">
                 <video autoplay muted loop playsinline preload="auto" aria-hidden="true">
@@ -905,7 +898,7 @@
             </div>
 
             <footer class="px-5 pb-4 text-center">
-                <p class="text-[9px] text-app-secondary mt-1">Travel4life x Telegram · Our Secret Your Miles</p>
+                <p class="text-[9px] text-app-secondary mt-1">T4L x Telegram · Our Secret Your Miles</p>
             </footer>
         </section>
 
@@ -1244,6 +1237,11 @@
             renderQuickDealPills();
         }
 
+        const quickDealState = {
+            index: 0,
+            timer: null
+        };
+
         function renderQuickDealPills() {
             const pillsContainer = document.getElementById('quick-deal-pills');
             if (!pillsContainer) return;
@@ -1263,16 +1261,20 @@
                 return { title, label: `${emoji} ${label}` };
             });
 
-            const loopedPills = [...dealPills, ...dealPills];
+            if (!dealPills.length) return;
+
+            const activeDeal = dealPills[quickDealState.index % dealPills.length];
             pillsContainer.innerHTML = `
-                <div class="quick-deal-track">
-                    ${loopedPills.map((deal) => `
-                        <button type="button" class="quick-deal-pill" onclick="openQuickDeal('${deal.title}')">
-                            ${deal.label}
-                        </button>
-                    `).join('')}
-                </div>
+                <button type="button" class="quick-deal-pill" onclick="openQuickDeal('${activeDeal.title}')">
+                    ${activeDeal.label}
+                </button>
             `;
+
+            if (quickDealState.timer) clearInterval(quickDealState.timer);
+            quickDealState.timer = setInterval(() => {
+                quickDealState.index = (quickDealState.index + 1) % dealPills.length;
+                renderQuickDealPills();
+            }, 2200);
         }
 
         function openQuickDeal(title) {
