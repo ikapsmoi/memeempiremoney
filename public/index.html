@@ -1443,6 +1443,64 @@
                 color: var(--app-text) !important;
             }
         }
+        /* Default text contract: dark gray unless a surface explicitly defines another color. */
+        :root { --app-text: #4b4f56; }
+
+        body,
+        main,
+        .view-section,
+        .view-section h1,
+        .view-section h2,
+        .view-section h3,
+        .view-section h4,
+        .view-section p,
+        .view-section span,
+        .view-section label,
+        .view-section a,
+        .view-section button,
+        .view-section dt,
+        .view-section dd,
+        .app-header,
+        .app-header h1,
+        .app-header p,
+        .app-header span,
+        nav,
+        nav span,
+        .social-proof-ticker,
+        .social-proof-ticker p,
+        .deal-dialog,
+        .deal-dialog h2,
+        .deal-dialog p,
+        .deal-dialog span {
+            color: #4b4f56;
+        }
+
+        input,
+        select,
+        textarea { color: #4b4f56; }
+
+        .app-header .brand-mark,
+        .dark-title-band h2,
+        .dark-title-band p,
+        .dark-title-band span,
+        .hot-deal-ticker-item,
+        .hot-deal-ticker-item > span,
+        .social-proof-ticker,
+        .social-proof-ticker p,
+        nav .nav-btn span,
+        .app-header .text-app-vip { color: #f7f7f8 !important; }
+
+        .app-header h1 .text-app-vip,
+        nav .nav-btn span.text-app-vip { color: var(--app-accent) !important; }
+
+        .yellow-button,
+        .yellow-button *,
+        .bg-app-vip,
+        .bg-app-vip *,
+        .ticker-tag { color: #111115 !important; }
+
+        input::placeholder,
+        textarea::placeholder { color: #737780; }
     </style>
 </head>
 <body class="pb-20 bg-app-bg text-neutral-900">
