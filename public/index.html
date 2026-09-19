@@ -1299,9 +1299,34 @@
         const localUserState = readLocalState();
         state.isVIP = localUserState.isVIP;
 
-        function syncInquiryUsage(count) {
-            const nextCount = Number.isFinite(Number(count)) ? Math.max(0, Number(count)) : 0;
-            state.inquiriesUsed = nextCount;
+        async function syncInquiryUsage(inquiriesOrCount) {
+            const telegramId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+
+            if (typeof inquiriesOrCount === 'number' && Number.isFinite(inquiriesOrCount)) {
+                state.inquiriesUsed = Math.max(0, inquiriesOrCount);
+                updateUI();
+                return;
+            }
+
+            if (window.supabaseClient && telegramId) {
+                try {
+                    const { count, error } = await window.supabaseClient
+                        .from('inquiries')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('telegram_id', telegramId);
+
+                    if (!error && count !== null) {
+                        state.inquiriesUsed = count;
+                        updateUI();
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch live count from Supabase, falling back to local array:', err);
+                }
+            }
+
+            const list = Array.isArray(inquiriesOrCount) ? inquiriesOrCount : [];
+            state.inquiriesUsed = list.length;
             updateUI();
         }
 
@@ -2058,39 +2083,36 @@
 
         async function loadInquiries() {
             const initData = tg && tg.initData;
-            const localVisibleInquiries = getVisibleInquiries();
+            const telegramId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
 
-            if (!initData) {
-                const container = document.getElementById('inquiries-list');
-                if (container && !localVisibleInquiries.length) {
-                    container.innerHTML = '<p class="text-sm text-app-secondary">Open this app in Telegram to sync your live requests.</p>';
-                } else {
-                    renderInquiries(localVisibleInquiries);
+            if (window.supabaseClient && telegramId) {
+                try {
+                    const { data, error } = await window.supabaseClient
+                        .from('inquiries')
+                        .select('*')
+                        .eq('telegram_id', telegramId)
+                        .order('created_at', { ascending: false });
+
+                    if (!error && data) {
+                        saveLocalInquiryCache(data);
+                        renderInquiries(data);
+                        await syncInquiryUsage(data);
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('Supabase direct load failed, trying cache:', err);
                 }
-                await refreshTrialUsageFromSupabase();
-                return;
             }
 
-            try {
-                const response = await fetchWithTimeout('/.netlify/functions/inquiries', {
-                    headers: { 'X-Telegram-Init-Data': initData }
-                }, 8000);
-                const data = await response.json().catch(() => ({}));
-                if (!response.ok) {
-                    console.warn('Inquiry fetch failed:', data.error || response.statusText);
-                    renderInquiries(localVisibleInquiries);
-                    await refreshTrialUsageFromSupabase();
-                    return;
-                }
+            const localVisibleInquiries = getVisibleInquiries();
+            renderInquiries(localVisibleInquiries);
+            await syncInquiryUsage(localVisibleInquiries);
 
-                const inquiries = Array.isArray(data.inquiries) ? data.inquiries : localVisibleInquiries;
-                saveLocalInquiryCache(inquiries);
-                renderInquiries(getVisibleInquiries());
-                await refreshTrialUsageFromSupabase();
-            } catch (error) {
-                console.error(error);
-                renderInquiries(localVisibleInquiries);
-                await refreshTrialUsageFromSupabase();
+            if (!initData && !localVisibleInquiries.length) {
+                const container = document.getElementById('inquiries-list');
+                if (container) {
+                    container.innerHTML = '<p class="text-sm text-app-secondary">Open this app in Telegram to sync your live requests.</p>';
+                }
             }
         }
 
