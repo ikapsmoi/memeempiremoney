@@ -936,7 +936,7 @@
         <!-- ========================================== -->
         <section id="view-vault" class="view-section pt-6 px-5">
             <div class="dark-title-band px-4 py-3 mb-5">
-                <h2 class="text-2xl font-bold tracking-tight">Your Vault</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-black">Your Vault</h2>
             </div>
             
             <div id="inquiries-list" class="space-y-3">
@@ -1138,7 +1138,8 @@
             category: 'Hotels',
             inquiriesUsed: 0,
             isVIP: false,
-            selectedDeal: null
+            selectedDeal: null,
+            replyingInquiryId: null
         };
 
         const localUserState = readLocalState();
@@ -1146,7 +1147,7 @@
 
         function syncInquiryUsage(inquiries) {
             const list = Array.isArray(inquiries) ? inquiries : [];
-            const nextCount = list.length;
+            const nextCount = list.filter(item => !(item && item.status === 'queued')).length;
             state.inquiriesUsed = nextCount;
             setSafeStorageValue('sm_inquiries', String(nextCount));
             updateUI();
@@ -1669,6 +1670,19 @@
             });
         }
 
+        function updateInquiryReplyState(inquiryId, nextValue) {
+            if (!inquiryId) return;
+            const item = getVisibleInquiries().find(entry => (entry.inquiry_id || `${entry.created_at || ''}${entry.destination || ''}`) === inquiryId);
+            if (!item) return;
+            const nextList = getVisibleInquiries().map(entry => (
+                (entry.inquiry_id || `${entry.created_at || ''}${entry.destination || ''}`) === inquiryId
+                    ? { ...entry, response: nextValue, response_at: new Date().toISOString() }
+                    : entry
+            ));
+            saveLocalInquiryCache(nextList);
+            renderInquiries(nextList);
+        }
+
         function renderInquiries(inquiries) {
             const container = document.getElementById('inquiries-list');
             const list = Array.isArray(inquiries) ? inquiries : [];
@@ -1676,18 +1690,93 @@
                 container.innerHTML = '<p class="text-sm text-app-secondary">Your submitted requests will appear here.</p>';
                 return;
             }
-            container.innerHTML = list.map(inquiry => `
-                <article class="bg-app-card border border-app-border p-4 rounded-[14px] shadow-sm">
-                    <div class="flex justify-between items-start gap-3">
-                        <div>
-                            <h4 class="text-sm font-extrabold">${inquiry.destination || 'Untitled request'}</h4>
-                            <p class="text-xs text-app-secondary mt-1">${inquiry.category || 'Travel'} · ${inquiry.dates || 'Flexible dates'}</p>
+            container.innerHTML = list.map((inquiry) => {
+                const inquiryKey = inquiry.inquiry_id || `${inquiry.created_at || 'n/a'}-${inquiry.destination || 'untitled'}`;
+                const isReplyOpen = state.replyingInquiryId === inquiryKey;
+                const responseText = inquiry.response || '';
+                return `
+                    <article class="bg-app-card border border-app-border p-4 rounded-[14px] shadow-sm">
+                        <div class="flex justify-between items-start gap-3">
+                            <div>
+                                <h4 class="text-sm font-extrabold text-black">${inquiry.destination || 'Untitled request'}</h4>
+                                <p class="text-xs text-black/70 mt-1">${inquiry.category || 'Travel'} · ${inquiry.dates || 'Flexible dates'}</p>
+                            </div>
+                            <span class="bg-app-vip px-2 py-1 rounded-md text-[9px] font-extrabold uppercase text-black">${inquiry.status || 'received'}</span>
                         </div>
-                        <span class="bg-app-vip px-2 py-1 rounded-md text-[9px] font-extrabold uppercase">${inquiry.status || 'received'}</span>
-                    </div>
-                    <p class="text-[10px] text-app-secondary mt-3">Received ${formatInquiryDate(inquiry.created_at || inquiry.queuedAt)}</p>
-                </article>
-            `).join('');
+                        <p class="text-[10px] text-black/70 mt-3">Received ${formatInquiryDate(inquiry.created_at || inquiry.queuedAt)}</p>
+                        ${responseText ? `<p class="mt-3 rounded-lg bg-app-surface p-2 text-[10px] text-black/80"><span class="font-extrabold uppercase tracking-wider text-black">Reply:</span> ${responseText}</p>` : ''}
+                        <div class="mt-3">
+                            ${isReplyOpen ? `
+                                <div class="rounded-xl border border-app-border bg-app-surface p-2.5">
+                                    <label class="block text-[9px] font-bold uppercase tracking-wider text-black/70 mb-1">Your quote response</label>
+                                    <textarea id="reply-text-${inquiryKey}" rows="3" class="w-full rounded-lg border border-app-border bg-white p-2 text-[11px] text-black placeholder:text-black/40" placeholder="Add your note or quote here...">${responseText}</textarea>
+                                    <div class="mt-2 flex items-center justify-between gap-2">
+                                        <button type="button" data-action="cancel-reply" data-id="${inquiryKey}" class="text-[10px] font-bold text-black/70">Cancel</button>
+                                        <button type="button" data-action="submit-reply" data-id="${inquiryKey}" class="bg-app-vip rounded-lg px-3 py-2 text-[10px] font-extrabold text-black">Submit quote</button>
+                                    </div>
+                                </div>
+                            ` : `
+                                <button type="button" data-action="reply-inquiry" data-id="${inquiryKey}" class="w-full rounded-xl border border-app-border bg-app-surface px-3 py-2 text-[10px] font-extrabold text-black">Reply / submit quote</button>
+                            `}
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        async function saveInquiryReply(inquiryId, replyText) {
+            const trimmed = (replyText || '').trim();
+            if (!trimmed) {
+                safeTg.showAlert('Please add a message before submitting your quote.');
+                return false;
+            }
+
+            const nextList = getVisibleInquiries().map(entry => {
+                const entryKey = entry.inquiry_id || `${entry.created_at || 'n/a'}-${entry.destination || 'untitled'}`;
+                if (entryKey !== inquiryId) return entry;
+                return {
+                    ...entry,
+                    response: trimmed,
+                    response_at: new Date().toISOString(),
+                    status: entry.status === 'queued' ? 'queued' : 'responded'
+                };
+            });
+
+            const shouldSyncToBackend = Boolean(tg && tg.initData && inquiryId && String(inquiryId).includes('-'));
+
+            if (shouldSyncToBackend) {
+                try {
+                    const backendResponse = await fetchWithTimeout('/.netlify/functions/inquiries', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Telegram-Init-Data': tg.initData
+                        },
+                        body: JSON.stringify({
+                            action: 'reply',
+                            inquiry_id: inquiryId,
+                            reply_text: trimmed
+                        })
+                    }, 12000);
+
+                    const backendData = await backendResponse.json().catch(() => ({}));
+                    if (backendResponse.ok) {
+                        saveLocalInquiryCache(nextList);
+                        state.replyingInquiryId = null;
+                        renderInquiries(nextList);
+                        return true;
+                    }
+
+                    console.warn('Reply sync failed:', backendData.error || backendResponse.statusText);
+                } catch (error) {
+                    console.warn('Reply sync error:', error);
+                }
+            }
+
+            saveLocalInquiryCache(nextList);
+            state.replyingInquiryId = null;
+            renderInquiries(nextList);
+            return true;
         }
 
         async function loadInquiries() {
@@ -1701,7 +1790,7 @@
                 } else {
                     renderInquiries(localVisibleInquiries);
                 }
-                syncInquiryUsage(localVisibleInquiries);
+                syncInquiryUsage(getLocalInquiryCache());
                 return;
             }
 
@@ -1783,6 +1872,34 @@
             return isValid;
         }
 
+        function bindInquiryReplyActions() {
+            document.addEventListener('click', (event) => {
+                const replyButton = event.target.closest('[data-action="reply-inquiry"]');
+                if (replyButton) {
+                    state.replyingInquiryId = replyButton.dataset.id || null;
+                    renderInquiries(getVisibleInquiries());
+                    return;
+                }
+
+                const cancelButton = event.target.closest('[data-action="cancel-reply"]');
+                if (cancelButton) {
+                    state.replyingInquiryId = null;
+                    renderInquiries(getVisibleInquiries());
+                    return;
+                }
+
+                const submitButton = event.target.closest('[data-action="submit-reply"]');
+                if (submitButton) {
+                    const inquiryId = submitButton.dataset.id || null;
+                    const textarea = inquiryId ? document.getElementById(`reply-text-${inquiryId}`) : null;
+                    const replyText = textarea ? textarea.value : '';
+                    if (saveInquiryReply(inquiryId, replyText)) {
+                        safeTg.showAlert('Your quote reply was saved.');
+                    }
+                }
+            });
+        }
+
         async function submitInquiry() {
             clearFieldErrors();
             const button = document.getElementById('btn-submit');
@@ -1822,7 +1939,7 @@
                 const message = profile.checkout ? 'Please choose valid start and end dates.' : 'Please choose a valid date.';
                 if (checkin) checkin.parentElement?.classList.add('invalid');
                 if (checkout && profile.checkout) checkout.parentElement?.classList.add('invalid');
-                safeTelegram.showAlert(message);
+                safeTg.showAlert(message);
                 return;
             }
 
@@ -1961,7 +2078,10 @@
         }
 
         // Boot
-        window.addEventListener('DOMContentLoaded', init);
+        window.addEventListener('DOMContentLoaded', () => {
+            bindInquiryReplyActions();
+            init();
+        });
     </script>
 </body>
 </html>
