@@ -1299,16 +1299,41 @@
         const localUserState = readLocalState();
         state.isVIP = localUserState.isVIP;
 
-        function getUsedInquiryCount(inquiries) {
-            const list = Array.isArray(inquiries) ? inquiries : [];
-            return list.filter(item => item && item.status !== 'queued' && item.status !== 'failed').length;
+        function syncInquiryUsage(count) {
+            const nextCount = Number.isFinite(Number(count)) ? Math.max(0, Number(count)) : 0;
+            state.inquiriesUsed = nextCount;
+            updateUI();
         }
 
-        function syncInquiryUsage(inquiries) {
-            const nextCount = getUsedInquiryCount(inquiries);
-            state.inquiriesUsed = nextCount;
-            setSafeStorageValue('sm_inquiries', String(nextCount));
-            updateUI();
+        async function refreshTrialUsageFromSupabase() {
+            const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+            if (!userId || !window.supabaseClient) {
+                state.inquiriesUsed = 0;
+                state.isVIP = false;
+                updateUI();
+                return 0;
+            }
+
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('users')
+                    .select('trial_count, is_vip')
+                    .eq('telegram_id', userId)
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                const used = Number(data && data.trial_count !== null && data.trial_count !== undefined ? data.trial_count : 0) || 0;
+                state.inquiriesUsed = used;
+                state.isVIP = Boolean(data && data.is_vip);
+                updateUI();
+                return used;
+            } catch (error) {
+                console.warn('Unable to load Supabase trial usage:', error);
+                state.inquiriesUsed = 0;
+                updateUI();
+                return 0;
+            }
         }
 
         const formProfiles = {
@@ -1751,13 +1776,37 @@
             const progress = document.getElementById('trial-progress');
             const badge = document.getElementById('status-badge');
             const membershipButton = document.querySelector('.app-header .yellow-button');
+            const magicSubmit = document.getElementById('magic-submit');
+            const magicQuery = document.getElementById('magic-query');
+            const remainingFreeQuotes = Math.max(0, 2 - state.inquiriesUsed);
+            const limitReached = !state.isVIP && remainingFreeQuotes <= 0;
 
             if (membershipButton) {
                 membershipButton.innerHTML = state.isVIP
                     ? 'VIP active <span class="text-sm">✓</span>'
-                    : state.inquiriesUsed >= 2
+                    : limitReached
                         ? 'Subscribe to continue <span class="text-sm">→</span>'
                         : 'Membership <span class="text-sm">→</span>';
+            }
+
+            if (magicQuery) {
+                magicQuery.disabled = limitReached;
+                magicQuery.classList.toggle('opacity-50', limitReached);
+                magicQuery.classList.toggle('cursor-not-allowed', limitReached);
+                magicQuery.placeholder = limitReached ? 'You have used both free quotes. Upgrade to continue.' : 'e.g., I want to go to Bali next month for a week for two people...';
+            }
+
+            if (magicSubmit) {
+                magicSubmit.disabled = limitReached;
+                magicSubmit.classList.toggle('opacity-50', limitReached);
+                magicSubmit.classList.toggle('cursor-not-allowed', limitReached);
+                magicSubmit.title = limitReached ? 'Free quotes exhausted' : 'Free quote request';
+            }
+
+            if (btn) {
+                btn.disabled = limitReached;
+                btn.classList.toggle('opacity-50', limitReached);
+                btn.classList.toggle('cursor-not-allowed', limitReached);
             }
 
             if (state.isVIP) {
@@ -1767,19 +1816,32 @@
                 counter.className = 'text-[10px] bg-app-vip/20 text-app-vip px-2.5 py-1 rounded-md font-bold uppercase';
                 if (miniText) miniText.textContent = 'VIP';
                 if (progress) progress.style.width = '100%';
-                btn.innerText = 'Request my VIP quote';
-                btn.className = 'w-full bg-app-vip text-black font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)]';
+                if (btn) {
+                    btn.innerText = 'Request my VIP quote';
+                    btn.className = 'w-full bg-app-vip text-black font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)]';
+                }
             } else {
                 const percent = Math.min(100, (state.inquiriesUsed / 2) * 100);
                 const usedText = `${Math.min(state.inquiriesUsed, 2)}/2 used`;
-                counter.innerText = `${state.inquiriesUsed}/2 free`;
+                counter.innerText = `${remainingFreeQuotes}/2 free`;
                 if (miniText) miniText.textContent = usedText;
                 if (progress) progress.style.width = `${percent}%`;
-                if (state.inquiriesUsed >= 2) {
-                    btn.innerText = 'Unlock more quotes';
-                    btn.className = 'w-full bg-app-surface border border-app-border text-neutral-900 font-bold py-3 rounded-xl text-xs transition active:scale-95';
+                if (limitReached) {
+                    if (btn) {
+                        btn.innerText = 'Unlock more quotes';
+                        btn.className = 'w-full bg-app-surface border border-app-border text-neutral-900 font-bold py-3 rounded-xl text-xs transition active:scale-95 opacity-50 cursor-not-allowed';
+                    }
+                    if (magicSubmit) {
+                        magicSubmit.innerText = 'Free quotes used';
+                    }
                 } else {
-                    btn.innerText = 'Get my free quote';
+                    if (btn) {
+                        btn.innerText = 'Get my free quote';
+                        btn.className = 'w-full yellow-button hover:bg-app-vip font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-sm';
+                    }
+                    if (magicSubmit) {
+                        magicSubmit.innerText = 'Free quote request';
+                    }
                 }
             }
         }
@@ -2005,7 +2067,7 @@
                 } else {
                     renderInquiries(localVisibleInquiries);
                 }
-                syncInquiryUsage(getLocalInquiryCache());
+                await refreshTrialUsageFromSupabase();
                 return;
             }
 
@@ -2017,18 +2079,18 @@
                 if (!response.ok) {
                     console.warn('Inquiry fetch failed:', data.error || response.statusText);
                     renderInquiries(localVisibleInquiries);
-                    syncInquiryUsage(localVisibleInquiries);
+                    await refreshTrialUsageFromSupabase();
                     return;
                 }
 
                 const inquiries = Array.isArray(data.inquiries) ? data.inquiries : localVisibleInquiries;
                 saveLocalInquiryCache(inquiries);
                 renderInquiries(getVisibleInquiries());
-                syncInquiryUsage(inquiries);
+                await refreshTrialUsageFromSupabase();
             } catch (error) {
                 console.error(error);
                 renderInquiries(localVisibleInquiries);
-                syncInquiryUsage(localVisibleInquiries);
+                await refreshTrialUsageFromSupabase();
             }
         }
 
@@ -2124,8 +2186,15 @@
             const rawQuery = magicInput ? magicInput.value.trim() : '';
             const isMagicRequest = Boolean(rawQuery && rawQuery.length > 5);
 
-            if (!state.isVIP && state.inquiriesUsed >= 2) {
+            if (!tg || !tg.initData) {
+                safeTg.showAlert('Open this app in Telegram to submit a request.');
+                return;
+            }
+
+            const currentUsage = await refreshTrialUsageFromSupabase();
+            if (!state.isVIP && currentUsage >= 2) {
                 safeTg.haptic('notification', 'warning');
+                updateUI();
                 switchTab('store');
                 return;
             }
@@ -2166,11 +2235,6 @@
                 return;
             }
 
-            if (!tg || !tg.initData) {
-                safeTg.showAlert('Open this app in Telegram to submit a request.');
-                return;
-            }
-
             const activeButton = btnSubmit || magicSubmit;
             if (activeButton) {
                 activeButton.disabled = true;
@@ -2186,63 +2250,35 @@
                     raw_query: isMagicRequest ? rawQuery : ''
                 };
 
-                const telegramId = tg.initDataUnsafe?.user?.id || null;
-                const inquiryId = crypto.randomUUID();
-
-                // 1. DIRECT SUPABASE INSERTION
-                if (window.supabaseClient) {
-                    const { error: dbError } = await window.supabaseClient
-                        .from('inquiries')
-                        .insert([{
-                            inquiry_id: inquiryId,
-                            telegram_id: telegramId,
-                            category: requestCategory,
-                            destination: requestDestination,
-                            dates: requestDates,
-                            raw_query: isMagicRequest ? rawQuery : '',
-                            status: 'received'
-                        }]);
-
-                    if (dbError) {
-                        console.error('Supabase Error:', dbError);
-                        throw new Error(`Database connection failed: ${dbError.message}`);
-                    }
-                } else {
-                    throw new Error('Supabase client is offline. Check API keys.');
-                }
-
-                // 2. BACKGROUND NOTIFICATION (Netlify)
-                fetchWithTimeout('/.netlify/functions/inquiries', {
+                const response = await fetchWithTimeout('/.netlify/functions/inquiries', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Telegram-Init-Data': tg.initData || ''
                     },
                     body: JSON.stringify({
-                        action: 'new_inquiry',
                         category: requestCategory,
                         destination: requestDestination,
                         dates: requestDates,
-                        raw_query: isMagicRequest ? rawQuery : '',
-                        details
+                        details,
+                        raw_query: isMagicRequest ? rawQuery : ''
                     })
-                }, 5000).catch(err => console.warn('Netlify notification skipped:', err));
+                }, 12000);
 
-                // 3. UPDATE UI ON SUCCESS
-                const submittedInquiry = {
-                    inquiry_id: inquiryId,
-                    telegram_id: telegramId,
-                    category: requestCategory,
-                    destination: requestDestination,
-                    dates: requestDates,
-                    details,
-                    status: 'received',
-                    created_at: new Date().toISOString()
-                };
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    if (data.code === 'TRIAL_LIMIT_REACHED') {
+                        await refreshTrialUsageFromSupabase();
+                        safeTg.haptic('notification', 'warning');
+                        safeTg.showAlert('Your two free quotes have been used. Upgrade to continue.');
+                        switchTab('store');
+                        return;
+                    }
+                    throw new Error(data.error || 'Unable to send your quote request.');
+                }
 
-                const nextList = [submittedInquiry, ...getVisibleInquiries()];
-                saveLocalInquiryCache(nextList);
-                syncInquiryUsage(nextList);
+                const nextCount = await refreshTrialUsageFromSupabase();
+                syncInquiryUsage(nextCount);
 
                 if (magicInput) magicInput.value = '';
                 if (dest) dest.value = '';
@@ -2251,7 +2287,8 @@
                 if (origin) origin.value = '';
                 if (notes) notes.value = '';
 
-                renderInquiries(nextList);
+                const localVisible = getVisibleInquiries();
+                renderInquiries(localVisible);
                 safeTg.haptic('notification', 'success');
                 safeTg.showAlert('Your quote request was securely received.');
                 switchTab('vault');
@@ -2259,7 +2296,6 @@
             } catch (error) {
                 console.error('Submission Error:', error);
                 const friendlyMessage = error.message || 'Unable to send your quote request.';
-                
                 safeTg.showAlert(`Error: ${friendlyMessage}`);
                 if (activeButton) activeButton.innerText = originalText;
             } finally {
