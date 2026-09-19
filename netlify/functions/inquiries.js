@@ -139,14 +139,26 @@ exports.handler = async (event) => {
             return reply(201, { reply: replyData });
         }
 
-        const category = typeof body.category === 'string' ? body.category.trim() : '';
-        const destination = typeof body.destination === 'string' ? body.destination.trim() : '';
-        const dates = typeof body.dates === 'string' ? body.dates.trim() : '';
         const details = body.details && typeof body.details === 'object' && !Array.isArray(body.details)
             ? body.details
             : {};
+        const rawQuery = typeof body.raw_query === 'string' ? body.raw_query.trim() : (typeof details.raw_query === 'string' ? details.raw_query.trim() : '');
+        const hasRawQuery = rawQuery.length > 0;
+        const category = hasRawQuery
+            ? 'Magic Request'
+            : (typeof body.category === 'string' ? body.category.trim() : '');
+        const destination = hasRawQuery
+            ? 'Magic Request'
+            : (typeof body.destination === 'string' ? body.destination.trim() : '');
+        const dates = hasRawQuery
+            ? 'Flexible'
+            : (typeof body.dates === 'string' ? body.dates.trim() : '');
 
-        if (!category || category.length > 40 || !destination || destination.length > 160 || !dates || dates.length > 100) {
+        if (hasRawQuery) {
+            details.raw_query = rawQuery;
+        }
+
+        if (!hasRawQuery && (!category || category.length > 40 || !destination || destination.length > 160 || !dates || dates.length > 100)) {
             return reply(400, { error: 'Category, destination, and dates are required.' });
         }
 

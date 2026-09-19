@@ -1269,18 +1269,6 @@
             return fetch(url, requestOptions).finally(() => clearTimeout(timeoutId));
         }
 
-        function notifyInquiry(inquiry) {
-            const queue = getSafeStorageValue('sm_inquiry_queue', []);
-            const nextQueue = Array.isArray(queue) ? queue : [];
-            nextQueue.unshift({
-                ...inquiry,
-                queuedAt: new Date().toISOString(),
-                status: inquiry.status || 'queued'
-            });
-            setSafeStorageValue('sm_inquiry_queue', nextQueue.slice(0, 25));
-            return nextQueue[0];
-        }
-
         if (tg) {
             safeTg.expand();
             if (tg.initDataUnsafe?.user) {
@@ -1886,21 +1874,14 @@
 
         function getVisibleInquiries() {
             const cached = getLocalInquiryCache();
-            const queued = getSafeStorageValue('sm_inquiry_queue', []);
-            const merged = [...(Array.isArray(queued) ? queued : []), ...(Array.isArray(cached) ? cached : [])];
-            const deduped = new Map();
-            merged.forEach((inquiry) => {
-                const key = inquiry && (inquiry.inquiry_id || inquiry.destination || inquiry.created_at || `${Math.random()}`);
-                if (!key) return;
-                if (!deduped.has(key)) {
-                    deduped.set(key, inquiry);
-                }
-            });
-            return [...deduped.values()].sort((a, b) => {
-                const aTime = new Date(a.created_at || a.queuedAt || 0).getTime();
-                const bTime = new Date(b.created_at || b.queuedAt || 0).getTime();
-                return bTime - aTime;
-            });
+            const list = Array.isArray(cached) ? cached : [];
+            return list
+                .filter(item => item && (item.inquiry_id || item.created_at || item.destination))
+                .sort((a, b) => {
+                    const aTime = new Date(a.created_at || 0).getTime();
+                    const bTime = new Date(b.created_at || 0).getTime();
+                    return bTime - aTime;
+                });
         }
 
         function updateInquiryReplyState(inquiryId, nextValue) {
@@ -1920,7 +1901,7 @@
             const container = document.getElementById('inquiries-list');
             const list = Array.isArray(inquiries) ? inquiries : [];
             if (!list.length) {
-                container.innerHTML = '<p class="text-sm text-app-secondary">Your submitted requests will appear here.</p>';
+                container.innerHTML = '<p class="text-sm text-app-secondary">No confirmed requests yet. Successful submissions will appear here.</p>';
                 return;
             }
             container.innerHTML = list.map((inquiry) => {
@@ -2221,42 +2202,6 @@
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || 'Unable to send your quote request.');
 
-                const supabaseClient = globalThis.supabaseClient || null;
-                const payload = {
-                    telegram_id: tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null,
-                    category: requestCategory,
-                    destination: requestDestination,
-                    dates: requestDates,
-                    status: 'Pending'
-                };
-
-                if (supabaseClient) {
-                    const { error: userError } = await supabaseClient
-                        .from('users')
-                        .upsert({ telegram_id: payload.telegram_id }, { onConflict: 'telegram_id' });
-
-                    if (userError) {
-                        console.error('Supabase User Error:', userError);
-                        throw new Error(`User DB Error: ${userError.message}`);
-                    }
-
-                    const { error: inquiryError } = await supabaseClient
-                        .from('inquiries')
-                        .insert([{
-                            telegram_id: payload.telegram_id,
-                            category: payload.category,
-                            destination: payload.destination,
-                            dates: JSON.stringify(payload.dates),
-                            details: { raw_query: isMagicRequest ? rawQuery : '' },
-                            status: 'Pending'
-                        }]);
-
-                    if (inquiryError) {
-                        console.error('Supabase Inquiry Error:', inquiryError);
-                        throw new Error(`Inquiry DB Error: ${inquiryError.message}`);
-                    }
-                }
-
                 const submittedInquiry = {
                     inquiry_id: data.inquiry?.inquiry_id || crypto.randomUUID(),
                     telegram_id: data.inquiry?.telegram_id || (tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null),
@@ -2268,10 +2213,9 @@
                     created_at: new Date().toISOString()
                 };
 
-                const cached = getLocalInquiryCache();
-                const merged = [submittedInquiry, ...cached.filter(item => item.inquiry_id !== submittedInquiry.inquiry_id)].slice(0, 25);
-                saveLocalInquiryCache(merged);
-                syncInquiryUsage(merged);
+                const nextList = [submittedInquiry];
+                saveLocalInquiryCache(nextList);
+                syncInquiryUsage(nextList);
 
                 if (magicInput) magicInput.value = '';
                 if (dest) dest.value = '';
@@ -2280,7 +2224,7 @@
                 if (origin) origin.value = '';
                 if (notes) notes.value = '';
 
-                renderInquiries(merged);
+                renderInquiries(nextList);
                 await loadInquiries();
                 safeTg.haptic('notification', 'success');
                 safeTg.showAlert('Your quote request was received.');
@@ -2288,24 +2232,9 @@
             } catch (error) {
                 console.error(error);
                 const friendlyMessage = error.name === 'AbortError' ? 'The request timed out. Please try again on a stronger connection.' : (error.message || 'Unable to send your quote request.');
-                const fallbackInquiry = {
-                    inquiry_id: `queued_${Date.now()}`,
-                    category: requestCategory,
-                    destination: requestDestination,
-                    dates: requestDates,
-                    details: {
-                        origin: origin ? origin.value.trim() : '',
-                        travellers: travellers ? travellers.value : '',
-                        budget: budget ? budget.value : '',
-                        notes: notes ? notes.value.trim() : '',
-                        raw_query: isMagicRequest ? rawQuery : ''
-                    },
-                    status: 'queued',
-                    created_at: new Date().toISOString()
-                };
-                notifyInquiry(fallbackInquiry);
-                renderInquiries(getVisibleInquiries());
-                safeTg.showAlert(`${friendlyMessage} Your request has been saved locally and will sync when connected.`);
+                renderInquiries([]);
+                syncInquiryUsage([]);
+                safeTg.showAlert(`${friendlyMessage} Your request was not submitted.`);
                 if (activeButton) activeButton.innerText = originalText;
             } finally {
                 if (activeButton) {
