@@ -1714,41 +1714,32 @@ function init() {
             if (safeTg && safeTg.haptic) safeTg.haptic('notification', 'success');
         }
 
-        async function loadTravelDeals() {
-            try {
-                const response = await fetch('/.netlify/functions/travelDeals');
-                if (!response.ok) throw new Error('API failed');
-                const data = await response.json();
-                const deals = Array.isArray(data.deals) && data.deals.length ? data.deals : [...fallbackHotPackagesDB];
+       async function loadTravelDeals() {
+    try {
+        const response = await fetch('/.netlify/functions/travelDeals');
+        if (!response.ok) throw new Error('API failed');
+        const data = await response.json();
+        const deals = Array.isArray(data.deals) && data.deals.length ? data.deals : [...fallbackHotPackagesDB];
 
-                hotPackagesDB = deals.map((deal) => ({
-                    destination: deal.destination || 'Destination',
-                    nights: Number(deal.nights || 3),
-                    days: Number(deal.days || deal.nights || 4),
-                    price: Number(deal.price || 0),
-                    tag: deal.tag || 'Hot',
-                    note: deal.note || 'Limited-time rate'
-                }));
+        hotPackagesDB = deals.map((deal) => {
+            // Check all possible price keys from API payloads
+            const rawPrice = Number(deal.price ?? deal.deal_price ?? deal.reference_price ?? 0);
+            return {
+                destination: deal.destination || deal.title || 'Destination',
+                nights: Number(deal.nights || 3),
+                days: Number(deal.days || deal.nights || 4),
+                price: rawPrice > 0 ? rawPrice : 540, // Ensure it never defaults to 0
+                tag: deal.tag || 'Hot',
+                note: deal.note || 'Limited-time rate'
+            };
+        });
 
-                offersDB = hotPackagesDB.map((deal, index) => ({
-                    id: `${(deal.destination || 'deal').toLowerCase().replace(/\s+/g, '-')}-${index}`,
-                    title: deal.destination,
-                    discount: `${deal.tag || 'Hot'} deal`,
-                    tag: deal.note || 'Hot Deal',
-                    emoji: deal.destination.toLowerCase().includes('bali') ? '🌴' : deal.destination.toLowerCase().includes('dubai') ? '🏙️' : deal.destination.toLowerCase().includes('paris') ? '🗼' : deal.destination.toLowerCase().includes('maldives') ? '🏝️' : '✈️',
-                    price: deal.price,
-                    deal_price: deal.price,
-                    reference_price: Math.max(deal.price + 200, deal.price * 1.25),
-                    currency: 'USD'
-                }));
-
-                renderOffers();
-            } catch (error) {
-                hotPackagesDB = [...fallbackHotPackagesDB];
-                offersDB = [...fallbackOffersDB];
-                renderOffers();
-            }
-        }
+        renderOffers();
+    } catch (error) {
+        hotPackagesDB = [...fallbackHotPackagesDB];
+        renderOffers();
+    }
+}
 
         async function loadHotPackages() {
     try {
