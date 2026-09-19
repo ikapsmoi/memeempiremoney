@@ -1749,9 +1749,18 @@
         async function loadDealRates() {
             try {
                 const response = await fetch('/.netlify/functions/dealRates');
-                if (!response.ok) return;
+                if (!response.ok) {
+                    throw new Error(`Deal rates request failed: ${response.status} ${response.statusText}`);
+                }
+
                 const data = await response.json();
-                if (!Array.isArray(data.rates) || !data.rates.length) return;
+                if (!Array.isArray(data.rates) || !data.rates.length) {
+                    rateCatalog = {};
+                    showcaseState = {};
+                    renderRates();
+                    return;
+                }
+
                 const databaseCatalog = {};
                 data.rates.forEach(rate => {
                     if (!databaseCatalog[rate.category]) databaseCatalog[rate.category] = [];
@@ -1764,11 +1773,15 @@
                         freshness: rate.freshness_label || 'Reference snapshot'
                     });
                 });
+
                 rateCatalog = databaseCatalog;
                 showcaseState = Object.fromEntries(Object.keys(rateCatalog).map(category => [category, 0]));
                 renderRates();
             } catch (error) {
-                console.warn('Using local rate preview:', error);
+                console.error('Failed to load live deal rates:', error);
+                rateCatalog = {};
+                showcaseState = {};
+                renderRates();
             }
         }
 
