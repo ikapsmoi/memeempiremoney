@@ -7,6 +7,19 @@
     
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        window.supabaseClient = null;
+        try {
+            const supabaseUrl = 'https://kaiqftrzoocqcmqtikua.supabase.co';
+            const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+            if (supabaseUrl && supabaseAnonKey && supabaseUrl !== 'https://YOUR_PROJECT_REF.supabase.co' && supabaseAnonKey !== 'YOUR_SUPABASE_ANON_KEY') {
+                window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+            }
+        } catch (error) {
+            console.warn('Supabase client not initialized:', error);
+        }
+    </script>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1974,6 +1987,41 @@
                 }, 12000);
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || 'Unable to send your quote request.');
+
+                const supabaseClient = globalThis.supabaseClient || null;
+                const payload = {
+                    telegram_id: tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null,
+                    category: state.category,
+                    destination: destValue,
+                    dates: profile.checkout ? `${checkinValue} to ${checkoutValue}` : checkinValue,
+                    status: 'Pending'
+                };
+
+                if (supabaseClient) {
+                    const { error: userError } = await supabaseClient
+                        .from('users')
+                        .upsert({ telegram_id: payload.telegram_id }, { onConflict: 'telegram_id' });
+
+                    if (userError) {
+                        console.error('Supabase User Error:', userError);
+                        throw new Error(`User DB Error: ${userError.message}`);
+                    }
+
+                    const { error: inquiryError } = await supabaseClient
+                        .from('inquiries')
+                        .insert([{
+                            telegram_id: payload.telegram_id,
+                            category: payload.category,
+                            destination: payload.destination,
+                            dates: JSON.stringify(payload.dates),
+                            status: 'Pending'
+                        }]);
+
+                    if (inquiryError) {
+                        console.error('Supabase Inquiry Error:', inquiryError);
+                        throw new Error(`Inquiry DB Error: ${inquiryError.message}`);
+                    }
+                }
 
                 const submittedInquiry = {
                     inquiry_id: data.inquiry?.inquiry_id || crypto.randomUUID(),
