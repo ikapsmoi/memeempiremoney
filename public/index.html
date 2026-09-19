@@ -1443,6 +1443,98 @@
                 color: var(--app-text) !important;
             }
         }
+
+        /* Final contrast layer for the blue travel backdrop. */
+        .app-header {
+            background: rgba(255, 255, 255, 0.96);
+            border-color: rgba(17, 17, 21, 0.14);
+        }
+
+        body > .px-3 > div,
+        body > .px-5 > div {
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        main {
+            isolation: isolate;
+        }
+
+        #view-home > .px-5:first-child,
+        #view-home > .px-5:nth-of-type(2),
+        #view-home > .px-5:nth-of-type(3),
+        #view-home > .px-5:nth-of-type(4),
+        #view-home > footer {
+            position: relative;
+            z-index: 1;
+        }
+
+        #view-home h2,
+        #view-home h3,
+        #view-home label,
+        #view-home p,
+        #view-home .text-neutral-900,
+        #view-home .text-black {
+            color: #111115;
+        }
+
+        #view-home .text-app-secondary,
+        #view-home .section-label { color: #62666d; }
+
+        .magic-compose,
+        .travel-deals-box,
+        #rates-container .compact-rate-card,
+        .cash-note {
+            background-color: rgba(255, 255, 255, 0.94);
+            border-color: rgba(17, 17, 21, 0.14);
+        }
+
+        .magic-input-shell,
+        .field-shell { background-color: rgba(245, 246, 248, 0.96); }
+
+        .magic-input-shell textarea,
+        .field-shell input,
+        .field-shell select { color: #111115 !important; }
+
+        .magic-input-shell textarea::placeholder,
+        .field-shell input::placeholder { color: #6b7078 !important; }
+
+        @media (prefers-color-scheme: dark) {
+            .app-header {
+                background: rgba(23, 24, 29, 0.97);
+                border-color: var(--app-border);
+            }
+
+            body > .px-3 > div,
+            body > .px-5 > div,
+            .magic-compose,
+            .travel-deals-box,
+            #rates-container .compact-rate-card,
+            .cash-note {
+                background-color: rgba(34, 36, 43, 0.96);
+                border-color: var(--app-border);
+            }
+
+            #view-home h2,
+            #view-home h3,
+            #view-home label,
+            #view-home p,
+            #view-home .text-neutral-900,
+            #view-home .text-black,
+            #view-home .text-app-secondary,
+            #view-home .section-label {
+                color: var(--app-text) !important;
+            }
+
+            .magic-input-shell,
+            .field-shell { background-color: rgba(44, 46, 54, 0.98); }
+
+            .magic-input-shell textarea,
+            .field-shell input,
+            .field-shell select { color: var(--app-text) !important; }
+
+            .magic-input-shell textarea::placeholder,
+            .field-shell input::placeholder { color: var(--app-muted) !important; }
+        }
     </style>
 </head>
 <body class="pb-20 bg-app-bg text-neutral-900">
