@@ -2091,7 +2091,12 @@ function init() {
     if (!container) return;
 
     const dealSource = Array.isArray(travelDealsDB) && travelDealsDB.length ? travelDealsDB : [...fallbackOffersDB];
-    hotDealsTickerIndex = hotDealsTickerIndex % dealSource.length;
+    const rateSource = Object.entries(rateCatalog || {}).flatMap(([category, rates]) => (rates || []).map(rate => ({
+        category,
+        title: rate.name || 'Travel rate',
+        price: Number(rate.ourRate || 0)
+    })));
+    hotDealsTickerIndex = hotDealsTickerIndex % Math.max(rateSource.length, 1);
      const visibleDeals = Array.from({ length: Math.min(4, dealSource.length) }, (_, offset) => {
           const index = (hotDealsTickerIndex + offset) % dealSource.length;
           return { deal: dealSource[index], index };
@@ -2099,16 +2104,12 @@ function init() {
 
     const ticker = document.getElementById('hot-deals-ticker');
     if (ticker) {
-        ticker.innerHTML = dealSource.map((deal, index) => {
-            const destination = deal.destination || deal.title || 'Destination';
-            const nights = Number(deal.nights || 3);
-            const days = Number(deal.days || deal.nights || 4);
-            const price = Number(deal.price || deal.deal_price || deal.reference_price || 0);
+        ticker.innerHTML = rateSource.map((rate, index) => {
             return `<div class="hot-deal-ticker-item ${index === hotDealsTickerIndex ? 'is-visible' : ''}">
                 <span class="hot-deal-fire" aria-hidden="true">🔥</span>
-                <span>${destination}</span>
-                <span>${nights} nights / ${days} days</span>
-                <span>${formatINR(price)}</span>
+                <span>${rate.category}</span>
+                <span>${rate.title}</span>
+                <span>${formatINR(rate.price)}</span>
             </div>`;
         }).join('');
     }
@@ -2522,6 +2523,7 @@ function init() {
 
                         rateCatalog = Object.keys(databaseCatalog).length ? databaseCatalog : JSON.parse(JSON.stringify(fallbackRateCatalog));
                         renderRates();
+                        renderOffers(false);
                         return;
                     }
                 } catch (error) {
@@ -2538,6 +2540,7 @@ function init() {
                 if (!liveRates.length) {
                     rateCatalog = JSON.parse(JSON.stringify(fallbackRateCatalog));
                     renderRates();
+                    renderOffers(false);
                     return;
                 }
 
@@ -2557,9 +2560,11 @@ function init() {
 
                 rateCatalog = Object.keys(databaseCatalog).length ? databaseCatalog : JSON.parse(JSON.stringify(fallbackRateCatalog));
                 renderRates();
+                renderOffers(false);
             } catch (error) {
                 rateCatalog = JSON.parse(JSON.stringify(fallbackRateCatalog));
                 renderRates();
+                renderOffers(false);
             }
         }
 
