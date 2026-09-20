@@ -930,12 +930,26 @@
             color: #111115;
         }
 
+        .hot-package-row .deal-summary {
+            display: -webkit-box;
+            margin-top: 1px;
+            overflow: hidden;
+            color: rgba(17, 17, 21, 0.62);
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1.3;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
         .hot-package-row .package-summary {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            margin-top: auto;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-end;
+            gap: 3px;
+            margin-top: 4px;
         }
 
         .hot-package-row .price-tag {
@@ -944,6 +958,26 @@
             color: #15803d;
             text-shadow: 0 0 12px rgba(34, 197, 94, 0.28);
             white-space: nowrap;
+        }
+
+        .hot-package-row .slots-available {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            color: #b45309;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            line-height: 1;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .hot-package-row .slots-available::before {
+            content: '\2022';
+            color: #f59e0b;
+            font-size: 13px;
+            line-height: 0;
         }
 
         .travel-deals-box {
@@ -1340,22 +1374,13 @@
             min-height: 132px;
         }
 
-        .hot-package-row .meta-row,
         .hot-package-row strong,
+        .hot-package-row .deal-summary,
         .hot-package-row .duration,
         .hot-package-row .price-tag,
         .compact-rate-card h4,
         .compact-rate-card .savings,
         .compact-rate-card .savings-value { overflow-wrap: anywhere; }
-
-        .hot-package-row .meta-row > span:first-child,
-        .hot-package-row .meta-row > span:last-child { min-width: 0; }
-
-        .hot-package-row .meta-row > span:last-child {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
 
         .compact-rate-card {
             min-width: 0;
@@ -2173,14 +2198,14 @@ function init() {
                     const days = Number(deal.days || deal.nights || 4);
                     const price = Number(deal.price || deal.deal_price || deal.reference_price || 0);
                     const summary = deal.summary || deal.note || 'Wholesale rate';
+                    const slotsAvailable = deal.slotsAvailable || (deal.slotsAvailable = Math.floor(Math.random() * 31) + 10);
                     return `
                     <button type="button" class="hot-package-row ${index === hotDealsTickerIndex ? 'is-visible' : ''}" onclick="setHotPackageInForm({ destination: '${destination.replace(/'/g, "\\'")}', nights:${nights}, days: ${days}, price:${price} })">
-                        <div class="meta-row">
-                            <span>${summary}</span>
-                        </div>
                         <strong>${destination}</strong>
+                        <span class="deal-summary">${summary}</span>
                         <div class="package-summary">
                             <span class="price-tag">${formatINR(price)}</span>
+                            <span class="slots-available">${slotsAvailable} slots left</span>
                         </div>
                     </button>
                 `;
