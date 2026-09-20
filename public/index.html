@@ -214,7 +214,7 @@
             position: absolute;
             inset: 0;
             z-index: 2;
-            background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.26));
+            background: linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.48));
             backdrop-filter: blur(1.5px);
         }
 
@@ -1642,10 +1642,10 @@
                     </div>
 
                     <div class="mt-1 text-center">
-                        <button id="toggle-detailed-form" type="button" class="magic-toggle-link text-[10px] font-bold uppercase tracking-[0.12em] bg-transparent border-0 p-0">Hide detailed form</button>
+                        <button id="toggle-detailed-form" type="button" class="magic-toggle-link text-[10px] font-bold uppercase tracking-[0.12em] bg-transparent border-0 p-0">Or use detailed form</button>
                     </div>
 
-                    <div id="structured-form-wrapper" class="mt-3 pt-3 border-t border-app-border">
+                    <div id="structured-form-wrapper" class="hidden mt-3 pt-3 border-t border-app-border">
                         <div id="inquiry-fields" class="space-y-2 mb-3">
                             <div id="field-origin" class="inquiry-field field-shell hidden bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
                                 <label id="origin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">From</label>
@@ -2118,10 +2118,13 @@ function init() {
     if (ticker) {
         ticker.innerHTML = dealSource.map((deal, index) => {
             const destination = deal.destination || deal.title || 'Destination';
-            const summary = deal.summary || deal.note || deal.tag || 'Wholesale rate';
+            const nights = Number(deal.nights || 3);
+            const days = Number(deal.days || deal.nights || 4);
+            const price = Number(deal.price || deal.deal_price || deal.reference_price || 0);
             return `<div class="hot-deal-ticker-item ${index === hotDealsTickerIndex ? 'is-visible' : ''}">
-                <span class="ticker-tag">${deal.tag || deal.discount || 'Hot'}</span>
-                <span>${destination} · ${summary}</span>
+                <span>${destination}</span>
+                <span>${nights} nights / ${days} days</span>
+                <span>${formatINR(price)}</span>
             </div>`;
         }).join('');
     }
@@ -2418,6 +2421,9 @@ function init() {
             const toggle = document.getElementById('toggle-detailed-form');
             const wrapper = document.getElementById('structured-form-wrapper');
             if (!toggle || !wrapper) return;
+
+            wrapper.classList.add('hidden');
+            toggle.textContent = 'Or use detailed form';
 
             toggle.addEventListener('click', () => {
                 const isHidden = wrapper.classList.toggle('hidden');
