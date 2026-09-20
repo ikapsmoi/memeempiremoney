@@ -2114,12 +2114,16 @@ function init() {
             safeTg.haptic('notification', 'success');
         }
 
-       function renderOffers() {
+         function renderOffers(renderQuickPills = true) {
     const container = document.getElementById('offers-container');
     if (!container) return;
 
     const dealSource = Array.isArray(travelDealsDB) && travelDealsDB.length ? travelDealsDB : [...fallbackOffersDB];
     hotDealsTickerIndex = hotDealsTickerIndex % dealSource.length;
+     const visibleDeals = Array.from({ length: Math.min(4, dealSource.length) }, (_, offset) => {
+          const index = (hotDealsTickerIndex + offset) % dealSource.length;
+          return { deal: dealSource[index], index };
+     });
 
     const ticker = document.getElementById('hot-deals-ticker');
     if (ticker) {
@@ -2140,16 +2144,15 @@ function init() {
     container.innerHTML = `
         <div class="travel-deals-box">
             <div class="hot-package-table">
-                ${dealSource.map((deal, index) => {
+                ${visibleDeals.map(({ deal, index }) => {
                     const destination = deal.destination || deal.title || 'Destination';
                     const nights = Number(deal.nights || 3);
                     const days = Number(deal.days || deal.nights || 4);
                     const price = Number(deal.price || deal.deal_price || deal.reference_price || 0);
-                    const summary = deal.summary || deal.note || deal.tag || 'Wholesale rate';
+                    const summary = deal.summary || deal.note || 'Wholesale rate';
                     return `
                     <button type="button" class="hot-package-row ${index === hotDealsTickerIndex ? 'is-visible' : ''}" onclick="setHotPackageInForm({ destination: '${destination.replace(/'/g, "\\'")}', nights:${nights}, days: ${days}, price:${price} })">
                         <div class="meta-row">
-                            <span>${deal.tag || deal.discount || 'Hot'}</span>
                             <span>${summary}</span>
                         </div>
                         <strong>${destination}</strong>
@@ -2170,12 +2173,13 @@ function init() {
         const showHotDeal = () => {
             hotDealsTickerIndex = (hotDealsTickerIndex + 1) % tickerItems.length;
             tickerItems.forEach((item, index) => item.classList.toggle('is-visible', index === hotDealsTickerIndex));
+            renderOffers(false);
         };
 
         window._tickerInterval = setInterval(showHotDeal, 2200);
     }
 
-    renderQuickDealPills();
+    if (renderQuickPills) renderQuickDealPills();
 }
 
         const quickDealState = { index: 0, timer: null };
