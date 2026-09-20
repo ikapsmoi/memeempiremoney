@@ -838,6 +838,7 @@
             gap: 6px;
             width: 100%;
             min-height: 118px;
+            cursor: pointer;
             border: 1px solid rgba(17, 17, 21, 0.08);
             border-radius: 16px;
             background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(244,246,248,0.98));
@@ -849,6 +850,16 @@
             transform: translateY(5px);
             transition: opacity 320ms ease, transform 320ms ease, box-shadow 320ms ease, border-color 320ms ease;
         }
+
+        .hot-package-row:hover,
+        .hot-package-row:focus-visible {
+            opacity: 1;
+            transform: translateY(-3px);
+            border-color: rgba(34, 197, 94, 0.58);
+            box-shadow: 0 12px 24px rgba(34, 197, 94, 0.16), 0 0 0 2px rgba(34, 197, 94, 0.12);
+        }
+
+        .hot-package-row:active { transform: translateY(-1px) scale(0.99); }
 
         .hot-package-row.is-visible {
             opacity: 1;
@@ -1007,16 +1018,26 @@
         }
 
         .compact-rate-card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(241,241,244,0.96));
-            border: 1px solid rgba(204,255,0,0.4);
+            background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(204,255,0,0.14));
+            border: 1px solid rgba(204,255,0,0.56);
             border-radius: 12px;
             padding: 9px 9px 8px;
             min-height: 78px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 16px rgba(204,255,0,0.12);
+            color: #111115;
+            cursor: pointer;
+            box-shadow: 0 5px 14px rgba(17,17,21,0.06), 0 0 16px rgba(204,255,0,0.12);
             animation: glowPulse 2.8s ease-in-out infinite alternate;
+            transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+        }
+
+        .compact-rate-card:hover,
+        .compact-rate-card:focus-visible {
+            transform: translateY(-2px);
+            border-color: rgba(17,17,21,0.32);
+            box-shadow: 0 10px 20px rgba(17,17,21,0.1), 0 0 0 2px rgba(204,255,0,0.3);
         }
 
         .rate-cycle-card {
@@ -1059,9 +1080,13 @@
         }
 
         .compact-rate-card .savings-value {
-            font-size: 10px;
-            color: #111115;
+            font-size: 12px;
+            color: #ffffff;
+            background: #15803d;
+            border-radius: 7px;
+            padding: 4px 7px;
             font-weight: 900;
+            white-space: nowrap;
         }
 
         @keyframes glowPulse {
@@ -1646,64 +1671,12 @@
                     <div class="flex items-center justify-between gap-2 mb-2">
                         <div id="magic-offer" class="magic-offer">✨ Current offer unlocked: Save starting at 15% on your travel.</div>
                         <button id="magic-submit" onclick="submitInquiry()" class="magic-submit yellow-button font-bold px-3 py-2 rounded-xl text-[10px] transition active:scale-95 shadow-sm">
-                            Free quote request
-                        </button>
-                    </div>
-
-                    <div class="mt-1 text-center">
-                        <button id="toggle-detailed-form" type="button" class="magic-toggle-link text-[10px] font-bold uppercase tracking-[0.12em] bg-transparent border-0 p-0">Or use detailed form</button>
-                    </div>
-
-                    <div id="structured-form-wrapper" class="hidden mt-3 pt-3 border-t border-app-border">
-                        <div id="inquiry-fields" class="space-y-2 mb-3">
-                            <div id="field-origin" class="inquiry-field field-shell hidden bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                <label id="origin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">From</label>
-                                <input type="text" id="req-origin" autocomplete="off" inputmode="text" placeholder="City or airport" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
-                            </div>
-                            <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                <label id="destination-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Destination / Property</label>
-                                <input type="text" id="req-dest" autocomplete="off" inputmode="text" placeholder="City, hotel, or experience" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
-                            </div>
-                            <div class="field-message" id="dest-error">Please add a destination.</div>
-
-                            <div class="grid grid-cols-2 gap-2">
-                                <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                    <label id="checkin-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Check in</label>
-                                    <input type="date" id="req-checkin" autocomplete="off" inputmode="numeric" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
-                                </div>
-                                <div id="field-checkout" class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                    <label id="checkout-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Check out</label>
-                                    <input type="date" id="req-checkout" autocomplete="off" inputmode="numeric" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                    <label id="travellers-label" class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Travellers</label>
-                                    <select id="req-travellers" autocomplete="off" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
-                                        <option value="1">1 traveller</option><option value="2" selected>2 travellers</option><option value="3">3 travellers</option><option value="4">4 travellers</option><option value="5">5+ travellers</option>
-                                    </select>
-                                </div>
-                                <div id="field-budget" class="field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                    <label class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Budget</label>
-                                    <select id="req-budget" autocomplete="off" class="w-full bg-transparent text-neutral-900 text-xs font-medium focus:outline-none">
-                                        <option value="">Any budget</option><option value="under-500">Under ₹500</option><option value="500-1500">₹500-₹1,500</option><option value="1500-plus">₹1,500+</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div id="field-notes" class="hidden field-shell bg-app-surface rounded-xl p-2.5 border border-transparent focus-within:border-neutral-900 transition">
-                                <label class="block text-[9px] font-bold text-app-secondary uppercase tracking-wider ml-1 mb-0.5">Preferences</label>
-                                <input type="text" id="req-notes" autocomplete="off" inputmode="text" placeholder="Cabin, room, event, or other preference" class="w-full bg-transparent text-neutral-900 text-sm font-medium px-1 focus:outline-none placeholder:text-app-secondary">
-                            </div>
-                        </div>
-
-                        <button id="btn-submit" onclick="submitInquiry()" class="w-full yellow-button hover:bg-app-vip font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-sm">
-                            Get my free quote
+                            Send Inquiry
                         </button>
                     </div>
 
                     <div class="cash-note mt-3 px-3 py-2 rounded-r-lg">
                         <p class="text-[10px] font-extrabold">Cash + Cards + Crypto + Bank Transfers Accepted</p>
-                        <p class="text-[10px] text-app-secondary mt-0.5">Choose your preferred payment method when your booking is confirmed.</p>
                     </div>
                 </div>
             </div>
@@ -2068,7 +2041,6 @@ function init() {
     rotateTicker();
     bindKeyboardSafeScroll();
     bindMagicInput();
-    bindDetailedFormToggle();
 }
 
         // -----------------------------------------------------
@@ -2428,28 +2400,20 @@ function init() {
             syncMagicState();
         }
 
-        function bindDetailedFormToggle() {
-            const toggle = document.getElementById('toggle-detailed-form');
-            const wrapper = document.getElementById('structured-form-wrapper');
-            if (!toggle || !wrapper) return;
-
-            wrapper.classList.add('hidden');
-            toggle.textContent = 'Or use detailed form';
-
-            toggle.addEventListener('click', () => {
-                const isHidden = wrapper.classList.toggle('hidden');
-                toggle.textContent = isHidden ? 'Or use detailed form' : 'Hide detailed form';
-            });
-        }
-
         function updateInquiryForm() {
             const profile = formProfiles[state.category] || formProfiles.Hotels;
-            document.getElementById('form-title').innerText = profile.title;
-            document.getElementById('destination-label').innerText = profile.destination;
-            document.getElementById('req-dest').placeholder = profile.placeholder;
-            document.getElementById('origin-label').innerText = profile.originLabel || 'From';
-            document.getElementById('checkin-label').innerText = profile.checkin;
-            document.getElementById('checkout-label').innerText = profile.checkoutLabel;
+            const formTitle = document.getElementById('form-title');
+            if (formTitle) formTitle.innerText = profile.title;
+            const destinationLabel = document.getElementById('destination-label');
+            if (destinationLabel) destinationLabel.innerText = profile.destination;
+            const destinationInput = document.getElementById('req-dest');
+            if (destinationInput) destinationInput.placeholder = profile.placeholder;
+            const originLabel = document.getElementById('origin-label');
+            if (originLabel) originLabel.innerText = profile.originLabel || 'From';
+            const checkinLabel = document.getElementById('checkin-label');
+            if (checkinLabel) checkinLabel.innerText = profile.checkin;
+            const checkoutLabel = document.getElementById('checkout-label');
+            if (checkoutLabel) checkoutLabel.innerText = profile.checkoutLabel;
             
             ['field-origin', 'field-checkout', 'field-budget', 'field-notes'].forEach(id => {
                 const field = document.getElementById(id);
@@ -2646,7 +2610,7 @@ function init() {
                 magicSubmit.disabled = limitReached;
                 magicSubmit.classList.toggle('opacity-50', limitReached);
                 magicSubmit.classList.toggle('cursor-not-allowed', limitReached);
-                magicSubmit.title = limitReached ? 'Free quotes exhausted' : 'Free quote request';
+                magicSubmit.title = limitReached ? 'Free quotes exhausted' : 'Send Inquiry';
             }
 
             if (btn) {
@@ -2663,7 +2627,7 @@ function init() {
                 if (miniText) miniText.textContent = 'VIP';
                 if (progress) progress.style.width = '100%';
                 if (btn) {
-                    btn.innerText = 'Request my VIP quote';
+                    btn.innerText = 'Send Inquiry';
                     btn.className = 'w-full bg-app-vip text-black font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)]';
                 }
             } else {
@@ -2680,10 +2644,10 @@ function init() {
                     if (magicSubmit) magicSubmit.innerText = 'Free quotes used';
                 } else {
                     if (btn) {
-                        btn.innerText = 'Get my free quote';
+                        btn.innerText = 'Send Inquiry';
                         btn.className = 'w-full yellow-button hover:bg-app-vip font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-sm';
                     }
-                    if (magicSubmit) magicSubmit.innerText = 'Free quote request';
+                    if (magicSubmit) magicSubmit.innerText = 'Send Inquiry';
                 }
             }
         }
@@ -2992,7 +2956,7 @@ function init() {
             clearFieldErrors();
             const btnSubmit = document.getElementById('btn-submit');
             const magicSubmit = document.getElementById('magic-submit');
-            const originalText = btnSubmit ? btnSubmit.innerText : 'Get my free quote';
+            const originalText = btnSubmit ? btnSubmit.innerText : 'Send Inquiry';
             const magicInput = document.getElementById('magic-query');
             const rawQuery = magicInput ? magicInput.value.trim() : '';
             const isMagicRequest = Boolean(rawQuery && rawQuery.length > 5);
