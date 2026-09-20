@@ -11,9 +11,11 @@ const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
 
 // 1. Updated to Secret Miles VIP Packages
 const vipPackages = {
-    secret_miles_vip_monthly: 750,
-    secret_miles_vip_annual: 7500,
-    secret_miles_single_pass: 150
+    secret_miles_one_time: 100,
+    secret_miles_vip_weekly: 250,
+    secret_miles_vip_monthly: 500,
+    secret_miles_vip_annual: 2500,
+    secret_miles_single_pass: 100
 };
 
 async function answerPreCheckoutQuery(queryId, ok, errorMessage) {

@@ -22,21 +22,31 @@ exports.handler = async (event) => {
         return response(500, { error: 'TELEGRAM_BOT_TOKEN is missing or invalid on Netlify.' });
     }
 
-    // 1. Updated Packages to match the Secret Miles Frontend
+    // 1. Updated Packages to match the Storefront pricing tiers
     const packages = {
+        secret_miles_one_time: {
+            stars: 100,
+            title: "One Time Pass",
+            description: "1x Custom Wholesale Travel Quote."
+        },
+        secret_miles_vip_weekly: {
+            stars: 250,
+            title: "VIP Weekly Pass",
+            description: "Unlimited wholesale travel inquiries for 7 days."
+        },
         secret_miles_vip_monthly: {
-            stars: 750,
+            stars: 500,
             title: "VIP Monthly Pass",
             description: "Unlimited wholesale travel inquiries for 30 days."
         },
         secret_miles_vip_annual: {
-            stars: 7500,
+            stars: 2500,
             title: "VIP Annual Pass",
             description: "Year-round access. Dedicated agent. Maximum savings."
         },
         secret_miles_single_pass: {
-            stars: 150,
-            title: "Single Priority Pass",
+            stars: 100,
+            title: "One Time Pass",
             description: "1x Custom Wholesale Travel Quote."
         }
     };
