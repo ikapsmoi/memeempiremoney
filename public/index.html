@@ -861,6 +861,40 @@
 
         .hot-package-row:active { transform: translateY(-1px) scale(0.99); }
 
+        .travel-deal-filters {
+            display: flex;
+            gap: 6px;
+            margin: 0 0 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .travel-deal-filters::-webkit-scrollbar { display: none; }
+
+        .travel-deal-filter {
+            min-height: 32px;
+            padding: 5px 11px;
+            border: 1px solid rgba(17, 17, 21, 0.12);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.76);
+            color: #55585c;
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            transition: color 180ms ease, background 180ms ease, border-color 180ms ease, transform 180ms ease;
+        }
+
+        .travel-deal-filter:hover,
+        .travel-deal-filter.is-active {
+            border-color: #111115;
+            background: #111115;
+            color: #ccff00;
+        }
+
+        .travel-deal-filter:active { transform: scale(0.96); }
+
         .hot-package-row.is-visible {
             opacity: 1;
             transform: translateY(0);
@@ -1775,10 +1809,10 @@
         // -----------------------------------------------------
         
         const fallbackOffersDB = [
-            { id: 'fallback-bali', title: 'Bali Villas', discount: 'Save 40%', tag: 'Hot Deal', emoji: '🌴', price: 540, deal_price: 540, reference_price: 900, currency: 'USD' },
-            { id: 'fallback-tomorrowland', title: 'Tomorrowland', discount: 'VIP Access', tag: 'Music Festival', emoji: '🎪', price: 1080, deal_price: 1080, reference_price: 1200, currency: 'USD' },
-            { id: 'fallback-maldives', title: 'Maldives Escape', discount: 'Wholesale Rates', tag: 'Luxury', emoji: '🚤', price: 1620, deal_price: 1620, reference_price: 1800, currency: 'USD' },
-            { id: 'fallback-paris', title: 'Paris Escape', discount: 'Private concierge', tag: 'City Break', emoji: '🗼', price: 740, deal_price: 740, reference_price: 980, currency: 'USD' }
+            { id: 'fallback-bali', title: 'Bali Villas', type: 'International', discount: 'Save 40%', tag: 'Hot Deal', emoji: '🌴', price: 540, deal_price: 540, reference_price: 900, currency: 'USD' },
+            { id: 'fallback-tomorrowland', title: 'Tomorrowland', type: 'International', discount: 'VIP Access', tag: 'Music Festival', emoji: '🎪', price: 1080, deal_price: 1080, reference_price: 1200, currency: 'USD' },
+            { id: 'fallback-maldives', title: 'Maldives Escape', type: 'International', discount: 'Wholesale Rates', tag: 'Luxury', emoji: '🚤', price: 1620, deal_price: 1620, reference_price: 1800, currency: 'USD' },
+            { id: 'fallback-paris', title: 'Paris Escape', type: 'International', discount: 'Private concierge', tag: 'City Break', emoji: '🗼', price: 740, deal_price: 740, reference_price: 980, currency: 'USD' }
         ];
 
         const fallbackHotPackagesDB = [
@@ -1794,6 +1828,8 @@
         let travelDealsDB = [...fallbackOffersDB];
         let offersDB = [...fallbackOffersDB];
         let hotDealsTickerIndex = 0;
+        let travelDealsIndex = 0;
+        let travelDealFilter = 'all';
         let travelDealsLoaded = false;
 
         const categoriesDB = [
@@ -2091,15 +2127,24 @@ function init() {
     if (!container) return;
 
     const dealSource = Array.isArray(travelDealsDB) && travelDealsDB.length ? travelDealsDB : [...fallbackOffersDB];
+            const filteredDeals = dealSource.filter((deal) => {
+                if (travelDealFilter === 'all') return true;
+                const type = String(deal.type || '').toLowerCase();
+                return travelDealFilter === 'india'
+                    ? type === 'india' || type === 'domestic'
+                    : type === 'international' || type === 'intl' || type === 'overseas';
+            });
+            const visibleSource = filteredDeals.length ? filteredDeals : dealSource;
     const rateSource = Object.entries(rateCatalog || {}).flatMap(([category, rates]) => (rates || []).map(rate => ({
         category,
         title: rate.name || 'Travel rate',
         price: Number(rate.ourRate || 0)
     })));
     hotDealsTickerIndex = hotDealsTickerIndex % Math.max(rateSource.length, 1);
-     const visibleDeals = Array.from({ length: Math.min(4, dealSource.length) }, (_, offset) => {
-          const index = (hotDealsTickerIndex + offset) % dealSource.length;
-          return { deal: dealSource[index], index };
+    travelDealsIndex = travelDealsIndex % visibleSource.length;
+    const visibleDeals = Array.from({ length: Math.min(4, visibleSource.length) }, (_, offset) => {
+        const index = (travelDealsIndex + offset) % visibleSource.length;
+        return { deal: visibleSource[index], index };
      });
 
     const ticker = document.getElementById('hot-deals-ticker');
@@ -2116,6 +2161,11 @@ function init() {
 
     container.innerHTML = `
         <div class="travel-deals-box">
+            <div class="travel-deal-filters" role="group" aria-label="Travel deal market">
+                ${[['all', 'All'], ['international', 'International'], ['india', 'India']].map(([value, label]) => `
+                    <button type="button" class="travel-deal-filter ${travelDealFilter === value ? 'is-active' : ''}" onclick="setTravelDealFilter('${value}')" aria-pressed="${travelDealFilter === value}">${label}</button>
+                `).join('')}
+            </div>
             <div class="hot-package-table">
                 ${visibleDeals.map(({ deal, index }) => {
                     const destination = deal.destination || deal.title || 'Destination';
@@ -2145,6 +2195,7 @@ function init() {
     if (tickerItems.length > 1) {
         const showHotDeal = () => {
             hotDealsTickerIndex = (hotDealsTickerIndex + 1) % tickerItems.length;
+            travelDealsIndex = (travelDealsIndex + 1) % visibleSource.length;
             tickerItems.forEach((item, index) => item.classList.toggle('is-visible', index === hotDealsTickerIndex));
             renderOffers(false);
         };
@@ -2154,6 +2205,12 @@ function init() {
 
     if (renderQuickPills) renderQuickDealPills();
 }
+
+        function setTravelDealFilter(filter) {
+            travelDealFilter = ['all', 'international', 'india'].includes(filter) ? filter : 'all';
+            travelDealsIndex = 0;
+            renderOffers(false);
+        }
 
         const quickDealState = { index: 0, timer: null };
 
@@ -2246,6 +2303,7 @@ function init() {
                 travelDealsDB = data.map((deal) => ({
                     id: deal.deal_id || deal.id || String(deal.title || deal.destination || 'travel-deal'),
                     title: deal.title || deal.destination || 'Travel deal',
+                    type: deal.type || 'International',
                     discount: deal.tag || 'Live deal',
                     tag: deal.tag || 'Live deal',
                     emoji: deal.emoji || '✈️',
@@ -2296,6 +2354,7 @@ function init() {
         travelDealsDB = deals.map((deal) => ({
             id: deal.deal_id || deal.id || String(deal.title || deal.destination || 'travel-deal'),
             title: deal.title || deal.destination || 'Travel deal',
+            type: deal.type || 'International',
             discount: deal.tag || 'Live deal',
             tag: deal.tag || 'Live deal',
             emoji: deal.emoji || '✈️',
