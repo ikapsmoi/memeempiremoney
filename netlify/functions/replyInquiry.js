@@ -37,13 +37,14 @@ exports.handler = async (event, context) => {
             throw new Error('Original inquiry not found');
         }
 
-        // 2. Insert into your reply thread table
+        // 2. Append to the shared inquiry thread
         const { error: replyError } = await supabase
-            .from('reply_inquiries')
+            .from('inquiry_replies')
             .insert([{
                 inquiry_id: inquiryId,
-                response: replyText,
-                telegram_id: inquiryData.telegram_id
+                reply_text: replyText,
+                telegram_id: inquiryData.telegram_id,
+                sender_type: 'admin'
             }]);
 
         if (replyError) throw replyError;
@@ -51,7 +52,7 @@ exports.handler = async (event, context) => {
         // 3. Update status on the main inquiries table
         await supabase
             .from('inquiries')
-            .update({ status: 'responded', response: replyText, response_at: new Date().toISOString() })
+            .update({ status: 'responded' })
             .eq('inquiry_id', inquiryId);
 
         // 4. Send Instant Push Notification PM via Telegram Bot (if telegram_id and bot token exist)

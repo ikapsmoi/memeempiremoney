@@ -2848,7 +2848,9 @@ function init() {
             container.innerHTML = list.map((inquiry) => {
                 const inquiryKey = inquiry.inquiry_id || `${inquiry.created_at || 'n/a'}-${inquiry.destination || 'untitled'}`;
                 const isReplyOpen = state.replyingInquiryId === inquiryKey;
-                const responseText = inquiry.response || '';
+                const thread = Array.isArray(inquiry.replies) && inquiry.replies.length
+                    ? inquiry.replies
+                    : (inquiry.response ? [{ reply_text: inquiry.response, sender_type: 'admin', created_at: inquiry.response_at }] : []);
                 
                 return `
                     <article class="bg-app-card border border-app-border p-4 rounded-[14px] shadow-sm">
@@ -2860,12 +2862,16 @@ function init() {
                             <span class="bg-app-vip px-2 py-1 rounded-md text-[9px] font-extrabold uppercase text-black">${inquiry.status || 'received'}</span>
                         </div>
                         <p class="text-[10px] text-black/70 mt-3">Received ${formatInquiryDate(inquiry.created_at || inquiry.queuedAt)}</p>
-                        ${responseText ? `<p class="mt-3 rounded-lg bg-app-surface p-2 text-[10px] text-black/80"><span class="font-extrabold uppercase tracking-wider text-black">Reply:</span> ${responseText}</p>` : ''}
+                        ${thread.length ? `<div class="mt-3 space-y-2">${thread.map(message => `
+                            <div class="rounded-lg ${message.sender_type === 'admin' ? 'bg-app-vip/30' : 'bg-app-surface'} p-2 text-[10px] text-black/80">
+                                <span class="font-extrabold uppercase tracking-wider text-black">${message.sender_type === 'admin' ? 'Travel4Life' : 'You'}:</span> ${message.reply_text || ''}
+                            </div>
+                        `).join('')}</div>` : ''}
                         <div class="mt-3">
                             ${isReplyOpen ? `
                                 <div class="rounded-xl border border-app-border bg-app-surface p-2.5">
                                     <label class="block text-[9px] font-bold uppercase tracking-wider text-black/70 mb-1">Your quote response</label>
-                                    <textarea id="reply-text-${inquiryKey}" rows="3" class="w-full rounded-lg border border-app-border bg-white p-2 text-[11px] text-black placeholder:text-black/40" placeholder="Add your note or quote here...">${responseText}</textarea>
+                                    <textarea id="reply-text-${inquiryKey}" rows="3" class="w-full rounded-lg border border-app-border bg-white p-2 text-[11px] text-black placeholder:text-black/40" placeholder="Add your note or quote here..."></textarea>
                                     <div class="mt-2 flex items-center justify-between gap-2">
                                         <button type="button" data-action="cancel-reply" data-id="${inquiryKey}" class="text-[10px] font-bold text-black/70">Cancel</button>
                                         <button type="button" data-action="submit-reply" data-id="${inquiryKey}" class="bg-app-vip rounded-lg px-3 py-2 text-[10px] font-extrabold text-black">Submit quote</button>
@@ -2940,9 +2946,25 @@ function init() {
                         .order('created_at', { ascending: false });
 
                     if (!error && data) {
-                        saveLocalInquiryCache(data);
-                        renderInquiries(data);
-                        await syncInquiryUsage(data);
+                        const inquiryIds = data.map(item => item.inquiry_id).filter(Boolean);
+                        let replies = [];
+                        if (inquiryIds.length) {
+                            const { data: replyData, error: repliesError } = await window.supabaseClient
+                                .from('inquiry_replies')
+                                .select('reply_id, inquiry_id, telegram_id, reply_text, sender_type, created_at')
+                                .in('inquiry_id', inquiryIds)
+                                .order('created_at', { ascending: true });
+                            if (repliesError) throw repliesError;
+                            replies = replyData || [];
+                        }
+                        const repliesByInquiry = replies.reduce((grouped, item) => {
+                            (grouped[item.inquiry_id] ||= []).push(item);
+                            return grouped;
+                        }, {});
+                        const threadedData = data.map(item => ({ ...item, replies: repliesByInquiry[item.inquiry_id] || [] }));
+                        saveLocalInquiryCache(threadedData);
+                        renderInquiries(threadedData);
+                        await syncInquiryUsage(threadedData);
                         return;
                     }
                 } catch (err) { console.warn('Supabase direct load failed, trying cache:', err); }

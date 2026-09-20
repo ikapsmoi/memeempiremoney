@@ -32,8 +32,19 @@ create table if not exists public.inquiry_replies (
     inquiry_id uuid not null references public.inquiries(inquiry_id) on delete cascade,
     telegram_id bigint not null,
     reply_text text not null,
+    sender_type text not null default 'customer' check (sender_type in ('customer', 'admin')),
     created_at timestamptz not null default now()
 );
+
+alter table public.inquiry_replies
+    add column if not exists sender_type text not null default 'customer';
+
+alter table public.inquiry_replies
+    drop constraint if exists inquiry_replies_sender_type_check;
+
+alter table public.inquiry_replies
+    add constraint inquiry_replies_sender_type_check
+    check (sender_type in ('customer', 'admin'));
 
 create index if not exists inquiry_replies_inquiry_idx
     on public.inquiry_replies (inquiry_id, created_at desc);

@@ -109,6 +109,29 @@ async function sendCustomerReplyNotification({ botToken, telegramId, inquiryId, 
     }
 }
 
+async function sendAdminReplyNotification({ botToken, adminChatId, telegramId, inquiryId, replyText, inquiryDestination }) {
+    if (!botToken || !adminChatId) return;
+
+    const payload = {
+        chat_id: adminChatId,
+        text: `<b>💬 Customer reply</b>\n\n` +
+            `<b>User:</b> <code>${telegramId}</code>\n` +
+            `<b>Request:</b> ${String(inquiryDestination || 'travel request').slice(0, 200)}\n` +
+            `<b>Reply:</b> ${replyText}\n\n` +
+            `<b>Inquiry:</b> <code>${inquiryId}</code>`,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
+    };
+
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) console.warn(`Admin reply notification failed for inquiry ${inquiryId}: ${response.status}`);
+}
+
 exports.handler = async (event) => {
     if (event.httpMethod === 'OPTIONS') return reply(204, {});
     if (!['GET', 'POST'].includes(event.httpMethod)) return reply(405, { error: 'Method Not Allowed' });
@@ -130,7 +153,26 @@ exports.handler = async (event) => {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            return reply(200, { inquiries: data || [] });
+
+            const inquiryIds = (data || []).map(item => item.inquiry_id).filter(Boolean);
+            let replies = [];
+            if (inquiryIds.length) {
+                const { data: replyData, error: repliesError } = await supabase
+                    .from('inquiry_replies')
+                    .select('reply_id, inquiry_id, telegram_id, reply_text, sender_type, created_at')
+                    .in('inquiry_id', inquiryIds)
+                    .order('created_at', { ascending: true });
+                if (repliesError) throw repliesError;
+                replies = replyData || [];
+            }
+
+            const repliesByInquiry = replies.reduce((grouped, item) => {
+                (grouped[item.inquiry_id] ||= []).push(item);
+                return grouped;
+            }, {});
+            return reply(200, {
+                inquiries: (data || []).map(item => ({ ...item, replies: repliesByInquiry[item.inquiry_id] || [] }))
+            });
         }
 
         let body;
@@ -164,7 +206,8 @@ exports.handler = async (event) => {
                 .insert({
                     inquiry_id: inquiryId,
                     telegram_id: user.id,
-                    reply_text: replyText
+                    reply_text: replyText,
+                    sender_type: 'customer'
                 })
                 .select()
                 .single();
@@ -177,13 +220,24 @@ exports.handler = async (event) => {
                 .eq('inquiry_id', inquiryId)
                 .eq('telegram_id', user.id);
 
-            await sendCustomerReplyNotification({
-                botToken: process.env.TELEGRAM_BOT_TOKEN,
-                telegramId: inquiryData.telegram_id,
-                inquiryId,
-                replyText,
-                inquiryDestination: inquiryData.destination
-            });
+            if (process.env.TELEGRAM_ADMIN_CHAT_ID) {
+                await sendAdminReplyNotification({
+                    botToken: process.env.TELEGRAM_BOT_TOKEN,
+                    adminChatId: process.env.TELEGRAM_ADMIN_CHAT_ID,
+                    telegramId: user.id,
+                    inquiryId,
+                    replyText,
+                    inquiryDestination: inquiryData.destination
+                });
+            } else {
+                await sendCustomerReplyNotification({
+                    botToken: process.env.TELEGRAM_BOT_TOKEN,
+                    telegramId: inquiryData.telegram_id,
+                    inquiryId,
+                    replyText,
+                    inquiryDestination: inquiryData.destination
+                });
+            }
 
             return reply(201, { reply: replyData });
         }
