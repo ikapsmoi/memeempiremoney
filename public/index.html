@@ -837,6 +837,7 @@
             flex-direction: column;
             gap: 6px;
             width: 100%;
+            min-height: 118px;
             border: 1px solid rgba(17, 17, 21, 0.08);
             border-radius: 16px;
             background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(244,246,248,0.98));
@@ -886,24 +887,18 @@
 
         .hot-package-row .package-summary {
             display: flex;
-            align-items: end;
+            align-items: center;
             justify-content: space-between;
             gap: 8px;
             margin-top: auto;
         }
 
-        .hot-package-row .duration {
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            color: rgba(17, 17, 21, 0.74);
-        }
-
         .hot-package-row .price-tag {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 900;
-            color: #111115;
+            color: #15803d;
+            text-shadow: 0 0 12px rgba(34, 197, 94, 0.28);
+            white-space: nowrap;
         }
 
         .travel-deals-box {
@@ -2159,7 +2154,6 @@ function init() {
                         </div>
                         <strong>${destination}</strong>
                         <div class="package-summary">
-                            <span class="duration">${nights} nights / ${days} days</span>
                             <span class="price-tag">${formatINR(price)}</span>
                         </div>
                     </button>
@@ -2529,7 +2523,6 @@ function init() {
                         <h4>${rate.name}</h4>
                     </div>
                     <div class="rate-bottom">
-                        <span class="savings">${Math.max(0, Math.round(((rate.referenceRate - rate.ourRate) / Math.max(rate.referenceRate, 1)) * 100))}% less</span>
                         <span class="savings-value">${formatINR(rate.ourRate)}</span>
                     </div>
                 </article>
