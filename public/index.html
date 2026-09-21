@@ -2177,7 +2177,6 @@ function init() {
         ticker.innerHTML = rateSource.map((rate, index) => {
             return `<div class="hot-deal-ticker-item ${index === hotDealsTickerIndex ? 'is-visible' : ''}">
                 <span class="hot-deal-fire" aria-hidden="true">🔥</span>
-                <span>${rate.category}</span>
                 <span>${rate.title}</span>
                 <span>${formatINR(rate.price)}</span>
             </div>`;
